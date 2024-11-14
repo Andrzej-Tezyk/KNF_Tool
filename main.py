@@ -7,7 +7,7 @@ import os
 
 
 # folder for downloaded pdfs
-newpath = '/pdfs'
+newpath = 'C:/Users/Andrzej T (Standard)/Desktop/Projects/KNF_Tool/pdfs'
 if not os.path.exists(newpath):
     os.makedirs(newpath)
 
@@ -28,7 +28,7 @@ user_agent_list = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.18363',
 ]
 
-# poxies
+# poxies -> DOES NOT WORK!!!
 proxy_list = [
   'http://Username:Password@85.237.57.198:20000',
   'http://Username:Password@85.237.57.198:21000',
@@ -40,12 +40,12 @@ response = None
 for _ in range(NUM_RETRIES):
     try:
         headers = {"User-Agent": user_agent_list[random.randint(0, len(user_agent_list) - 1)]}
-        proxy_index = randint(0, len(proxy_list) - 1)
-        proxies = {
-          "http": proxy_list[proxy_index],
-          "https": proxy_list[proxy_index],
-        }
-        response = requests.get(url, headers=headers, proxies=proxies)
+        #proxy_index = randint(0, len(proxy_list) - 1)
+        #proxies = {
+        #  "http": proxy_list[proxy_index],
+        #  "https": proxy_list[proxy_index],
+        #}
+        response = requests.get(url, headers=headers)
         if response.status_code in [200, 404]:
             break  # escape loop if response was successful
     except requests.exceptions.ConnectionError:

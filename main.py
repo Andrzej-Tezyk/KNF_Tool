@@ -1,6 +1,17 @@
 import requests #web scraping
-import random #rotate agents
+from bs4 import BeautifulSoup 
 from random import randint
+
+import random #rotate agents
+import os
+
+
+# folder for downloaded pdfs
+newpath = '/pdfs'
+if not os.path.exists(newpath):
+    os.makedirs(newpath)
+
+NUM_RETRIES = 5
 
 # KNF recommendation page (contains .pdf documents to scrape)
 url = 'https://www.knf.gov.pl/dla_rynku/regulacje_i_praktyka/rekomendacje_i_wytyczne/rekomendacje_dla_bankow?articleId=8522&p_id=18'
@@ -17,8 +28,6 @@ user_agent_list = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.18363',
 ]
 
-headers={"User-Agent": user_agent_list[random.randint(0, len(user_agent_list)-1)]} # rotate
-
 # poxies
 proxy_list = [
   'http://Username:Password@85.237.57.198:20000',
@@ -27,28 +36,46 @@ proxy_list = [
   'http://Username:Password@85.237.57.198:23000',
               ]
 
-proxy_index = randint(0, len(proxy_list) - 1)
-
-proxies = {
-  "http://": proxy_list[proxy_index],
-  "https://": proxy_list[proxy_index],
-}
-
-
-
-## retry mechanism
-
-NUM_RETRIES = 5
-
+response = None
 for _ in range(NUM_RETRIES):
     try:
+        headers = {"User-Agent": user_agent_list[random.randint(0, len(user_agent_list) - 1)]}
+        proxy_index = randint(0, len(proxy_list) - 1)
+        proxies = {
+          "http": proxy_list[proxy_index],
+          "https": proxy_list[proxy_index],
+        }
         response = requests.get(url, headers=headers, proxies=proxies)
         if response.status_code in [200, 404]:
-            break #escape loop if resposnse was successfull
+            break  # escape loop if response was successful
     except requests.exceptions.ConnectionError:
-        print("connection failed")
+        print("Connection failed, retrying...")
 
-if response is not None and response.status_code == 200:
-    print("connection succeded")
 
-print(response.content)
+if response and response.status_code == 200:
+    soup = BeautifulSoup(response.content, 'html.parser') #makes html text response a nested datastructure, which can be queried
+
+
+    pdf_links = []
+    for link in soup.find_all('a', title=lambda x: x and 'Rekomendacja' in x):
+        try:
+            href = link.get('href')
+            if href and href.endswith('.pdf'):
+                full_url = 'https://www.knf.gov.pl' + href
+                pdf_links.append(full_url)
+        except:
+            print(f'Problem with link for {link}')
+
+
+    for pdf_url in pdf_links:
+        try:
+            pdf_response = requests.get(pdf_url, headers=headers)
+            pdf_name = os.path.basename(pdf_url)
+            pdf_path = os.path.join(newpath, pdf_name)
+            with open(pdf_path, 'wb') as f:
+                f.write(pdf_response.content)
+                print(f'Downloaded: {pdf_path}')
+        except:
+            print(f'PDF not downloaded: {pdf_url}')
+else:
+    print("Failed to retrieve the main page content after retries.")

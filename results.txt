@@ -1,0 +1,88 @@
+Podsumowanie dla: pdfs\akt.pdf
+Dokument nie zawiera Å¼adnych bezpoÅ›rednich wzmianek o sztucznej inteligencji (AI).  UchwaÅ‚a i zaÅ‚Ä…czona do niej rekomendacja dotyczÄ… dobrych praktyk w zakresie bancassurance (oferowania ubezpieczeÅ„ przez banki i SKOK-i).  SkupiajÄ… siÄ™ na kwestiach takich jak zarzÄ…dzanie ryzykiem, relacje z klientami, polityka rachunkowoÅ›ci i kontrola wewnÄ™trzna w tym sektorze.  Brak jest w nich jakichkolwiek technologii, w tym AI.
+ 
+ 
+Podsumowanie dla: pdfs\akt.pdf
+Dokument nie zawiera ¿adnych bezpoœrednich wzmianek o sztucznej inteligencji (AI).  Uchwa³a i za³¹czona do niej rekomendacja dotycz¹ dobrych praktyk w zakresie bancassurance (oferowania ubezpieczeñ przez banki).  Opisuj¹ one regulacje prawne, zarz¹dzanie ryzykiem, relacje z klientami, rachunkowoœæ i systemy kontroli wewnêtrznej w tym obszarze.  Nie ma w nich miejsca na dyskusjê na temat zastosowania AI w tych procesach.
+ 
+ 
+Podsumowanie dla: pdfs\knf_123958_RekomendacjaF_39880.pdf
+Dokument nie zawiera ¿adnych informacji na temat Sztucznej Inteligencji (AI).  Jest to rekomendacja Komisji Nadzoru Finansowego z 2014 roku dotycz¹ca oceny wartoœci nieruchomoœci pod zastaw hipoteczny.  Opisuje metody i procedury szacowania ryzyka kredytowego zwi¹zanego z nieruchomoœciami, ale nie wspomina o wykorzystaniu technologii AI w tym procesie.
+ 
+ 
+Podsumowanie dla: pdfs\knf_137749_Rekomendacja_W_42219.pdf
+Dokument nie zawiera bezpoœrednich informacji na temat Sztucznej Inteligencji (AI).  Skupia siê on na zarz¹dzaniu ryzykiem zwi¹zanym z modelami stosowanymi w bankach, niezale¿nie od technologii ich tworzenia.  Chocia¿ AI mo¿e byæ u¿ywana do budowy niektórych z tych modeli, dokument nie omawia specyfiki AI ani jej wp³ywu na zarz¹dzanie ryzykiem.  Dokument koncentruje siê na procesach, procedurach i kontroli ryzyka zwi¹zanego z modelami, które mog¹, ale nie musz¹, byæ oparte na AI.
+ 
+ 
+Podsumowanie dla: pdfs\knf_170534_Rekomendacja_H_2017_50303.pdf
+Dokument nie zawiera ¿adnych informacji na temat Sztucznej Inteligencji (AI).  Jest to rekomendacja Komisji Nadzoru Finansowego (KNF) z 2017 roku dotycz¹ca systemu kontroli wewnêtrznej w bankach.  Dokument szczegó³owo omawia kwestie organizacji systemu kontroli wewnêtrznej, funkcji kontroli, zapewniania zgodnoœci i audytu wewnêtrznego, ale nie wspomina o AI ani jej zastosowaniach w sektorze bankowym.
+ 
+ 
+Podsumowanie dla: pdfs\Rekomendacja%20A_2010_22718.05_22718.05_22718.pdf
+Ten dokument nie zawiera ¿adnych informacji na temat sztucznej inteligencji (AI).  Skupia siê wy³¹cznie na zarz¹dzaniu ryzykiem zwi¹zanym z transakcjami instrumentów pochodnych w bankach.
+ 
+ 
+Podsumowanie dla: pdfs\RekomendacjaT_33586.pdf
+Dokument nie zawiera ¿adnych informacji na temat sztucznej inteligencji (AI).  Koncentruje siê on wy³¹cznie na rekomendacjach dotycz¹cych dobrych praktyk w zarz¹dzaniu ryzykiem detalicznych ekspozycji kredytowych w bankach.
+ 
+ 
+Podsumowanie dla: pdfs\Rekomendacja_A_2022_80053.pdf
+Dokument nie zawiera ¿adnych bezpoœrednich informacji na temat Sztucznej Inteligencji (AI).  Skupia siê on na rekomendacjach Komisji Nadzoru Finansowego dla banków dotycz¹cych zarz¹dzania ryzykiem zwi¹zanym z dzia³alnoœci¹ na instrumentach pochodnych.  Chocia¿ banki mog¹ wykorzystywaæ AI w swoich wewnêtrznych systemach zarz¹dzania ryzykiem (np. do analizy danych, wykrywania anomalii), dokument nie wspomina o tym konkretnie.
+ 
+ 
+Podsumowanie dla: pdfs\Rekomendacja_B_26_03_2019_65275.pdf
+Dokument nie zawiera informacji na temat Sztucznej Inteligencji (AI).  Jest to rekomendacja Komisji Nadzoru Finansowego (KNF) dotycz¹ca ograniczenia ryzyka inwestycji banków.  Skupia siê na zarz¹dzaniu ryzykiem, strategii i polityce inwestycyjnej, monitoringu i raportowania,  kontroli wewnêtrznej oraz na rolach zarz¹du i rady nadzorczej w tym procesie.
+ 
+ 
+Podsumowanie dla: pdfs\Rekomendacja_C_2016_47196.pdf
+Dokument nie zawiera ¿adnych informacji na temat Sztucznej Inteligencji (AI).  Skupia siê wy³¹cznie na rekomendacjach Komisji Nadzoru Finansowego (KNF) dotycz¹cych zarz¹dzania ryzykiem koncentracji w bankach.
+ 
+ 
+Podsumowanie dla: pdfs\Rekomendacja_D_8_01_13_uchwala_7_33016.pdf
+Dokument nie zawiera bezpoœrednich wzmianek o "sztucznej inteligencji" (AI).  Chocia¿ dokument pochodzi z 2013 roku, a technologia AI dynamicznie siê rozwija,  rekomendacje dotycz¹ce bezpieczeñstwa i zarz¹dzania systemami informatycznymi w bankach, zawarte w dokumencie, s¹ nadal aktualne i stanowi¹ solidn¹ podstawê do zarz¹dzania ryzykiem zwi¹zanym z wykorzystaniem wszelkich zaawansowanych technologii, w tym AI, w sektorze bankowym.  Dokument skupia siê na ogólnych zasadach bezpieczeñstwa informacji i zarz¹dzania infrastruktur¹ IT, które s¹ niezbêdne niezale¿nie od konkretnych u¿ywanych technologii.
+ 
+ 
+Podsumowanie dla: pdfs\Rekomendacja_G_dot_zarzadzania_ryzykiem_stopy_procentowej_w_bankach_88185.pdf
+Dokument nie zawiera informacji na temat sztucznej inteligencji (AI).  Skupia siê wy³¹cznie na rekomendacjach dotycz¹cych zarz¹dzania ryzykiem stopy procentowej w bankach.
+ 
+ 
+Podsumowanie dla: pdfs\Rekomendacja_J_2023_81609.pdf
+Dokument nie zawiera ¿adnych informacji na temat sztucznej inteligencji (AI). Skupia siê on wy³¹cznie na rekomendacjach dla banków w zakresie gromadzenia i przetwarzania danych o rynku nieruchomoœci, w celu lepszego zarz¹dzania ryzykiem kredytowym zwi¹zanym z kredytami hipotecznymi.  Mowa jest o modelach statystycznych wykorzystywanych do oceny ryzyka, ale nie s¹ to modele oparte na AI.
+ 
+ 
+Podsumowanie dla: pdfs\Rekomendacja_J_znowelizowana_31791.pdf
+Dokument nie zawiera ¿adnych informacji na temat sztucznej inteligencji (AI).  Koncentruje siê wy³¹cznie na rekomendacjach Komisji Nadzoru Finansowego (KNF) dotycz¹cych zasad gromadzenia i przetwarzania przez banki danych o nieruchomoœciach, w celu lepszego zarz¹dzania ryzykiem kredytowym zwi¹zanym z hipotekami.
+ 
+ 
+Podsumowanie dla: pdfs\Rekomendacja_K_2016_45956.pdf
+Proszê podaæ mi dokument, który mam przeanalizowaæ pod k¹tem informacji na temat sztucznej inteligencji.  Nie mam dostêpu do plików zewnêtrznych, wiêc potrzebujê jego treœci, aby móc odpowiedzieæ na Twoje pytanie.
+ 
+ 
+Podsumowanie dla: pdfs\Rekomendacja_L_12_2018_64158.pdf
+Dokument nie zawiera ¿adnych informacji na temat sztucznej inteligencji (AI).  Skupia siê on wy³¹cznie na rekomendacjach Komisji Nadzoru Finansowego (KNF) dotycz¹cych roli bieg³ych rewidentów w procesie nadzoru nad bankami i spó³dzielczymi kasami oszczêdnoœciowo-kredytowymi.
+ 
+ 
+Podsumowanie dla: pdfs\Rekomendacja_M_8_01_2013_uchwala_8_33017.pdf
+Ten dokument, Rekomendacja M Komisji Nadzoru Finansowego dotycz¹ca zarz¹dzania ryzykiem operacyjnym w bankach (styczeñ 2013 r.), nie omawia Sztucznej Inteligencji (AI) wprost.  Dokument skupia siê na identyfikacji, ocenie, przeciwdzia³aniu i monitorowaniu ryzyka operacyjnego w bankach, u¿ywaj¹c  frameworku Bazylejskiego Komitetu Nadzoru Bankowego.  Chocia¿ AI mog³aby byæ u¿yta do usprawnienia niektórych aspektów opisanych w dokumencie (np. wykrywanie oszustw, ocena ryzyka), nie jest ona w nim w ¿aden sposób wspomniana.
+ 
+ 
+Podsumowanie dla: pdfs\Rekomendacja_R_16-04-2021_73341.pdf
+Ten dokument nie zawiera ¿adnych informacji na temat sztucznej inteligencji (AI).  Jest to rekomendacja Komisji Nadzoru Finansowego dotycz¹ca zarz¹dzania ryzykiem kredytowym w bankach, skupiaj¹ca siê na klasyfikacji ekspozycji kredytowych, szacowaniu strat i zgodnoœci z Miêdzynarodowymi Standardami Sprawozdawczoœci Finansowej (MSSF 9).
+ 
+ 
+Podsumowanie dla: pdfs\Rekomendacja_S_nowelizacja_czerwiec_2023_82872.pdf
+Dokument nie zawiera informacji na temat sztucznej inteligencji (AI).  Koncentruje siê wy³¹cznie na rekomendacjach Komisji Nadzoru Finansowego dotycz¹cych dobrych praktyk w zarz¹dzaniu ekspozycjami kredytowymi zabezpieczonymi hipotecznie.  Nie ma wzmianki o zastosowaniu AI w procesach oceny ryzyka kredytowego,  monitorowania czy innych obszarów objêtych rekomendacjami.
+ 
+ 
+Podsumowanie dla: pdfs\Rekomendacja_T_%2814_09_2018%29_63160.pdf
+Dokument nie zawiera informacji na temat Sztucznej Inteligencji (AI).  Skupia siê na rekomendacjach Komisji Nadzoru Finansowego dotycz¹cych zarz¹dzania ryzykiem detalicznych ekspozycji kredytowych w bankach.  Wspomina o modelach scoringowych u¿ywanych w ocenie zdolnoœci kredytowej, ale nie opisuje ich jako systemów opartych na AI.  S¹ to raczej statystyczne narzêdzia wspieraj¹ce proces decyzyjny.
+ 
+ 
+Podsumowanie dla: pdfs\Rekomendacja_WFD_pdf.pdf
+Dokument nie zawiera ¿adnych informacji na temat sztucznej inteligencji (AI).  Ca³oœæ koncentruje siê na rekomendacjach Komisji Nadzoru Finansowego dotycz¹cych WskaŸnika Finansowania D³ugoterminowego (WFD) dla kredytów hipotecznych w bankach.
+ 
+ 
+Podsumowanie dla: pdfs\Rekomendacja_Z_70998.pdf
+Dokument nie zawiera ¿adnych informacji na temat sztucznej inteligencji (AI).  Jest to rekomendacja Komisji Nadzoru Finansowego dotycz¹ca zasad ³adu wewnêtrznego w bankach.  Koncentruje siê na kwestiach takich jak zarz¹dzanie ryzykiem,  rola rady nadzorczej i zarz¹du,  polityka wynagrodzeñ i etyka w sektorze bankowym.
+ 
+ 

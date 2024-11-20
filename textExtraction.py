@@ -4,9 +4,13 @@ from dotenv import load_dotenv
 
 import pathlib
 import os
+import traceback
 
 
 load_dotenv()
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+model = genai.GenerativeModel("gemini-1.5-flash")
+
 
 
 def extract(pdf_path):
@@ -36,7 +40,18 @@ def extract(pdf_path):
 files = [f for f in pathlib.Path().glob("pdfs/*.pdf")]
 
 for file in files:
-    extract(file)
+    try:
+        print(f"{file} is analyzed")
+        text = extract(file)
+        response = model.generate_content(f"Czy ten dokument zawiera cokolwiek na temat Sztucznej Inteligencji? Jeżeli tak, to posumuj to co jest napisane na temat Sztucznej Inteligencji. {text}")
 
+        with open("results.txt", "a", encoding="cp1250", errors="replace") as f:
+            f.write(f"Podsumowanie dla: {file}\n{response.text} \n \n")
 
-genai.configure(api_key=f"{os.getenv.GEMINI_API_KEY}")
+        print(f"Response for {file} was saved!")
+        print("")
+
+    except Exception as e:
+        print(f"There is a problem with {file}. \n Error messange: {e}")
+        print("")
+        traceback.print_exc()

@@ -61,8 +61,11 @@ if response and response.status_code == 200:
         try:
             href = link.get('href')
             if href and href.endswith('.pdf'):
-                full_url = 'https://www.knf.gov.pl' + href
-                pdf_links.append(full_url)
+                if 'https' not in href:
+                    full_url = 'https://www.knf.gov.pl' + href
+                    pdf_links.append(full_url)
+                else:
+                    pdf_links.append(href)
         except:
             print(f'Problem with link for {link}')
 

@@ -8,15 +8,26 @@ import traceback
 from datetime import datetime
 import time
 
-
+#file naming
 run_time = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
 
 load_dotenv()
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+#another model to be used: "gemini-1.5-flash"
 model = genai.GenerativeModel("gemini-1.5-flash-8b")
 
 
+# folder for downloaded pdfs
+output = 'C:/Users/Andrzej T (Standard)/Desktop/Projects/KNF_Tool/output'
+if not os.path.exists(output):
+    os.makedirs(output)
+
+
 def extract(pdf_path):
+    '''
+        text extraction from pdfs;
+        pdf_path: path to .pdf files
+    '''
     if not os.path.exists(pdf_path):
         print(f"File not found: {pdf_path}")
         return
@@ -30,13 +41,14 @@ def extract(pdf_path):
         text = ''
 
         try:    
-            for i in range (numPages):
+            for i in range (numPages): #loop through all pages
                 page = pdf.pages[i]
                 text += page.extract_text()
             return text
         
-        except IndexError:
-            print(f"Something went wrong with {pdf_path}")
+        except Exception as e:
+            print(f"Something went wrong with {pdf_path}. Error messange: {e}")
+            traceback.print_exc()
 
 
 files = [f for f in pathlib.Path().glob("pdfs/*.pdf")]
@@ -46,12 +58,13 @@ count = 1
 for file in files:
     try:
         print(f"{count}/{num_files}")
-        print(f"{file} is analyzed")
+        print(f"{file} is beeing analyzed.")
         text = extract(file)
         response = model.generate_content(f"Czy ten dokument zawiera cokolwiek na temat Sztucznej Inteligencji? Jeżeli tak, to posumuj to co jest napisane na temat Sztucznej Inteligencji. {text}")
 
         #replace -> sometimes double space between words occure; most likely reason: pdf formating
-        with open(run_time + ".txt", "a", encoding="cp1250", errors="replace") as f:
+        output_path = os.path.join(output, f"{run_time}.txt")
+        with open(output_path, "a", encoding="cp1250", errors="replace") as f:
             f.write(f"Podsumowanie dla: {file.stem}\n\n{response.text.replace('  ', ' ')} \n\n\n\n\n")
 
         print(f"Response for {file} was saved!")

@@ -1,26 +1,17 @@
-import requests #web scraping
+import requests
 from bs4 import BeautifulSoup
 
-from random import randint
-import random #rotate agents
-import os
+import random
+import os # change to path !!!
 
 
-# folder for downloaded pdfs
-newpath = 'C:/Users/Andrzej T (Standard)/Desktop/Projects/KNF_Tool/scraped_files'
-if not os.path.exists(newpath):
-    os.makedirs(newpath)
-
+SCRAPED_FILES_DIR = 'scraped_files'
 NUM_RETRIES = 5
+KNF_BASE_URL = 'https://www.knf.gov.pl'
+KNF_RECOMMENDATIONS_URL = f'{KNF_BASE_URL}/dla_rynku/regulacje_i_praktyka/rekomendacje_i_wytyczne/rekomendacje_dla_bankow?articleId=8522&p_id=18'
 
-# KNF recommendation page (contains .pdf documents to scrape)
-url = 'https://www.knf.gov.pl/dla_rynku/regulacje_i_praktyka/rekomendacje_i_wytyczne/rekomendacje_dla_bankow?articleId=8522&p_id=18'
-
-
-## agents and proxies to avoid being blocked by the website -> can be extended using 3 party services if needed; license???
-
-# fake user agents
-user_agent_list = [
+# agents to avoid being blocked by the website
+USER_AGENT_LIST = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36',
     'Mozilla/5.0 (iPhone; CPU iPhone OS 14_4_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Mobile/15E148 Safari/604.1',
     'Mozilla/4.0 (compatible; MSIE 9.0; Windows NT 6.1)',
@@ -28,24 +19,16 @@ user_agent_list = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.18363',
 ]
 
-# poxies -> DOES NOT WORK!!!
-proxy_list = [
-  'http://Username:Password@85.237.57.198:20000',
-  'http://Username:Password@85.237.57.198:21000',
-  'http://Username:Password@85.237.57.198:22000',
-  'http://Username:Password@85.237.57.198:23000',
-              ]
+
+if not os.path.exists(SCRAPED_FILES_DIR):
+    os.makedirs(SCRAPED_FILES_DIR)
+
 
 response = None
 for _ in range(NUM_RETRIES):
     try:
-        headers = {"User-Agent": user_agent_list[random.randint(0, len(user_agent_list) - 1)]}
-        #proxy_index = randint(0, len(proxy_list) - 1)
-        #proxies = {
-        #  "http": proxy_list[proxy_index],
-        #  "https": proxy_list[proxy_index],
-        #}
-        response = requests.get(url, headers=headers)
+        headers = {"User-Agent": USER_AGENT_LIST[random.randint(0, len(USER_AGENT_LIST) - 1)]}
+        response = requests.get(KNF_RECOMMENDATIONS_URL, headers=headers)
         if response.status_code in [200, 404]:
             break  # escape loop if response was successful
     except requests.exceptions.ConnectionError:
@@ -53,28 +36,26 @@ for _ in range(NUM_RETRIES):
 
 
 if response and response.status_code == 200:
-    soup = BeautifulSoup(response.content, 'html.parser') #makes html text response a nested datastructure, which can be queried
-
-
+    soup = BeautifulSoup(response.content, 'html.parser')
     pdf_links = []
     for link in soup.find_all('a', title=lambda x: x and 'Rekomendacja' in x):
         try:
             href = link.get('href')
             if href and href.endswith('.pdf'):
+                # not all .pdf are listed on knf.gov.pl
                 if 'https' not in href:
-                    full_url = 'https://www.knf.gov.pl' + href
+                    full_url = KNF_BASE_URL + href
                     pdf_links.append(full_url)
                 else:
                     pdf_links.append(href)
         except:
             print(f'Problem with link for {link}')
 
-
     for pdf_url in pdf_links:
         try:
             pdf_response = requests.get(pdf_url, headers=headers)
             pdf_name = os.path.basename(pdf_url)
-            pdf_path = os.path.join(newpath, pdf_name)
+            pdf_path = os.path.join(SCRAPED_FILES_DIR, pdf_name)
             with open(pdf_path, 'wb') as f:
                 f.write(pdf_response.content)
                 print(f'Downloaded: {pdf_path}')

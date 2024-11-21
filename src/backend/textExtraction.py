@@ -3,77 +3,59 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 
 import pathlib
-import os
+import os # change to path !!!
 import traceback
 from datetime import datetime
 import time
 
-#file naming
-run_time = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
 
 load_dotenv()
+
+
+SCRAPED_FILES_DIR = 'scraped_files'
+OUTPUT_DIR = 'output'
+if not os.path.exists(OUTPUT_DIR):
+    os.makedirs(OUTPUT_DIR)
+
+
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-#another model to be used: "gemini-1.5-flash"
-model = genai.GenerativeModel("gemini-1.5-flash-8b")
+model = genai.GenerativeModel("gemini-1.5-flash-8b") # another model to be used: "gemini-1.5-flash"
 
 
-# folder for downloaded pdfs
-output = 'C:/Users/Andrzej T (Standard)/Desktop/Projects/KNF_Tool/output'
-if not os.path.exists(output):
-    os.makedirs(output)
-
-
-def extract(pdf_path):
-    '''
-        text extraction from pdfs;
-        pdf_path: path to .pdf files
-    '''
-    if not os.path.exists(pdf_path):
-        print(f"File not found: {pdf_path}")
-        return
-
-    with open(pdf_path, 'rb') as f:
-        pdf = PdfReader(f)
-
-        numPages = len(pdf.pages)
-        print(f"Number of pages: {numPages}")
+def extract_text_from_pdf(pdf_path):
+    with open(pdf_path, 'rb') as file:
+        pdf = PdfReader(file)
+        print(f"Number of pages: {len(pdf.pages)}")
 
         text = ''
-
         try:    
-            for i in range (numPages): #loop through all pages
-                page = pdf.pages[i]
+            for page in pdf.pages: #loop through all pages
                 text += page.extract_text()
             return text
-        
         except Exception as e:
             print(f"Something went wrong with {pdf_path}. Error messange: {e}")
             traceback.print_exc()
 
 
-files = [f for f in pathlib.Path().glob("pdfs/*.pdf")]
-num_files = len(files)
+pdfs_to_scan = [pdf for pdf in pathlib.Path().glob(f"{SCRAPED_FILES_DIR}/*.pdf")]
+output_path = os.path.join(OUTPUT_DIR, f'{datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")}.txt')
 
-count = 1
-for file in files:
+llm_response_output = ''
+for count, pdf in enumerate(pdfs_to_scan, 1):
     try:
-        print(f"{count}/{num_files}")
-        print(f"Document: {file} is beeing analyzed.")
-        text = extract(file)
+        print(f"{count}/{len(pdfs_to_scan)}")
+        print(f"Document: {pdf.stem} is beeing analyzed.")
+        text = extract_text_from_pdf(pdf)
         response = model.generate_content(f"Czy ten dokument zawiera cokolwiek na temat Sztucznej Inteligencji? Jeżeli tak, to posumuj to co jest napisane na temat Sztucznej Inteligencji. {text}")
 
-        #replace -> sometimes double space between words occure; most likely reason: pdf formating
-        output_path = os.path.join(output, f"{run_time}.txt")
-        with open(output_path, "a", encoding="cp1250", errors="replace") as f:
-            f.write(f"Podsumowanie dla: {file.stem}\n\n{response.text.replace('  ', ' ')} \n\n\n\n\n")
-
-        print(f"Response for: {file} was saved!")
-        print("")
-
+        # replace -> sometimes double space between words occure; most likely reason: pdf formating
+        llm_response_output += f"Podsumowanie dla: {pdf.stem}\n\n{response.text.replace('  ', ' ')} \n\n\n\n\n"
+        print(f"Response for: {pdf.stem} was saved!\n")
     except Exception as e:
-        print(f"There is a problem with {file}. \n Error messange: {e}")
-        print("")
+        print(f"There is a problem with {pdf.stem}. \n Error messange: {e}\n")
         traceback.print_exc()
     
-    count += 1
-    time.sleep(1) #to lower number api requests per sec
+    time.sleep(1) # to lower number api requests to model per sec
+
+with open(output_path, "w", encoding="utf-8", errors="replace") as llm_output:
+    llm_output.write(llm_response_output)

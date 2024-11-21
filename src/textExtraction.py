@@ -58,7 +58,7 @@ count = 1
 for file in files:
     try:
         print(f"{count}/{num_files}")
-        print(f"{file} is beeing analyzed.")
+        print(f"Document: {file} is beeing analyzed.")
         text = extract(file)
         response = model.generate_content(f"Czy ten dokument zawiera cokolwiek na temat Sztucznej Inteligencji? Jeżeli tak, to posumuj to co jest napisane na temat Sztucznej Inteligencji. {text}")
 
@@ -67,7 +67,7 @@ for file in files:
         with open(output_path, "a", encoding="cp1250", errors="replace") as f:
             f.write(f"Podsumowanie dla: {file.stem}\n\n{response.text.replace('  ', ' ')} \n\n\n\n\n")
 
-        print(f"Response for {file} was saved!")
+        print(f"Response for: {file} was saved!")
         print("")
 
     except Exception as e:

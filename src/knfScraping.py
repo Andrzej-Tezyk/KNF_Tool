@@ -1,13 +1,13 @@
 import requests #web scraping
-from bs4 import BeautifulSoup 
-from random import randint
+from bs4 import BeautifulSoup
 
+from random import randint
 import random #rotate agents
 import os
 
 
 # folder for downloaded pdfs
-newpath = 'C:/Users/Andrzej T (Standard)/Desktop/Projects/KNF_Tool/pdfs'
+newpath = 'C:/Users/Andrzej T (Standard)/Desktop/Projects/KNF_Tool/scraped_files'
 if not os.path.exists(newpath):
     os.makedirs(newpath)
 

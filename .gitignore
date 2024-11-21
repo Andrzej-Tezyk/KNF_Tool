@@ -1,3 +1,5 @@
 .venv
-.pdf
+/scraped_files
 .env
+/output
+outputEmail.py

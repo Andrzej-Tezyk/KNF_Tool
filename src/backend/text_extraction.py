@@ -57,5 +57,5 @@ for count, pdf in enumerate(pdfs_to_scan, 1):
     
     time.sleep(1) # to lower number api requests to model per sec
 
-with open(output_path, "w", encoding="utf-8", errors="replace") as llm_output:
-    llm_output.write(llm_response_output)
+with open(output_path, "w", encoding="utf-8", errors="replace") as llm_output_file:
+    llm_output_file.write(llm_response_output)

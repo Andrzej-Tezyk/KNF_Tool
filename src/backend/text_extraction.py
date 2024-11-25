@@ -1,13 +1,12 @@
-from PyPDF2 import PdfReader
-import google.generativeai as genai
-from dotenv import load_dotenv
-
-from pathlib import Path
 import os
+import time
 import traceback
 from datetime import datetime
-import time
+from pathlib import Path
 
+import google.generativeai as genai
+from dotenv import load_dotenv
+from PyPDF2 import PdfReader
 
 load_dotenv()
 
@@ -40,7 +39,7 @@ def extract_text_from_pdf(pdf_path):
             traceback.print_exc()
 
 
-pdfs_to_scan = [pdf for pdf in Path().glob(f"{SCRAPED_FILES_DIR}/*.pdf")]
+pdfs_to_scan = list(Path().glob(f"{SCRAPED_FILES_DIR}/*.pdf"))
 output_path = os.path.join(
     OUTPUT_DIR, f'{datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")}.txt'
 )
@@ -52,7 +51,8 @@ for count, pdf in enumerate(pdfs_to_scan, 1):
         print(f"Document: {pdf.stem} is beeing analyzed.")
         text = extract_text_from_pdf(pdf)
         response = model.generate_content(
-            f"Czy ten dokument zawiera cokolwiek na temat Sztucznej Inteligencji? Jeżeli tak, to posumuj to co jest napisane na temat Sztucznej Inteligencji. {text}"
+            "Czy ten dokument zawiera cokolwiek na temat Sztucznej Inteligencji?"
+            + f"Jeżeli tak, to posumuj to co jest napisane na temat Sztucznej Inteligencji. {text}"
         )
 
         # replace -> sometimes double space between words occure; most likely reason: pdf formating

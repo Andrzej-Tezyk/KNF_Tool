@@ -1,9 +1,12 @@
 target-version = "py310"
 
-# Set the maximum line length to 79
-line-length = 79
+# Set the maximum line length to 119
+line-length = 119
 [lint]
 extend-select = ["E501"]
+
+# , "D" -> use after implementing auto documentation
+select = ["E", "W", "F", "C", "A", "U", "N", "TID"]
 
 [lint.pydocstyle]
 convention = "google"

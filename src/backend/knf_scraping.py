@@ -41,7 +41,7 @@ if response and response.status_code == 200:
     soup = BeautifulSoup(response.content, "html.parser")
 
     time_html_tag = soup.time
-    datetime_atr = time_html_tag['datetime']
+    datetime_atr = time_html_tag["datetime"]
 
     pdf_links = []
     for link in soup.find_all("a", title=lambda x: x and "Rekomendacja" in x):

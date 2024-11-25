@@ -2,10 +2,11 @@ import requests
 from bs4 import BeautifulSoup
 
 import random
-import os  # change to path !!!
+import os
+from pathlib import Path
 
 
-SCRAPED_FILES_DIR = "scraped_files"
+SCRAPED_FILES_DIR = Path("scraped_files")
 NUM_RETRIES = 5
 KNF_BASE_URL = "https://www.knf.gov.pl"
 KNF_RECOMMENDATIONS_URL = f"{KNF_BASE_URL}/dla_rynku/regulacje_i_praktyka/rekomendacje_i_wytyczne/rekomendacje_dla_bankow?articleId=8522&p_id=18"
@@ -20,8 +21,7 @@ USER_AGENT_LIST = [
 ]
 
 
-if not os.path.exists(SCRAPED_FILES_DIR):
-    os.makedirs(SCRAPED_FILES_DIR)
+SCRAPED_FILES_DIR.mkdir(parents=True, exist_ok=True)
 
 
 response = None

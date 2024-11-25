@@ -2,8 +2,8 @@ from PyPDF2 import PdfReader
 import google.generativeai as genai
 from dotenv import load_dotenv
 
-import pathlib
-import os  # change to path !!!
+from pathlib import Path
+import os
 import traceback
 from datetime import datetime
 import time
@@ -13,9 +13,10 @@ load_dotenv()
 
 
 SCRAPED_FILES_DIR = "scraped_files"
-OUTPUT_DIR = "output"
-if not os.path.exists(OUTPUT_DIR):
-    os.makedirs(OUTPUT_DIR)
+OUTPUT_DIR = Path("output")
+
+
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
@@ -39,7 +40,7 @@ def extract_text_from_pdf(pdf_path):
             traceback.print_exc()
 
 
-pdfs_to_scan = [pdf for pdf in pathlib.Path().glob(f"{SCRAPED_FILES_DIR}/*.pdf")]
+pdfs_to_scan = [pdf for pdf in Path().glob(f"{SCRAPED_FILES_DIR}/*.pdf")]
 output_path = os.path.join(
     OUTPUT_DIR, f'{datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")}.txt'
 )

@@ -1,0 +1,17 @@
+name: Lint
+
+on: 
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: black linting step
+        uses: psf/black@stable
+      - name: ruff linting step
+        uses: astral-sh/ruff-action@v1

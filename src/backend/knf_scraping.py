@@ -5,7 +5,6 @@ import random
 import os  # change to path !!!
 
 
-SCRAPED_FILES_DIR = "scraped_files"
 NUM_RETRIES = 5
 KNF_BASE_URL = "https://www.knf.gov.pl"
 KNF_RECOMMENDATIONS_URL = f"{KNF_BASE_URL}/dla_rynku/regulacje_i_praktyka/rekomendacje_i_wytyczne/rekomendacje_dla_bankow?articleId=8522&p_id=18"
@@ -18,10 +17,6 @@ USER_AGENT_LIST = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36 Edg/87.0.664.75",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.18363",
 ]
-
-
-if not os.path.exists(SCRAPED_FILES_DIR):
-    os.makedirs(SCRAPED_FILES_DIR)
 
 
 response = None
@@ -39,6 +34,15 @@ for _ in range(NUM_RETRIES):
 
 if response and response.status_code == 200:
     soup = BeautifulSoup(response.content, "html.parser")
+
+    time_html_tag = soup.time
+    datetime_atr = time_html_tag['datetime']
+
+    scraped_files_dir = f"scraped_files_version_date_{datetime_atr}"
+
+    if not os.path.exists(scraped_files_dir):
+        os.makedirs(scraped_files_dir)
+
     pdf_links = []
     for link in soup.find_all("a", title=lambda x: x and "Rekomendacja" in x):
         try:
@@ -57,7 +61,7 @@ if response and response.status_code == 200:
         try:
             pdf_response = requests.get(pdf_url, headers=headers)
             pdf_name = os.path.basename(pdf_url)
-            pdf_path = os.path.join(SCRAPED_FILES_DIR, pdf_name)
+            pdf_path = os.path.join(scraped_files_dir, pdf_name)
             with open(pdf_path, "wb") as f:
                 f.write(pdf_response.content)
                 print(f"Downloaded: {pdf_path}")

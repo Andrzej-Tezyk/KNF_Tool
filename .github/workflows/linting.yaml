@@ -11,7 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: black linting step
+      
+      - name: First linting step - Black
         uses: psf/black@stable
-      - name: ruff linting step
+
+      - name: Second linting step - Ruff 
         uses: astral-sh/ruff-action@v1

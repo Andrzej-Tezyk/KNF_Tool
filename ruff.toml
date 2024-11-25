@@ -6,7 +6,6 @@ line-length = 119
 extend-select = ["E501"]
 
 # , "D" -> use after implementing auto documentation
-
 select = ["E", "W", "F", "C", "A", "U", "N", "TID"]
 
 [lint.pydocstyle]

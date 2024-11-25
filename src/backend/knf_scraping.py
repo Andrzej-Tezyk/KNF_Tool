@@ -42,7 +42,9 @@ SCRAPED_FILES_DIR.mkdir(parents=True, exist_ok=True)
 response = None
 for _ in range(NUM_RETRIES):
     try:
-        headers = {"User-Agent": USER_AGENT_LIST[random.randint(0, len(USER_AGENT_LIST) - 1)]}
+        headers = {
+            "User-Agent": USER_AGENT_LIST[random.randint(0, len(USER_AGENT_LIST) - 1)]
+        }
         response = requests.get(KNF_RECOMMENDATIONS_URL, headers=headers)
         if response.status_code in [200, 404]:
             break  # escape loop if response was successful

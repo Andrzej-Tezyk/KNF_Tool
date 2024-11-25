@@ -19,7 +19,9 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-model = genai.GenerativeModel("gemini-1.5-flash-8b")  # another model to be used: "gemini-1.5-flash"
+model = genai.GenerativeModel(
+    "gemini-1.5-flash-8b"
+)  # another model to be used: "gemini-1.5-flash"
 
 
 def extract_text_from_pdf(pdf_path):
@@ -38,7 +40,9 @@ def extract_text_from_pdf(pdf_path):
 
 
 pdfs_to_scan = list(Path().glob(f"{SCRAPED_FILES_DIR}/*.pdf"))
-output_path = os.path.join(OUTPUT_DIR, f'{datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")}.txt')
+output_path = os.path.join(
+    OUTPUT_DIR, f'{datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")}.txt'
+)
 
 llm_response_output = ""
 for count, pdf in enumerate(pdfs_to_scan, 1):

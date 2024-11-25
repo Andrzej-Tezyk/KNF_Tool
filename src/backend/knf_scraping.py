@@ -39,6 +39,10 @@ for _ in range(NUM_RETRIES):
 
 if response and response.status_code == 200:
     soup = BeautifulSoup(response.content, "html.parser")
+
+    time_html_tag = soup.time
+    datetime_atr = time_html_tag['datetime']
+
     pdf_links = []
     for link in soup.find_all("a", title=lambda x: x and "Rekomendacja" in x):
         try:
@@ -57,7 +61,8 @@ if response and response.status_code == 200:
         try:
             pdf_response = requests.get(pdf_url, headers=headers)
             pdf_name = os.path.basename(pdf_url)
-            pdf_path = os.path.join(SCRAPED_FILES_DIR, pdf_name)
+            # adding datetime from KNF site to file name
+            pdf_path = os.path.join(SCRAPED_FILES_DIR, f"{datetime_atr}_{pdf_name}")
             with open(pdf_path, "wb") as f:
                 f.write(pdf_response.content)
                 print(f"Downloaded: {pdf_path}")

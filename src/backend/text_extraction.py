@@ -13,6 +13,10 @@ load_dotenv()
 
 SCRAPED_FILES_DIR = "scraped_files"
 OUTPUT_DIR = Path("output")
+SYSTEM_PROMPT = (
+    "Do generowania odpowiedzi wykorzystaj tylko" +
+    "to co jest zawarte w udostępnionych dokumentach."
+    )
 
 
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -20,7 +24,8 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = genai.GenerativeModel(
-    "gemini-1.5-flash-8b"
+    "gemini-1.5-flash-8b",
+    system_instruction=SYSTEM_PROMPT
 )  # another model to be used: "gemini-1.5-flash"
 
 

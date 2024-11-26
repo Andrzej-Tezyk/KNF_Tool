@@ -69,7 +69,7 @@ for count, pdf in enumerate(pdfs_to_scan, 1):
             response = model.generate_content(
                 [
                     "Czy przesłany dokument zawiera cokolwiek na temat Sztucznej Inteligencji?"
-                    + f"Jeżeli tak, to posumuj to co jest napisane na temat Sztucznej Inteligencji.",
+                    + "Jeżeli tak, to posumuj to co jest napisane na temat Sztucznej Inteligencji.",
                     file_to_send,
                 ]
             )

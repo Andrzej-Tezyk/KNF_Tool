@@ -54,7 +54,7 @@ for count, pdf in enumerate(pdfs_to_scan, 1):
         print(f"{count}/{len(pdfs_to_scan)}")
         print(f"Document: {pdf.stem} is beeing analyzed.")
         text = extract_text_from_pdf(pdf)
-        if len(text) > 10: # random small number
+        if len(text) > 10:  # random small number
             response = model.generate_content(
                 "Czy ten dokument zawiera cokolwiek na temat Sztucznej Inteligencji?"
                 + f"Jeżeli tak, to posumuj to co jest napisane na temat Sztucznej Inteligencji. {text}"
@@ -67,9 +67,11 @@ for count, pdf in enumerate(pdfs_to_scan, 1):
             file_to_send = genai.upload_file(pdf)
             print(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
             response = model.generate_content(
-                ["Czy przesłany dokument zawiera cokolwiek na temat Sztucznej Inteligencji?"
-                + f"Jeżeli tak, to posumuj to co jest napisane na temat Sztucznej Inteligencji.",
-                file_to_send]
+                [
+                    "Czy przesłany dokument zawiera cokolwiek na temat Sztucznej Inteligencji?"
+                    + f"Jeżeli tak, to posumuj to co jest napisane na temat Sztucznej Inteligencji.",
+                    file_to_send,
+                ]
             )
 
             # replace -> sometimes double space between words occure; most likely reason: pdf formating

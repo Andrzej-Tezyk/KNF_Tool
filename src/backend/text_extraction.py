@@ -54,14 +54,28 @@ for count, pdf in enumerate(pdfs_to_scan, 1):
         print(f"{count}/{len(pdfs_to_scan)}")
         print(f"Document: {pdf.stem} is beeing analyzed.")
         text = extract_text_from_pdf(pdf)
-        response = model.generate_content(
-            "Czy ten dokument zawiera cokolwiek na temat Sztucznej Inteligencji?"
-            + f"Jeżeli tak, to posumuj to co jest napisane na temat Sztucznej Inteligencji. {text}"
-        )
+        if len(text) > 10: # random small number
+            response = model.generate_content(
+                "Czy ten dokument zawiera cokolwiek na temat Sztucznej Inteligencji?"
+                + f"Jeżeli tak, to posumuj to co jest napisane na temat Sztucznej Inteligencji. {text}"
+            )
 
-        # replace -> sometimes double space between words occure; most likely reason: pdf formating
-        llm_response_output += f"Podsumowanie dla: {pdf.stem}\n\n{response.text.replace('  ', ' ')} \n\n\n\n\n"
-        print(f"Response for: {pdf.stem} was saved!\n")
+            # replace -> sometimes double space between words occure; most likely reason: pdf formating
+            llm_response_output += f"Podsumowanie dla: {pdf.stem}\n\n{response.text.replace('  ', ' ')} \n\n\n\n\n"
+            print(f"Response for: {pdf.stem} was saved!\n")
+        else:
+            file_to_send = genai.upload_file(pdf)
+            print(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
+            response = model.generate_content(
+                ["Czy przesłany dokument zawiera cokolwiek na temat Sztucznej Inteligencji?"
+                + f"Jeżeli tak, to posumuj to co jest napisane na temat Sztucznej Inteligencji.",
+                file_to_send]
+            )
+
+            # replace -> sometimes double space between words occure; most likely reason: pdf formating
+            llm_response_output += f"Podsumowanie dla: {pdf.stem}\n\n{response.text.replace('  ', ' ')} \n\n\n\n\n"
+            print(f"Response for: {pdf.stem} was saved!\n")
+
     except Exception as e:
         print(f"There is a problem with {pdf.stem}. \n Error messange: {e}\n")
         traceback.print_exc()

@@ -78,22 +78,5 @@
             <textarea id="output" readonly></textarea>
         </div>
     </div>
-
-    <script>
-        // Simulating server response
-        htmx.on("htmx:configRequest", (event) => {
-            event.detail.headers['Content-Type'] = 'application/x-www-form-urlencoded';
-        });
-
-        htmx.onLoad(function(content) {
-            const input = document.querySelector('#input').value;
-            const processedText = processText(input);
-            document.querySelector('#output').value = processedText;
-        });
-
-        function processText(input) {
-            return input.toUpperCase();
-        }
-    </script>
 </body>
 </html>

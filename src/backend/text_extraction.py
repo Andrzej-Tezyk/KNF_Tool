@@ -1,7 +1,6 @@
 import os
 import time
 import traceback
-from datetime import datetime
 from pathlib import Path
 
 import google.generativeai as genai

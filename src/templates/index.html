@@ -50,6 +50,7 @@
         }
         #output {
             background-color: #fff;
+            overflow-y: auto;
         }
         button {
             margin-top: 10px;
@@ -75,7 +76,7 @@
         </div>
         <div class="output-section">
             <h1>Output</h1>
-            <textarea id="output" readonly></textarea>
+            <div id="output" style="height: 100%; overflow-y: auto;"></div>  <!-- to allow streaming -->
         </div>
     </div>
 </body>

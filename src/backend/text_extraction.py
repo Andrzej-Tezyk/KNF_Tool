@@ -52,35 +52,32 @@ def process_pdfs(prompt):
     and save results to an output file.
     """
     pdfs_to_scan = list(Path().glob(f"{SCRAPED_FILES_DIR}/*.pdf"))
-    output_path = os.path.join(
-        OUTPUT_DIR, f'{datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")}.txt'
-    )
+    #output_path = os.path.join(
+    #    OUTPUT_DIR, f'{datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")}.txt'
+    #)
 
-    llm_response_output = ""
     for count, pdf in enumerate(pdfs_to_scan, 1):
         try:
             print(f"{count}/{len(pdfs_to_scan)}")
             print(f"Document: {pdf.stem} is beeing analyzed.")
             text = extract_text_from_pdf(pdf)
             if len(text) > 10:  # random small number
-                response = model.generate_content(f"{prompt}. {text}")
+                response = model.generate_content(f"{prompt} {text}")
 
                 # replace -> sometimes double space between words occure; most likely reason: pdf formating
-                llm_response_output += f"Podsumowanie dla: {pdf.stem}\n\n{response.text.replace('  ', ' ')} \n\n\n\n\n"
+                response_text = response.text.replace('  ', ' ')
+
+                yield f"<strong>Podsumowanie dla</strong>: <em>{pdf.stem}</em><br>{response_text}"
                 print(f"Response for: {pdf.stem} was saved!\n")
             else:
                 file_to_send = genai.upload_file(pdf)
                 print(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
-                response = model.generate_content(
-                    [
-                        "Czy przesłany dokument zawiera cokolwiek na temat Sztucznej Inteligencji?"
-                        + "Jeżeli tak, to posumuj to co jest napisane na temat Sztucznej Inteligencji.",
-                        file_to_send,
-                    ]
-                )
+                response = model.generate_content([prompt, file_to_send,])
 
                 # replace -> sometimes double space between words occure; most likely reason: pdf formating
-                llm_response_output += f"Podsumowanie dla: {pdf.stem}\n\n{response.text.replace('  ', ' ')} \n\n\n\n\n"
+                response_text = response.text.replace('  ', ' ')
+
+                yield f"<strong>Podsumowanie dla</strong>: <em>{pdf.stem}</em><br>{response_text}"
                 print(f"Response for: {pdf.stem} was saved!\n")
 
         except Exception as e:
@@ -92,8 +89,8 @@ def process_pdfs(prompt):
     #with open(output_path, "w", encoding="utf-8", errors="replace") as llm_output_file:
         #llm_output_file.write(llm_response_output)
 
-    return llm_response_output
-
 
 #"Czy ten dokument zawiera cokolwiek na temat Sztucznej Inteligencji?"
     #+ f"Jeżeli tak, to posumuj to co jest napisane na temat Sztucznej Inteligencji.
+
+print(process_pdfs("Napisz podsumowanie dokumentu w 2 zdaniach."))

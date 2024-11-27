@@ -1,43 +1,37 @@
 from backend.text_extraction import extract_text_from_pdf, process_pdfs
-import os
+from flask import Flask, request, jsonify, render_template, Response
 import time
-from datetime import datetime
-from pathlib import Path
-
-from flask import Flask, request, jsonify, render_template
-from dotenv import load_dotenv
-import google.generativeai as genai
-
-
-SCRAPED_FILES_DIR = "scraped_files"
-OUTPUT_DIR = Path("output")
-SYSTEM_PROMPT = (
-    "Do generowania odpowiedzi wykorzystaj tylko"
-    + "to co jest zawarte w udostępnionych dokumentach."
-)
-
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-model = genai.GenerativeModel(
-    "gemini-1.5-flash-8b", system_instruction=SYSTEM_PROMPT
-)  # another model to be used: "gemini-1.5-flash"
-
-load_dotenv()
 
 app = Flask(__name__)
 
 @app.route("/")
 def index():
+    # Serve the HTML page
     return render_template('index.html')
 
 @app.route('/process', methods=['POST'])
 def process_text():
     try:
-        input_text = request.form.get('input')
-        processed_text = process_pdfs(input_text)
-        return processed_text
+        # Get the input text from the textarea in the HTML
+        prompt = request.form['input']
+        
+        # Create a generator function to stream results back
+        def generate_results():
+            # Process PDFs and yield results for each PDF as it is processed
+            pdfs_to_process = process_pdfs(prompt)  # Modify this to process PDFs iteratively
+            
+            for result in pdfs_to_process:
+                yield f"<div><p>{result}<br><br><br></p></div>"  # This will wrap each result in a <div> tag for easy styling
+                time.sleep(1)  # To simulate the delay for each document being processed (optional)
+
+        # Return the streamed response
+        return Response(generate_results(), content_type='text/html;charset=utf-8')
 
     except Exception as e:
+        # If an error occurs, return a JSON response with the error message
         return jsonify({"error": str(e)}), 500
-    
-if __name__ == '__main__':
+
+if __name__ == "__main__":
+    # Run the Flask app
     app.run(debug=True)
+

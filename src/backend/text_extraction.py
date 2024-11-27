@@ -67,8 +67,6 @@ def process_pdfs(prompt):
                 # replace -> sometimes double space between words occure; most likely reason: pdf formating
                 response_text = response.text.replace('  ', ' ')
 
-                yield f"<strong>Podsumowanie dla</strong>: <em>{pdf.stem}</em><br>{response_text}"
-                print(f"Response for: {pdf.stem} was saved!\n")
             else:
                 file_to_send = genai.upload_file(pdf)
                 print(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
@@ -77,8 +75,12 @@ def process_pdfs(prompt):
                 # replace -> sometimes double space between words occure; most likely reason: pdf formating
                 response_text = response.text.replace('  ', ' ')
 
-                yield f"<strong>Podsumowanie dla</strong>: <em>{pdf.stem}</em><br>{response_text}"
-                print(f"Response for: {pdf.stem} was saved!\n")
+            yield {
+                "pdf_name": pdf.stem,
+                "content": response_text
+            }
+            #yield f"<strong>Podsumowanie dla</strong>: <em>{pdf.stem}</em><br>{response_text}"
+            print(f"Response for: {pdf.stem} was saved!\n")
 
         except Exception as e:
             print(f"There is a problem with {pdf.stem}. \n Error messange: {e}\n")
@@ -92,5 +94,3 @@ def process_pdfs(prompt):
 
 #"Czy ten dokument zawiera cokolwiek na temat Sztucznej Inteligencji?"
     #+ f"Jeżeli tak, to posumuj to co jest napisane na temat Sztucznej Inteligencji.
-
-print(process_pdfs("Napisz podsumowanie dokumentu w 2 zdaniach."))

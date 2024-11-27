@@ -1,7 +1,6 @@
 import os
 import time
 import traceback
-from datetime import datetime
 from pathlib import Path
 
 import google.generativeai as genai
@@ -29,6 +28,9 @@ model = genai.GenerativeModel(
 
 
 def extract_text_from_pdf(pdf_path):
+    """
+    Extract text from a PDF file.
+    """
     with open(pdf_path, "rb") as file:
         pdf = PdfReader(file)
         print(f"Number of pages: {len(pdf.pages)}")
@@ -43,46 +45,53 @@ def extract_text_from_pdf(pdf_path):
             traceback.print_exc()
 
 
-pdfs_to_scan = list(Path().glob(f"{SCRAPED_FILES_DIR}/*.pdf"))
-output_path = os.path.join(
-    OUTPUT_DIR, f'{datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")}.txt'
-)
+def process_pdfs(prompt):
+    """
+    Process all PDFs in the scraped files directory, analyze them with the model,
+    and save results to an output file.
+    """
+    pdfs_to_scan = list(Path().glob(f"{SCRAPED_FILES_DIR}/*.pdf"))
+    # output_path = os.path.join(
+    #    OUTPUT_DIR, f'{datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")}.txt'
+    # )
 
-llm_response_output = ""
-for count, pdf in enumerate(pdfs_to_scan, 1):
-    try:
-        print(f"{count}/{len(pdfs_to_scan)}")
-        print(f"Document: {pdf.stem} is beeing analyzed.")
-        text = extract_text_from_pdf(pdf)
-        if len(text) > 10:  # random small number
-            response = model.generate_content(
-                "Czy ten dokument zawiera cokolwiek na temat Sztucznej Inteligencji?"
-                + f"Jeżeli tak, to posumuj to co jest napisane na temat Sztucznej Inteligencji. {text}"
-            )
+    for count, pdf in enumerate(pdfs_to_scan, 1):
+        try:
+            print(f"{count}/{len(pdfs_to_scan)}")
+            print(f"Document: {pdf.stem} is beeing analyzed.")
+            text = extract_text_from_pdf(pdf)
+            if len(text) > 10:  # random small number
+                response = model.generate_content(f"{prompt} {text}")
 
-            # replace -> sometimes double space between words occure; most likely reason: pdf formating
-            llm_response_output += f"Podsumowanie dla: {pdf.stem}\n\n{response.text.replace('  ', ' ')} \n\n\n\n\n"
+                # replace -> sometimes double space between words occure; most likely reason: pdf formating
+                response_text = response.text.replace("  ", " ")
+
+            else:
+                file_to_send = genai.upload_file(pdf)
+                print(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
+                response = model.generate_content(
+                    [
+                        prompt,
+                        file_to_send,
+                    ]
+                )
+
+                # replace -> sometimes double space between words occure; most likely reason: pdf formating
+                response_text = response.text.replace("  ", " ")
+
+            yield {"pdf_name": pdf.stem, "content": response_text}
+            # yield f"<strong>Podsumowanie dla</strong>: <em>{pdf.stem}</em><br>{response_text}"
             print(f"Response for: {pdf.stem} was saved!\n")
-        else:
-            file_to_send = genai.upload_file(pdf)
-            print(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
-            response = model.generate_content(
-                [
-                    "Czy przesłany dokument zawiera cokolwiek na temat Sztucznej Inteligencji?"
-                    + "Jeżeli tak, to posumuj to co jest napisane na temat Sztucznej Inteligencji.",
-                    file_to_send,
-                ]
-            )
 
-            # replace -> sometimes double space between words occure; most likely reason: pdf formating
-            llm_response_output += f"Podsumowanie dla: {pdf.stem}\n\n{response.text.replace('  ', ' ')} \n\n\n\n\n"
-            print(f"Response for: {pdf.stem} was saved!\n")
+        except Exception as e:
+            print(f"There is a problem with {pdf.stem}. \n Error messange: {e}\n")
+            traceback.print_exc()
 
-    except Exception as e:
-        print(f"There is a problem with {pdf.stem}. \n Error messange: {e}\n")
-        traceback.print_exc()
+        time.sleep(1)  # to lower number api requests to model per sec
 
-    time.sleep(1)  # to lower number api requests to model per sec
+    # with open(output_path, "w", encoding="utf-8", errors="replace") as llm_output_file:
+    # llm_output_file.write(llm_response_output)
 
-with open(output_path, "w", encoding="utf-8", errors="replace") as llm_output_file:
-    llm_output_file.write(llm_response_output)
+
+# "Czy ten dokument zawiera cokolwiek na temat Sztucznej Inteligencji?"
+# + f"Jeżeli tak, to posumuj to co jest napisane na temat Sztucznej Inteligencji.

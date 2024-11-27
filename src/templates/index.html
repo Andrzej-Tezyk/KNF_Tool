@@ -50,6 +50,7 @@
         }
         #output {
             background-color: #fff;
+            overflow-y: auto;
         }
         button {
             margin-top: 10px;
@@ -64,6 +65,23 @@
         button:hover {
             background-color: #2c5282;
         }
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #929191;
+            border-top: 2px solid #1a3a5c;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .spinner.htmx-request {
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -71,29 +89,19 @@
         <div class="input-section">
             <h1>Input</h1>
             <textarea id="input" name="input" placeholder="Co mam zrobić?"></textarea>
-            <button hx-post="/process" hx-trigger="click" hx-target="#output" hx-include="#input">Process Text</button>
+            <div class="button-container">
+                <button hx-post="/process" 
+                        hx-trigger="click" 
+                        hx-target="#output" 
+                        hx-include="#input"
+                        hx-indicator="#spinner">Process Text</button>
+                <div id="spinner" class="spinner"></div>
+            </div>
         </div>
         <div class="output-section">
             <h1>Output</h1>
-            <textarea id="output" readonly></textarea>
+            <div id="output" style="height: 100%; overflow-y: auto;"></div>
         </div>
     </div>
-
-    <script>
-        // Simulating server response
-        htmx.on("htmx:configRequest", (event) => {
-            event.detail.headers['Content-Type'] = 'application/x-www-form-urlencoded';
-        });
-
-        htmx.onLoad(function(content) {
-            const input = document.querySelector('#input').value;
-            const processedText = processText(input);
-            document.querySelector('#output').value = processedText;
-        });
-
-        function processText(input) {
-            return input.toUpperCase();
-        }
-    </script>
 </body>
 </html>

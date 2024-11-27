@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KNF AI</title>
+    <script 
+        src="https://unpkg.com/htmx.org@2.0.3" 
+        integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq" 
+        crossorigin="anonymous">
+    </script>
+    <link rel="icon" type="image/x-icon" href="/static/logo.ico">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        .container {
+            display: flex;
+            height: 100vh;
+            padding: 27px;
+            padding-right: 45px;
+            box-sizing: border-box;
+        }
+        .input-section {
+            flex: 1;
+            padding-right: 35px;
+        }
+        .output-section {
+            flex: 2;
+        }
+        h1 {
+            color: #1a3a5c;
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: calc(100% - 100px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: none;
+            font-size: 14px;
+        }
+        #input {
+            height: 150px;
+        }
+        #output {
+            background-color: #fff;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #1a3a5c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #2c5282;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="input-section">
+            <h1>Input</h1>
+            <textarea id="input" name="input" placeholder="Co mam zrobić?"></textarea>
+            <button hx-post="/process" hx-trigger="click" hx-target="#output" hx-include="#input">Process Text</button>
+        </div>
+        <div class="output-section">
+            <h1>Output</h1>
+            <textarea id="output" readonly></textarea>
+        </div>
+    </div>
+
+    <script>
+        // Simulating server response
+        htmx.on("htmx:configRequest", (event) => {
+            event.detail.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+        });
+
+        htmx.onLoad(function(content) {
+            const input = document.querySelector('#input').value;
+            const processedText = processText(input);
+            document.querySelector('#output').value = processedText;
+        });
+
+        function processText(input) {
+            return input.toUpperCase();
+        }
+    </script>
+</body>
+</html>

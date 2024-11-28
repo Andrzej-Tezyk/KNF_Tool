@@ -2,8 +2,9 @@ import os
 import time
 import traceback
 from pathlib import Path
+from typing import Generator
 
-import google.generativeai as genai
+import google.generativeai as genai # type: ignore[import-untyped]
 from dotenv import load_dotenv
 from PyPDF2 import PdfReader
 
@@ -27,7 +28,7 @@ model = genai.GenerativeModel(
 )  # another model to be used: "gemini-1.5-flash"
 
 
-def extract_text_from_pdf(pdf_path):
+def extract_text_from_pdf(pdf_path: Path) -> str:
     """
     Extract text from a PDF file.
     """
@@ -39,13 +40,13 @@ def extract_text_from_pdf(pdf_path):
         try:
             for page in pdf.pages:  # loop through all pages
                 text += page.extract_text()
-            return text
         except Exception as e:
             print(f"Something went wrong with {pdf_path}. Error messange: {e}")
             traceback.print_exc()
+    return text
 
 
-def process_pdfs(prompt):
+def process_pdfs(prompt: str) -> Generator:
     """
     Process all PDFs in the scraped files directory, analyze them with the model,
     and save results to an output file.

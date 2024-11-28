@@ -3,7 +3,7 @@ from flask_cors import CORS
 from backend.text_extraction import process_pdfs
 
 app = Flask(__name__)
-CORS(app)
+CORS(app) # IS IT NEEDED
 
 
 @app.route("/")

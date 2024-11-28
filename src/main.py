@@ -1,4 +1,4 @@
-from typing import Generator
+import typing
 
 from flask import Flask, request, jsonify, render_template, Response
 from flask_cors import CORS
@@ -19,7 +19,7 @@ def process_text() -> Response:
         prompt = request.form["input"]
 
         # a generator function to stream results back
-        def generate_results() -> Generator:
+        def generate_results() -> typing.Generator:
             pdfs_to_process = process_pdfs(prompt)
 
             for result in pdfs_to_process:

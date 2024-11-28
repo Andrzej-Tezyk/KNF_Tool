@@ -2,7 +2,7 @@ import os
 import time
 import traceback
 from pathlib import Path
-from typing import Generator
+import typing
 
 import google.generativeai as genai  # type: ignore[import-untyped]
 from dotenv import load_dotenv
@@ -46,7 +46,7 @@ def extract_text_from_pdf(pdf_path: Path) -> str:
     return text
 
 
-def process_pdfs(prompt: str) -> Generator:
+def process_pdfs(prompt: str) -> typing.Generator:
     """
     Process all PDFs in the scraped files directory, analyze them with the model,
     and save results to an output file.

@@ -2,7 +2,7 @@ from typing import Generator
 
 from flask import Flask, request, jsonify, render_template, Response
 from flask_cors import CORS
-from backend.text_extraction import process_pdfs # type: ignore[import-not-found]
+from backend.text_extraction import process_pdfs  # type: ignore[import-not-found]
 
 app = Flask(__name__)
 CORS(app)  # IS IT NEEDED

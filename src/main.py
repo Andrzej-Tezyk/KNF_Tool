@@ -24,7 +24,7 @@ def process_text() -> Response:
 
             for result in pdfs_to_process:
                 yield (
-                    "<div><p><strong>Podsumowanie dla</strong>:"
+                    "<div><p><strong>Odpowiedź dla</strong>:"
                     + f"<em>{result['pdf_name']}</em><br>{result['content']}<br><br></p></div>"
                 )
 

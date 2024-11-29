@@ -1,10 +1,10 @@
 name: Mypy Type Check
 
 on: 
-    pull_request:
-    push:
-      branches:
-        - main
+  pull_request:
+  push:
+    branches:
+      - main
 
 jobs:
   type-check:
@@ -24,10 +24,6 @@ jobs:
           pip install mypy
           pip install -r requirements.txt
 
-      - name: Install mypy types
-        run: |
-          mypy --install-types
-
       - name: Run mypy
         run: |
-          mypy --config-file mypy.ini .
+          mypy --install-types --non-interactive --config-file mypy.ini .

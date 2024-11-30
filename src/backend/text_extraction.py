@@ -22,7 +22,11 @@ SYSTEM_PROMPT = (
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY not found in environment variables")
+
+genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel(
     "gemini-1.5-flash-8b", system_instruction=SYSTEM_PROMPT
 )  # another model to be used: "gemini-1.5-flash"
@@ -32,18 +36,23 @@ def extract_text_from_pdf(pdf_path: Path) -> str:
     """
     Extract text from a PDF file.
     """
-    with open(pdf_path, "rb") as file:
-        pdf = PdfReader(file)
-        print(f"Number of pages: {len(pdf.pages)}")
+    try:
+        with open(pdf_path, "rb") as file:
+            pdf = PdfReader(file)
+            print(f"Number of pages: {len(pdf.pages)}")
 
-        text = ""
-        try:
-            for page in pdf.pages:  # loop through all pages
-                text += page.extract_text()
-        except Exception as e:
-            print(f"Something went wrong with {pdf_path}. Error messange: {e}")
-            traceback.print_exc()
-    return text
+            text = ""
+            try:
+                for page in pdf.pages:  # loop through all pages
+                    text += page.extract_text()
+            except Exception as e:
+                print(f"Something went wrong with {pdf_path}. Error messange: {e}")
+                traceback.print_exc()
+        return text
+    except Exception as e:
+        print(f"Error processing {pdf_path}: {str(e)}")
+        traceback.print_exc()
+        return ""
 
 
 def process_pdfs(prompt: str) -> typing.Generator:
@@ -51,48 +60,54 @@ def process_pdfs(prompt: str) -> typing.Generator:
     Process all PDFs in the scraped files directory, analyze them with the model,
     and save results to an output file.
     """
-    pdfs_to_scan = list(Path().glob(f"{SCRAPED_FILES_DIR}/*.pdf"))
-    # output_path = os.path.join(
-    #    OUTPUT_DIR, f'{datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")}.txt'
-    # )
 
-    for count, pdf in enumerate(pdfs_to_scan, 1):
-        try:
-            print(f"{count}/{len(pdfs_to_scan)}")
-            print(f"Document: {pdf.stem} is beeing analyzed.")
-            text = extract_text_from_pdf(pdf)
-            if len(text) > 10:  # random small number
-                response = model.generate_content(f"{prompt} {text}")
+    if not prompt:
+        yield {"error": "No prompt provided"}
+        return
 
-                # replace -> sometimes double space between words occure; most likely reason: pdf formating
-                response_text = response.text.replace("  ", " ")
+    try:
+        pdf_dir = Path(SCRAPED_FILES_DIR)
+        if not pdf_dir.exists():
+            yield {"error": f"Directory {SCRAPED_FILES_DIR} not found"}
+            return
 
-            else:
-                file_to_send = genai.upload_file(pdf)
-                print(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
-                response = model.generate_content(
-                    [
-                        prompt,
-                        file_to_send,
-                    ]
-                )
+        pdfs_to_scan = list(pdf_dir.glob("*.pdf"))
+        if not pdfs_to_scan:
+            yield {"error": f"No PDF files found in {SCRAPED_FILES_DIR}"}
+            return
 
-                # replace -> sometimes double space between words occure; most likely reason: pdf formating
-                response_text = response.text.replace("  ", " ")
+        for count, pdf in enumerate(pdfs_to_scan, 1):
+            try:
+                print(f"{count}/{len(pdfs_to_scan)}")
+                print(f"Document: {pdf.stem} is beeing analyzed.")
+                text = extract_text_from_pdf(pdf)
+                if len(text) > 10:  # random small number
+                    response = model.generate_content(f"{prompt} {text}")
 
-            yield {"pdf_name": pdf.stem, "content": response_text}
-            # yield f"<strong>Podsumowanie dla</strong>: <em>{pdf.stem}</em><br>{response_text}"
-            print(f"Response for: {pdf.stem} was saved!\n")
+                    # replace -> sometimes double space between words occure; most likely reason: pdf formating
+                    response_text = response.text.replace("  ", " ")
 
-        except Exception as e:
-            print(f"There is a problem with {pdf.stem}. \n Error messange: {e}\n")
-            traceback.print_exc()
+                else:
+                    file_to_send = genai.upload_file(pdf)
+                    print(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
+                    response = model.generate_content(
+                        [
+                            prompt,
+                            file_to_send,
+                        ]
+                    )
 
-        time.sleep(1)  # to lower number api requests to model per sec
+                    # replace -> sometimes double space between words occure; most likely reason: pdf formating
+                    response_text = response.text.replace("  ", " ")
 
-    # with open(output_path, "w", encoding="utf-8", errors="replace") as llm_output_file:
-    # llm_output_file.write(llm_response_output)
+                yield {"pdf_name": pdf.stem, "content": response_text}
+                print(f"Response for: {pdf.stem} was saved!\n")
 
+            except Exception as e:
+                print(f"There is a problem with {pdf.stem}. \n Error messange: {e}\n")
+                traceback.print_exc()
 
-# "Czy ten dokument zawiera cokolwiek na temat Sztucznej Inteligencji?"
-# + f"Jeżeli tak, to posumuj to co jest napisane na temat Sztucznej Inteligencji.
+            time.sleep(1)  # to lower number api requests to model per sec
+
+    except Exception as e:
+        yield {"error": str(e)}

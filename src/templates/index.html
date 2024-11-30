@@ -4,11 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KNF AI</title>
-    <script 
-        src="https://unpkg.com/htmx.org@2.0.3" 
-        integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq" 
-        crossorigin="anonymous">
-    </script>
+    <script src="https://unpkg.com/htmx.org@2.0.3"></script>
     <link rel="icon" type="image/x-icon" href="/static/logo.ico">
     <style>
         body {
@@ -18,24 +14,57 @@
             background-color: #f0f2f5;
             color: #333;
         }
+
+        .header {
+            background-color: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0.5rem 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #1a3a5c;
+            text-decoration: none;
+        }
+
+        .ms-logo {
+            height: 30px;
+            width: auto;
+        }
+
         .container {
             display: flex;
-            height: 100vh;
+            height: calc(100vh - 50px);
             padding: 27px;
             padding-right: 45px;
             box-sizing: border-box;
         }
+
         .input-section {
             flex: 1;
             padding-right: 35px;
         }
+
         .output-section {
             flex: 2;
         }
-        h1 {
-            color: #1a3a5c;
-            margin-bottom: 20px;
-        }
+
         textarea {
             width: 100%;
             height: calc(100% - 100px);
@@ -45,13 +74,17 @@
             resize: none;
             font-size: 14px;
         }
+
         #input {
             height: 150px;
         }
+
         #output {
             background-color: #fff;
             overflow-y: auto;
+            height: calc(100% - 60px);
         }
+
         button {
             margin-top: 10px;
             padding: 10px 20px;
@@ -62,9 +95,11 @@
             cursor: pointer;
             font-size: 14px;
         }
+
         button:hover {
             background-color: #2c5282;
         }
+
         .spinner {
             display: none;
             width: 20px;
@@ -75,20 +110,73 @@
             animation: spin 1s linear infinite;
             margin-left: 10px;
         }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
         .spinner.htmx-request {
             display: inline-block;
+        }
+
+        .menu-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .menu-icon {
+            width: 20px;
+            height: 20px;
+            fill: #1a3a5c;
+        }
+
+        .menu-dropdown {
+            display: none;
+            position: absolute;
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .menu-dropdown.show {
+            display: block;
+        }
+
+        .menu-dropdown a {
+            display: block;
+            padding: 10px 20px;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .menu-dropdown a:hover {
+            background-color: #f0f2f5;
         }
     </style>
 </head>
 <body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <button class="menu-button" hx-get="/menu" hx-target="#menu-dropdown" hx-swap="outerHTML">
+                    <svg class="menu-icon" viewBox="0 0 20 20">
+                        <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z"/>
+                    </svg>
+                </button>
+                <div id="menu-dropdown"></div>
+                <p class="name">AppName</p>
+            </div>
+            <p class="ms-logo">LOGO</p>
+        </div>
+    </header>
     <div class="container">
         <div class="input-section">
-            <h1>Input</h1>
-            <textarea id="input" name="input" placeholder="Co mam zrobić?"></textarea>
+            <textarea id="input" name="input" placeholder="Type your prompt here"></textarea>
             <div class="button-container">
                 <button hx-post="/process" 
                         hx-trigger="click" 
@@ -99,9 +187,9 @@
             </div>
         </div>
         <div class="output-section">
-            <h1>Output</h1>
-            <div id="output" style="height: 100%; overflow-y: auto;"></div>
+            <div id="output"></div>
         </div>
     </div>
 </body>
 </html>
+

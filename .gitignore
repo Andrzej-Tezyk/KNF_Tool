@@ -2,3 +2,4 @@
 /scraped_files
 .env
 /output
+/src/backend/__pycache__

@@ -18,7 +18,9 @@ def process_text() -> Response:
     try:
         prompt = request.form["input"]
         if not prompt:
-            return jsonify({"error": "No input provided"}), 400
+            response = jsonify({"error": "No input provided"})
+            response.status_code = 400
+            return response
 
         # a generator function to stream results back
         def generate_results() -> typing.Generator:

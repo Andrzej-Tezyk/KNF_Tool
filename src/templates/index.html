@@ -3,109 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KNF AI</title>
-    <script src="https://unpkg.com/htmx.org@2.0.3"></script>
+    <title>PDF AI Interface</title>
+    <script 
+        src="https://unpkg.com/htmx.org@2.0.3" 
+        integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq" 
+        crossorigin="anonymous">
+    </script>
     <link rel="icon" type="image/x-icon" href="/static/logo.ico">
     <style>
+        :root {
+            --primary-color: #2c5282;
+            --secondary-color: #5376a1;
+            --background-color: #f7fafc;
+            --text-color: #2d3748;
+            --border-color: #e2e8f0;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f0f2f5;
-            color: #333;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
         }
 
         .header {
             background-color: white;
-            border-bottom: 1px solid #e0e0e0;
-            padding: 0.5rem 1rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.3rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .header-content {
-            max-width: 1600px;
+            max-width: 1200px;
             margin: 0 auto;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
+            justify-content: flex-start;
         }
 
         .name {
             font-size: 1.2rem;
             font-weight: bold;
-            color: #1a3a5c;
+            color: var(--primary-color);
             text-decoration: none;
-        }
-
-        .ms-logo {
-            height: 30px;
-            width: auto;
+            line-height: 1;
         }
 
         .container {
             display: flex;
-            height: calc(100vh - 50px);
-            padding: 27px;
-            padding-right: 45px;
+            height: calc(100vh - 70px);
+            max-width: 75%;
+            margin: 0 auto;
+            padding: 1rem;
             box-sizing: border-box;
+            gap: 2rem;
         }
 
         .input-section {
-            flex: 1;
-            padding-right: 35px;
+            flex: 0 0 30%;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
         }
 
         .output-section {
-            flex: 2;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
         }
 
-        textarea {
+        .section-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .text-area-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+        }
+
+        .input-container {
+            flex: 0 0 auto;
+            margin-bottom: 1rem;
+        }
+
+        textarea, #output {
             width: 100%;
-            height: calc(100% - 100px);
-            padding: 10px;
-            border: 1px solid #ccc;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
             border-radius: 4px;
             resize: none;
             font-size: 14px;
+            box-sizing: border-box;
+            background-color: #f8fafc;
+            transition: border-color 0.3s ease;
         }
 
-        #input {
-            height: 150px;
+        textarea:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.2);
+        }
+
+        textarea {
+            height: 200px;
         }
 
         #output {
-            background-color: #fff;
+            flex-grow: 1;
             overflow-y: auto;
-            height: calc(100% - 60px);
+        }
+
+        .button-container {
+            margin-top: 0.1rem;
+            display: flex;
+            align-items: center;
         }
 
         button {
-            margin-top: 10px;
-            padding: 10px 20px;
-            background-color: #1a3a5c;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary-color);
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
         }
 
         button:hover {
-            background-color: #2c5282;
+            background-color: var(--secondary-color);
         }
 
         .spinner {
             display: none;
             width: 20px;
             height: 20px;
-            border: 2px solid #929191;
-            border-top: 2px solid #1a3a5c;
+            border: 2px solid #e2e8f0;
+            border-top: 2px solid var(--secondary-color);
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-left: 10px;
@@ -120,76 +170,100 @@
             display: inline-block;
         }
 
-        .menu-button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px;
+        .instructions {
+            margin-top: 4rem;
+            font-size: 14px;
+            color: #4a5568;
+            width: 90%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            text-align: justify;
         }
 
-        .menu-icon {
-            width: 20px;
-            height: 20px;
-            fill: #1a3a5c;
+        .instructions ul {
+            margin-top: 0.5rem;
+            padding-left: 1.5rem;
         }
 
-        .menu-dropdown {
-            display: none;
-            position: absolute;
+        .instructions ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* New styles for the clear button */
+        .clear-button {
             background-color: white;
-            border: 1px solid #e0e0e0;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            font-weight: 600;
+            padding: 0.5rem 1rem;
             border-radius: 4px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        .menu-dropdown.show {
-            display: block;
+        .clear-button:hover {
+            background-color: var(--primary-color);
+            color: white;
         }
 
-        .menu-dropdown a {
-            display: block;
-            padding: 10px 20px;
-            color: #333;
-            text-decoration: none;
+        .section-header-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 1rem;;
+            background-color: var(--primary-color);
+            color: white;
         }
 
-        .menu-dropdown a:hover {
-            background-color: #f0f2f5;
+        .clear-button-container {
+            margin-left: auto;
         }
     </style>
 </head>
 <body>
     <header class="header">
         <div class="header-content">
-            <div class="header-left">
-                <button class="menu-button" hx-get="/menu" hx-target="#menu-dropdown" hx-swap="outerHTML">
-                    <svg class="menu-icon" viewBox="0 0 20 20">
-                        <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z"/>
-                    </svg>
-                </button>
-                <div id="menu-dropdown"></div>
-                <p class="name">AppName</p>
-            </div>
-            <p class="ms-logo">LOGO</p>
+            <p class="name">AppName</p>
         </div>
     </header>
     <div class="container">
         <div class="input-section">
-            <textarea id="input" name="input" placeholder="Type your prompt here"></textarea>
-            <div class="button-container">
-                <button hx-post="/process" 
-                        hx-trigger="click" 
-                        hx-target="#output" 
-                        hx-include="#input"
-                        hx-indicator="#spinner">Process Text</button>
-                <div id="spinner" class="spinner"></div>
+            <div class="text-area-container">
+                <div class="input-container">
+                    <textarea id="input" name="input" placeholder="Type your prompt here..."></textarea>
+                </div>
+                <div class="button-container">
+                    <button hx-post="/process" 
+                            hx-trigger="click" 
+                            hx-target="#output" 
+                            hx-include="#input"
+                            hx-indicator="#spinner">Process</button>
+                    <div id="spinner" class="spinner"></div>
+                </div>
+                <div class="instructions">
+                    <p><strong>How to write prompts?</strong></p>
+                    <ul>
+                        <li>Clearly define the task you want the LLM to perform. Avoid vague language.</li>
+                        <li>If the task requires additional background, include it in the prompt.</li>
+                        <li>Frame your prompt as a clear instruction.</li>
+                        <li>Specify any requirements, such as word count, tone, or format.</li>
+                        <li>If you need multiple pieces of information, break them down into separate prompts.</li>
+                    </ul>
+                </div>
             </div>
         </div>
         <div class="output-section">
+            <div class="section-header-wrapper">
+                <div class="section-header">Output</div>
+                <!-- Clear Button (aligned to the right) -->
+                <div class="clear-button-container">
+                    <button hx-get="/clear_output" hx-target="#output" class="clear-button">Clear</button>
+                </div>
+            </div>
             <div id="output"></div>
         </div>
     </div>
 </body>
 </html>
-

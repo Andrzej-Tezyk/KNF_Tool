@@ -40,5 +40,10 @@ def process_text() -> Response:
         return response
 
 
+@app.route("/clear_output", methods=["GET"])
+def clear_output() -> str:
+    return ""
+
+
 if __name__ == "__main__":
     app.run(debug=True)

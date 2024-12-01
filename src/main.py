@@ -41,7 +41,7 @@ def process_text() -> Response:
                 status=400,
                 mimetype="text/html",
             )
-        
+
         pdfs_to_scan = list(pdf_dir.glob("*.pdf"))
         if not pdfs_to_scan:
             return Response(
@@ -50,10 +50,11 @@ def process_text() -> Response:
                 mimetype="text/html",
             )
 
-
         def generate() -> typing.Generator:
             try:
                 for pdf in pdfs_to_scan:
+                    #yield f"<div><p>Processing: {pdf.name}</p></div>"
+
                     result = process_pdf(prompt, pdf)
 
                     if stop_flag.is_set():
@@ -67,11 +68,9 @@ def process_text() -> Response:
                     elif "content" in result:
                         markdown_content = markdown.markdown(result["content"])
                         yield f"""
-                        <div style="border: 1px solid var(--border-color); padding: 1rem; margin-bottom: 1rem;">
-                            <h3 style="color: var(--primary-color);">
-                                Result for <em>{result['pdf_name']}</em>
-                            </h3>
-                            <div>{markdown_content}</div>
+                        <div class="output-content">
+                            <h3>Result for <em>{result['pdf_name']}</em></h3>
+                            <div class="markdown-body">{markdown_content}</div>
                         </div>
                         """
                     else:

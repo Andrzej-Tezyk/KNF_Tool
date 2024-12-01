@@ -1,8 +1,14 @@
 import typing
 import threading
+from pathlib import Path
+
 import markdown
 from flask import Flask, request, render_template, Response, stream_with_context
 from backend.text_extraction import process_pdfs  # type: ignore[import-not-found]
+
+
+SCRAPED_FILES_DIR = "scraped_files"
+
 
 app = Flask(__name__)
 
@@ -27,8 +33,25 @@ def process_text() -> Response:
 
         stop_flag.clear()
 
-        def generate_results() -> typing.Generator:
-            pdfs_to_process = process_pdfs(prompt)
+        pdf_dir = Path(SCRAPED_FILES_DIR)
+        if not pdf_dir.exists():
+            return Response(
+                f"<div><p><strong>Error:</strong> Directory {SCRAPED_FILES_DIR} not found.</p></div>",
+                status=400,
+                mimetype="text/html",
+            )
+        
+        pdfs_to_scan = list(pdf_dir.glob("*.pdf"))
+        if not pdfs_to_scan:
+            return Response(
+                f"<div><p><strong>Error:</strong> No PDF files found in {SCRAPED_FILES_DIR}.</p></div>",
+                status=400,
+                mimetype="text/html",
+            )
+
+
+        def generate() -> typing.Generator:
+            pdfs_to_process = process_pdfs(prompt, pdfs_to_scan)
 
             for result in pdfs_to_process:
                 if stop_flag.is_set():
@@ -51,7 +74,7 @@ def process_text() -> Response:
                     """
 
         return Response(
-            stream_with_context(generate_results()), content_type="text/html"
+            stream_with_context(generate()), content_type="text/html"
         )
 
     except Exception as e:

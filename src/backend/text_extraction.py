@@ -11,7 +11,6 @@ from PyPDF2 import PdfReader
 load_dotenv()
 
 
-SCRAPED_FILES_DIR = "scraped_files"
 OUTPUT_DIR = Path("output")
 SYSTEM_PROMPT = (
     "Do generowania odpowiedzi wykorzystaj tylko"
@@ -55,7 +54,7 @@ def extract_text_from_pdf(pdf_path: Path) -> str:
         return ""
 
 
-def process_pdfs(prompt: str) -> typing.Generator:
+def process_pdfs(prompt: str, pdfs_to_scan: typing.Generator) -> typing.Generator:
     """
     Process all PDFs in the scraped files directory, analyze them with the model,
     and save results to an output file.
@@ -66,16 +65,6 @@ def process_pdfs(prompt: str) -> typing.Generator:
         return
 
     try:
-        pdf_dir = Path(SCRAPED_FILES_DIR)
-        if not pdf_dir.exists():
-            yield {"error": f"Directory {SCRAPED_FILES_DIR} not found"}
-            return
-
-        pdfs_to_scan = list(pdf_dir.glob("*.pdf"))
-        if not pdfs_to_scan:
-            yield {"error": f"No PDF files found in {SCRAPED_FILES_DIR}"}
-            return
-
         for count, pdf in enumerate(pdfs_to_scan, 1):
             try:
                 print(f"{count}/{len(pdfs_to_scan)}")

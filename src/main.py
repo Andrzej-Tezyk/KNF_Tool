@@ -1,63 +1,70 @@
 import typing
 import threading
-
-from flask import Flask, request, jsonify, render_template, Response
-from flask_cors import CORS
+import markdown
+from flask import Flask, request, render_template, Response, stream_with_context
 from backend.text_extraction import process_pdfs  # type: ignore[import-not-found]
 
 app = Flask(__name__)
-CORS(app)  # IS IT NEEDED
-
 
 stop_flag = threading.Event()
-
 
 @app.route("/")
 def index() -> str:
     return render_template("index.html")
-
 
 @app.route("/process", methods=["POST"])
 def process_text() -> Response:
     try:
         prompt = request.form["input"]
         if not prompt:
-            response = jsonify({"error": "No input provided"})
-            response.status_code = 400
-            return response
+            return Response(
+                "<div><p><strong>Error:</strong> No input provided.</p></div>",
+                status=400,
+                mimetype="text/html",
+            )
 
         stop_flag.clear()
 
-        # a generator function to stream results back
         def generate_results() -> typing.Generator:
             pdfs_to_process = process_pdfs(prompt)
 
             for result in pdfs_to_process:
                 if stop_flag.is_set():
+                    yield "<div><p><strong>Processing stopped. Partial results displayed.</strong></p></div>"
                     break
-                yield (
-                    "<div><p><strong>Response for:</strong> "
-                    + f"<em>{result['pdf_name']}</em><br>{result['content']}<br><br></p></div>"
-                )
 
-        return Response(generate_results(), mimetype="text/html")
+                if "error" in result:
+                    yield (
+                        f"<div><p><strong>Error:</strong> {result['error']}</p></div>"
+                    )
+                else:
+                    markdown_content = markdown.markdown(result['content'])
+                    yield f"""
+                    <div style="border: 1px solid var(--border-color); padding: 1rem; margin-bottom: 1rem;">
+                        <h3 style="color: var(--primary-color);">
+                            Result for <em>{result['pdf_name']}</em>
+                        </h3>
+                        <div>{markdown_content}</div>
+                    </div>
+                    """
+
+        return Response(stream_with_context(generate_results()), content_type="text/html")
 
     except Exception as e:
-        response = jsonify({"error": str(e)})
-        response.status_code = 500
-        return response
-
+        return Response(
+            f"<div><p><strong>Error:</strong> {str(e)}</p></div>",
+            status=500,
+            mimetype="text/html",
+        )
 
 @app.route("/clear_output", methods=["GET"])
 def clear_output() -> str:
     return ""
 
-
 @app.route("/stop_processing", methods=["GET"])
 def stop_processing() -> str:
     stop_flag.set()
     return "<div><p><strong>Processing stopped. Displaying partial results...</strong></p></div>"
-
 
 if __name__ == "__main__":
     app.run(debug=True)

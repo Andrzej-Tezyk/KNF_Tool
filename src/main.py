@@ -1,10 +1,11 @@
 import typing
 import threading
 from pathlib import Path
+import traceback
 
 import markdown
 from flask import Flask, request, render_template, Response, stream_with_context
-from backend.text_extraction import process_pdfs  # type: ignore[import-not-found]
+from backend.text_extraction import process_pdf  # type: ignore[import-not-found]
 
 
 SCRAPED_FILES_DIR = "scraped_files"
@@ -51,27 +52,35 @@ def process_text() -> Response:
 
 
         def generate() -> typing.Generator:
-            pdfs_to_process = process_pdfs(prompt, pdfs_to_scan)
+            try:
+                for pdf in pdfs_to_scan:
+                    result = process_pdf(prompt, pdf)
 
-            for result in pdfs_to_process:
-                if stop_flag.is_set():
-                    yield "<div><p><strong>Processing stopped. Partial results displayed.</strong></p></div>"
-                    break
+                    if stop_flag.is_set():
+                        yield "<div><p><strong>Processing stopped. Partial results displayed.</strong></p></div>"
+                        break
 
-                if "error" in result:
-                    yield (
-                        f"<div><p><strong>Error:</strong> {result['error']}</p></div>"
-                    )
-                else:
-                    markdown_content = markdown.markdown(result["content"])
-                    yield f"""
-                    <div style="border: 1px solid var(--border-color); padding: 1rem; margin-bottom: 1rem;">
-                        <h3 style="color: var(--primary-color);">
-                            Result for <em>{result['pdf_name']}</em>
-                        </h3>
-                        <div>{markdown_content}</div>
-                    </div>
-                    """
+                    if "error" in result:
+                        yield (
+                            f"<div><p><strong>Error:</strong> {result['error']}</p></div>"
+                        )
+                    elif "content" in result:
+                        markdown_content = markdown.markdown(result["content"])
+                        yield f"""
+                        <div style="border: 1px solid var(--border-color); padding: 1rem; margin-bottom: 1rem;">
+                            <h3 style="color: var(--primary-color);">
+                                Result for <em>{result['pdf_name']}</em>
+                            </h3>
+                            <div>{markdown_content}</div>
+                        </div>
+                        """
+                    else:
+                        yield "<div><p><strong>Error:</strong> Unexpected result format.</p></div>"
+
+            except Exception as e:
+                print(f"An error occurred in the generate function: {e}")
+                traceback.print_exc()
+                yield "<div><p><strong>Error:</strong> An unexpected error occurred.</p></div>"
 
         return Response(
             stream_with_context(generate()), content_type="text/html"

@@ -52,10 +52,12 @@ def process_text() -> Response:
 def clear_output() -> str:
     return ""
 
+
 @app.route("/stop_processing", methods=["GET"])
 def stop_processing() -> str:
-    stop_flag.set() 
+    stop_flag.set()
     return "<div><p><strong>Processing stopped. Displaying partial results...</strong></p></div>"
+
 
 if __name__ == "__main__":
     app.run(debug=True)

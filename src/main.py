@@ -1,4 +1,5 @@
 import typing
+import threading
 
 from flask import Flask, request, jsonify, render_template, Response
 from flask_cors import CORS
@@ -6,6 +7,9 @@ from backend.text_extraction import process_pdfs  # type: ignore[import-not-foun
 
 app = Flask(__name__)
 CORS(app)  # IS IT NEEDED
+
+
+stop_flag = threading.Event()
 
 
 @app.route("/")
@@ -22,13 +26,17 @@ def process_text() -> Response:
             response.status_code = 400
             return response
 
+        stop_flag.clear()
+
         # a generator function to stream results back
         def generate_results() -> typing.Generator:
             pdfs_to_process = process_pdfs(prompt)
 
             for result in pdfs_to_process:
+                if stop_flag.is_set():
+                    break
                 yield (
-                    "<div><p><strong>Odpowiedź dla</strong>:"
+                    "<div><p><strong>Response for:</strong> "
                     + f"<em>{result['pdf_name']}</em><br>{result['content']}<br><br></p></div>"
                 )
 
@@ -43,6 +51,12 @@ def process_text() -> Response:
 @app.route("/clear_output", methods=["GET"])
 def clear_output() -> str:
     return ""
+
+
+@app.route("/stop_processing", methods=["GET"])
+def stop_processing() -> str:
+    stop_flag.set()
+    return "<div><p><strong>Processing stopped. Displaying partial results...</strong></p></div>"
 
 
 if __name__ == "__main__":

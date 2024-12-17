@@ -61,8 +61,6 @@ def process_pdf(prompt: str, pdf: typing.Generator) -> dict:
 
     if not prompt:
         return {"error": "No prompt provided"}
-        
-
 
     try:
         print(f"Document: {pdf.stem} is beeing analyzed.")
@@ -74,13 +72,12 @@ def process_pdf(prompt: str, pdf: typing.Generator) -> dict:
             file_to_send = genai.upload_file(pdf)
             print(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
             response = model.generate_content([prompt, file_to_send])
-        
+
         # replace -> sometimes double space between words occure; most likely reason: pdf formating
         response_text = response.text.replace("  ", " ")
         print(f"Response for: {pdf.stem} was saved!\n")
         time.sleep(1)  # to lower number api requests to model per sec
         return {"pdf_name": pdf.stem, "content": response_text}
-
 
     except Exception as e:
         print(f"There is a problem with {pdf.stem}. \n Error message: {e}\n")

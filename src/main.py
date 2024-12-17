@@ -11,7 +11,7 @@ from backend.text_extraction import process_pdf  # type: ignore[import-not-found
 SCRAPED_FILES_DIR = "scraped_files"
 
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
 
 stop_flag = threading.Event()
 
@@ -21,8 +21,8 @@ def index() -> str:
     return render_template("index.html")
 
 
-@app.route("/process", methods=["POST"])
-def process_text() -> Response:
+@app.route("/process", methods=["POST", "GET"])
+def process_text() -> Response:    
     try:
         prompt = request.form["input"]
         if not prompt:
@@ -32,7 +32,7 @@ def process_text() -> Response:
                 mimetype="text/html",
             )
 
-        stop_flag.clear()
+        stop_flag.clear() # set flag to false
 
         pdf_dir = Path(SCRAPED_FILES_DIR)
         if not pdf_dir.exists():
@@ -57,7 +57,7 @@ def process_text() -> Response:
 
                     result = process_pdf(prompt, pdf)
 
-                    if stop_flag.is_set():
+                    if stop_flag.is_set(): # check is flag True or False
                         yield "<div><p><strong>Processing stopped. Partial results displayed.</strong></p></div>"
                         break
 
@@ -100,7 +100,7 @@ def clear_output() -> str:
 
 @app.route("/stop_processing", methods=["GET"])
 def stop_processing() -> str:
-    stop_flag.set()
+    stop_flag.set() # set flag to true
     return "<div><p><strong>Processing stopped. Displaying partial results...</strong></p></div>"
 
 

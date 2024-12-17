@@ -9,7 +9,6 @@
         integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq" 
         crossorigin="anonymous">
     </script>
-    <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/sse.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css">
     <link rel="icon" type="image/x-icon" href="/static/logo.ico">
     <style>
@@ -174,26 +173,6 @@
             display: inline-block;
         }
 
-        .instructions {
-            margin-top: 4rem;
-            font-size: 14px;
-            color: #4a5568;
-            width: 90%;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            text-align: justify;
-        }
-
-        .instructions ul {
-            margin-top: 0.5rem;
-            padding-left: 1.5rem;
-        }
-
-        .instructions ul li {
-            margin-bottom: 0.5rem;
-        }
-
         .clear-button {
             background-color: white;
             color: var(--primary-color);
@@ -269,35 +248,26 @@
             <p class="name">AppName</p>
         </div>
     </header>
+
     <div class="container">
         <div class="input-section">
             <div class="text-area-container">
-                <div class="input-container">
-                    <textarea id="input" name="input" placeholder="Type your prompt here..."></textarea>
-                </div>
-                <div class="button-container">
-                    <button hx-post="/process" 
-                            hx-trigger="click" 
-                            hx-target="#output" 
-                            hx-include="#input"
-                            hx-indicator="#spinner">Process</button>
-                    <div id="spinner" class="spinner"></div>
-                </div>
-                <div class="instructions">
-                    <p><strong>How to write prompts?</strong></p>
-                    <ul>
-                        <li>Clearly define the task you want the LLM to perform. Avoid vague language.</li>
-                        <li>If the task requires additional background, include it in the prompt.</li>
-                        <li>Frame your prompt as a clear instruction.</li>
-                        <li>Specify any requirements, such as word count, tone, or format.</li>
-                        <li>If you need multiple pieces of information, break them down into separate prompts.</li>
-                    </ul>
-                </div>
+                <form id="input-form" hx-post="/process" hx-target="#output" hx-indicator="#spinner">
+                    <div class="input-container">
+                        <textarea id="input" name="input" placeholder="Type your prompt here..." required></textarea>
+                    </div>
+                    <div class="button-container">
+                        <button type="submit">Process</button>
+                        <div id="spinner" class="spinner"></div>
+                    </div>
+                </form>
             </div>
         </div>
+
         <div class="output-section">
             <div class="section-header-wrapper">
                 <div class="section-header">Output</div>
+
                 <div class="clear-button-container">
                     <button hx-get="/stop_processing" hx-target="#output" class="clear-button">Stop</button>
                     <button hx-get="/clear_output" hx-target="#output" class="clear-button">Clear</button>
@@ -306,7 +276,17 @@
             <div id="output" class="markdown-body"></div>
         </div>
     </div>
+    <script>
+        // form submission on Enter key
+        const inputField = document.getElementById("input");
+        const form = document.getElementById("input-form");
+
+        inputField.addEventListener("keydown", function(event) {
+            if (event.key === "Enter" && !event.shiftKey) { // submit only when Shift is not pressed -> shift + enter for new line
+                event.preventDefault(); // prevent default Enter behavior (adding a newline)
+                form.requestSubmit();
+            }
+        });
+    </script>
 </body>
 </html>
-
-

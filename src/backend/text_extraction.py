@@ -2,7 +2,6 @@ import os
 import time
 import traceback
 from pathlib import Path
-import typing
 
 import google.generativeai as genai  # type: ignore[import-untyped]
 from dotenv import load_dotenv

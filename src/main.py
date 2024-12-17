@@ -8,6 +8,7 @@ from flask import Flask, request, render_template, Response, stream_with_context
 from backend.text_extraction import process_pdf  # type: ignore[import-not-found]
 
 
+# directory with pdf files
 SCRAPED_FILES_DIR = "scraped_files"
 
 
@@ -104,4 +105,3 @@ def stop_processing() -> str:
 
 if __name__ == "__main__":
     app.run(debug=True)
-    

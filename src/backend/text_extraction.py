@@ -54,7 +54,7 @@ def extract_text_from_pdf(pdf_path: Path) -> str:
         return ""
 
 
-def process_pdf(prompt: str, pdf: typing.Generator) -> dict:
+def process_pdf(prompt: str, pdf: Path) -> dict:
     """
     Processes a single PDF document using the provided prompt and returns the result incrementally.
     """

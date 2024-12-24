@@ -1,14 +1,13 @@
 import time
 import traceback
 from pathlib import Path
+from typing import Any
 
 import google.generativeai as genai  # type: ignore[import-untyped]
 from dotenv import load_dotenv
 from PyPDF2 import PdfReader
 
 load_dotenv()
-
-
 
 
 def extract_text_from_pdf(pdf_path: Path) -> str:
@@ -34,7 +33,7 @@ def extract_text_from_pdf(pdf_path: Path) -> str:
         return ""
 
 
-def process_pdf(prompt: str, pdf: Path, model) -> dict:
+def process_pdf(prompt: str, pdf: Path, model: Any) -> dict:
     """
     Processes a single PDF document using the provided prompt and returns the result incrementally.
     """

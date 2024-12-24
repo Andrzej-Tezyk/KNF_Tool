@@ -39,7 +39,7 @@ stop_flag = threading.Event()
 def index() -> str:
     pdf_dir = Path(SCRAPED_FILES_DIR)
     pdf_files = [pdf.name for pdf in pdf_dir.glob("*.pdf")] if pdf_dir.exists() else []
-    return render_template("index.html", pdf_files = pdf_files)
+    return render_template("index.html", pdf_files=pdf_files)
 
 
 @app.route("/process", methods=["POST"])

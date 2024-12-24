@@ -1,33 +1,13 @@
-import os
 import time
 import traceback
 from pathlib import Path
+from typing import Any
 
 import google.generativeai as genai  # type: ignore[import-untyped]
 from dotenv import load_dotenv
 from PyPDF2 import PdfReader
 
 load_dotenv()
-
-
-OUTPUT_DIR = Path("output")
-SYSTEM_PROMPT = (
-    "Do generowania odpowiedzi wykorzystaj tylko"
-    + "to co jest zawarte w udostępnionych dokumentach."
-)
-
-
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
-
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if not GEMINI_API_KEY:
-    raise ValueError("GEMINI_API_KEY not found in environment variables")
-
-genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel(
-    "gemini-1.5-flash-8b", system_instruction=SYSTEM_PROMPT
-)  # another model to be used: "gemini-1.5-flash"
 
 
 def extract_text_from_pdf(pdf_path: Path) -> str:
@@ -53,7 +33,7 @@ def extract_text_from_pdf(pdf_path: Path) -> str:
         return ""
 
 
-def process_pdf(prompt: str, pdf: Path) -> dict:
+def process_pdf(prompt: str, pdf: Path, model: Any) -> dict:
     """
     Processes a single PDF document using the provided prompt and returns the result incrementally.
     """

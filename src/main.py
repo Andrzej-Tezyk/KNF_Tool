@@ -2,14 +2,32 @@ import typing
 import threading
 from pathlib import Path
 import traceback
+import os
 
 import markdown
 from flask import Flask, request, render_template, Response, stream_with_context
+import google.generativeai as genai  # type: ignore[import-untyped]
 from backend.text_extraction import process_pdf  # type: ignore[import-not-found]
 
 
 # directory with pdf files
 SCRAPED_FILES_DIR = "scraped_files"
+
+
+SYSTEM_PROMPT = (
+    "Do generowania odpowiedzi wykorzystaj tylko"
+    + "to co jest zawarte w udostępnionych dokumentach."
+)
+
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY not found in environment variables")
+
+genai.configure(api_key=GEMINI_API_KEY)
+model = genai.GenerativeModel(
+    "gemini-2.0-flash-exp", system_instruction=SYSTEM_PROMPT
+)  # another model to be used: "gemini-1.5-flash", "gemini-1.5-flash-8b"
 
 
 app = Flask(__name__, template_folder="templates")
@@ -19,12 +37,15 @@ stop_flag = threading.Event()
 
 @app.route("/")
 def index() -> str:
-    return render_template("index.html")
+    pdf_dir = Path(SCRAPED_FILES_DIR)
+    pdf_files = [pdf.name for pdf in pdf_dir.glob("*.pdf")] if pdf_dir.exists() else []
+    return render_template("index.html", pdf_files=pdf_files)
 
 
 @app.route("/process", methods=["POST"])
 def process_text() -> Response:
     try:
+        # get the input prompt
         prompt = request.form["input"]
         if not prompt:
             return Response(
@@ -33,46 +54,44 @@ def process_text() -> Response:
                 mimetype="text/html",
             )
 
-        stop_flag.clear()  # set flag to false
+        stop_flag.clear()  # reset stop flag
 
+        # get selected files from the form
+        selected_files = request.form.getlist("selected_files")
+        if not selected_files:
+            return Response(
+                "<div><p><strong>Error:</strong> No files selected for processing.</p></div>",
+                status=400,
+                mimetype="text/html",
+            )
+
+        # get the directory of PDFs and filter only the selected files
         pdf_dir = Path(SCRAPED_FILES_DIR)
-        if not pdf_dir.exists():
-            return Response(
-                f"<div><p><strong>Error:</strong> Directory {SCRAPED_FILES_DIR} not found.</p></div>",
-                status=400,
-                mimetype="text/html",
-            )
-
-        pdfs_to_scan = list(pdf_dir.glob("*.pdf"))
-        if not pdfs_to_scan:
-            return Response(
-                f"<div><p><strong>Error:</strong> No PDF files found in {SCRAPED_FILES_DIR}.</p></div>",
-                status=400,
-                mimetype="text/html",
-            )
+        # result: Path("scraped_files/example.pdf") -> when used with Path object
+        pdfs_to_scan = [pdf_dir / file_name for file_name in selected_files]
 
         def generate() -> typing.Generator:
             try:
                 for pdf in pdfs_to_scan:
-                    # yield f"<div><p>Processing: {pdf.name}</p></div>"
+                    if not pdf.exists():
+                        yield f"<div><p><strong>Error:</strong> File {pdf.name} not found.</p></div>"
+                        continue
 
-                    result = process_pdf(prompt, pdf)
+                    result = process_pdf(prompt, pdf, model)
 
-                    if stop_flag.is_set():  # check is flag True or False
+                    if stop_flag.is_set():  # check stop flag
                         yield "<div><p><strong>Processing stopped. Partial results displayed.</strong></p></div>"
                         break
 
                     if "error" in result:
-                        yield (
-                            f"<div><p><strong>Error:</strong> {result['error']}</p></div>"
-                        )
+                        yield f"<div><p><strong>Error:</strong> {result['error']}</p></div>"
                     elif "content" in result:
                         markdown_content = markdown.markdown(result["content"])
                         yield f"""
                         <div class="output-content">
                             <h3>Result for <em>{result['pdf_name']}</em></h3>
                             <div class="markdown-body">{markdown_content}</div>
-                        </div>
+                        </div>\n\n
                         """
                     else:
                         yield "<div><p><strong>Error:</strong> Unexpected result format.</p></div>"

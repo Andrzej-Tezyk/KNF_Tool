@@ -15,33 +15,10 @@ body {
     line-height: 1.6;
 }
 
-.header {
-    background-color: white;
-    border-bottom: 1px solid var(--border-color);
-    padding: 0.3rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.header-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-}
-
-.name {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: var(--primary-color);
-    text-decoration: none;
-    line-height: 1;
-}
-
 .container {
     display: flex;
-    height: calc(100vh - 70px);
-    max-width: 75%;
+    height: calc(100vh - 70px); /* header? */
+    max-width: 97%;
     margin: 0 auto;
     padding: 1rem;
     box-sizing: border-box;
@@ -49,13 +26,13 @@ body {
 }
 
 .input-section {
-    flex: 0 0 30%;
+    flex: 0 0 25%;
     display: flex;
     flex-direction: column;
     background-color: white;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
+    overflow: auto;
 }
 
 .output-section {
@@ -159,7 +136,7 @@ button:hover {
     display: inline-block;
 }
 
-.clear-button {
+.output-button {
     background-color: white;
     color: var(--primary-color);
     border: 1px solid var(--primary-color);
@@ -171,7 +148,7 @@ button:hover {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.clear-button:hover {
+.output-button:hover {
     background-color: var(--primary-color);
     color: white;
 }
@@ -185,14 +162,14 @@ button:hover {
     color: white;
 }
 
-.clear-button-container {
+.output-button-container {
     margin-left: auto;
 }
 
 .markdown-body {
     box-sizing: border-box;
     min-width: 200px;
-    max-width: 980px;
+    /* max-width: 980px; */
     margin: 0 auto;
     padding: 20px;
     color: #24292e;
@@ -230,16 +207,18 @@ button:hover {
 /* style for the scrollable list */
 .scrollable-list {
     max-height: 300px; /* adjust the height as needed */
-    overflow-y: scroll; /* Enable vertical scrolling */
-    border: 1px solid var(--border-color); /* Optional: Add a border */
-    padding: 0.5rem; /* Optional: Add padding inside the container */
-    background-color: #f8fafc; /* Match the input field background */
-    border-radius: 4px; /* Match the design style */
+    overflow-y: scroll; /* enable vertical scrolling */
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+    padding: 0.5rem;
+    background-color: #f8fafc;
+    border-radius: 4px;
 }
 
 /* scrollbars */
 .scrollable-list::-webkit-scrollbar {
     width: 4px;
+    height: 4px;
 }
 
 .scrollable-list::-webkit-scrollbar-thumb {

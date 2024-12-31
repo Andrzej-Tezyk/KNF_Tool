@@ -152,7 +152,7 @@ button:hover {
     display: inline-block;
 }
 
-.clear-button {
+.output-button {
     background-color: white;
     color: var(--primary-color);
     border: 1px solid var(--primary-color);
@@ -164,7 +164,7 @@ button:hover {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.clear-button:hover {
+.output-button:hover {
     background-color: var(--primary-color);
     color: white;
 }
@@ -178,25 +178,19 @@ button:hover {
     color: white;
 }
 
-.clear-button-container {
+.output-button-container {
     margin-left: auto;
 }
 
 .markdown-body {
     box-sizing: border-box;
     min-width: 200px;
-    max-width: 980px;
+    /* max-width: 980px; */
     margin: 0 auto;
     padding: 20px;
     color: #24292e;
     font-size: 16px;
     line-height: 1.5;
-}
-
-@media (max-width: 767px) {
-    .markdown-body {
-        padding: 15px;
-    }
 }
 
 .output-content {
@@ -223,16 +217,18 @@ button:hover {
 /* style for the scrollable list */
 .scrollable-list {
     max-height: 300px; /* adjust the height as needed */
-    overflow-y: scroll; /* Enable vertical scrolling */
-    border: 1px solid var(--border-color); /* Optional: Add a border */
-    padding: 0.5rem; /* Optional: Add padding inside the container */
-    background-color: #f8fafc; /* Match the input field background */
-    border-radius: 4px; /* Match the design style */
+    overflow-y: scroll; /* enable vertical scrolling */
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+    padding: 0.5rem;
+    background-color: #f8fafc;
+    border-radius: 4px;
 }
 
 /* scrollbars */
 .scrollable-list::-webkit-scrollbar {
     width: 4px;
+    height: 4px;
 }
 
 .scrollable-list::-webkit-scrollbar-thumb {
@@ -284,9 +280,9 @@ button:hover {
             <div class="section-header-wrapper">
                 <div class="section-header">Output</div>
 
-                <div class="clear-button-container">
-                    <button hx-get="/stop_processing" hx-target="#output" class="clear-button">Stop</button>
-                    <button hx-get="/clear_output" hx-target="#output" class="clear-button">Clear</button>
+                <div class="output-button-container">
+                    <button hx-get="/stop_processing" hx-target="#output" class="output-button">Stop</button>
+                    <button hx-get="/clear_output" hx-target="#output" class="output-button">Clear</button>
                 </div>
             </div>
             <div id="output" class="markdown-body"></div>

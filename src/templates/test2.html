@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF AI Interface</title>
+    <script 
+        src="https://unpkg.com/htmx.org@2.0.3" 
+        integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq" 
+        crossorigin="anonymous">
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css">
+    <link rel="icon" type="image/x-icon" href="/static/logo.ico">
+    <style>
+        :root {
+            --primary-color: #2c5282;
+            --secondary-color: #4a69bd;
+            --background-color: #ffffff;
+            --text-color: #2d3748;
+            --border-color: #cbd5e0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            height: calc(100vh - 20px);
+            max-width: 97%;
+            margin: 10px auto;
+            padding: 0.5rem;
+            box-sizing: border-box;
+            gap: 1rem;
+        }
+
+        .input-section {
+            flex: 0 0 25%;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem;
+        }
+
+        .output-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .section-header-wrapper {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #output {
+            flex-grow: 1;
+            overflow-y: auto;
+            background-color: #ffffff;
+            color: #24292e;
+            padding: 1rem;
+        }
+
+        .input-form-container {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 0.5rem;
+            background-color: white;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        textarea {
+            flex: 1;
+            height: 50px;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            resize: none;
+            font-size: 14px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.2);
+        }
+
+        .button-round {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            color: white;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .button-round:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .scrollable-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            padding: 0.5rem;
+            background-color: #f8fafc;
+            border-radius: 4px;
+        }
+
+        .scrollable-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .scrollable-list::-webkit-scrollbar-thumb {
+            background-color: var(--primary-color);
+        }
+
+        .trash-icon {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="input-section">
+            <div class="section-header-wrapper">
+                <div>Files</div>
+            </div>
+            <form id="input-form" hx-post="/process" hx-target="#output">
+                <label for="pdf-selection"><strong>Files:</strong></label>
+                <div id="pdf-selection" class="scrollable-list">
+                    {% for pdf in pdf_files %}
+                    <div>
+                        <input 
+                            type="checkbox" 
+                            id="{{ pdf }}" 
+                            name="selected_files" 
+                            value="{{ pdf }}">
+                        <label for="{{ pdf }}">{{ pdf }}</label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </form>
+        </div>
+
+        <div class="output-section">
+            <div id="output" class="markdown-body"></div>
+            <div class="input-form-container">
+                <form id="input-form" hx-post="/process" hx-target="#output">
+                    <div class="input-container">
+                        <textarea id="input" name="input" placeholder="Type your prompt here..." required></textarea>
+                        <button type="submit" class="button-round">⮝</button>
+                        <button type="button" class="button-round" hx-get="/stop_processing" hx-target="#output">⏸</button>
+                        <button type="button" class="button-round" hx-get="/clear_output" hx-target="#output">
+                            <svg class="trash-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                                <path d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0L284.2 0c12.1 0 23.2 6.8 28.6 17.7L320 32l96 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 96C14.3 96 0 81.7 0 64S14.3 32 32 32l96 0 7.2-14.3zM32 128l384 0 0 320c0 35.3-28.7 64-64 64L96 512c-35.3 0-64-28.7-64-64l0-320zm96 64c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

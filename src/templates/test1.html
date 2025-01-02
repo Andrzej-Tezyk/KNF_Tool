@@ -190,7 +190,7 @@
     </style>
 </head>
 <body>
-    <form id="input-form" hx-post="/process" hx-target="#output">
+    <form id="input-form" hx-post="/process" hx-target="#output" hx-trigger="submit, keydown[key==='Enter'&&!shiftKey]" hx-on:keydown="(event.keyCode===13&&!event.shiftKey)?event.preventDefault():null">
         <div class="container">
             <!-- input section -->
             <div class="input-section">
@@ -227,19 +227,6 @@
             </div>
         </div>
     </form>
-    
-    <script>
-        // form submission on Enter key
-        const inputField = document.getElementById("input");
-        const form = document.getElementById("input-form");
-
-        inputField.addEventListener("keydown", function(event) {
-            if (event.key === "Enter" && !event.shiftKey) { // submit only when Shift is not pressed -> shift + enter for new line
-                event.preventDefault(); // prevent default Enter behavior (adding a newline)
-                form.requestSubmit();
-            }
-        });
-    </script>
     <script>
         function toggleProcessing() {
             const button = document.getElementById('action-button');

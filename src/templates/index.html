@@ -53,42 +53,41 @@
     </form>
     <script>
         document.getElementById('input').addEventListener('keydown', (event) => {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                startProcessing();
-                document.getElementById('input-form').requestSubmit();
+            if (event.key === 'Enter' && !event.shiftKey) { // triggers when Enter is pressed while the input field is focused -> Shift+Enter is allowed
+                event.preventDefault(); // not to create a new line
+                startProcessing(); // use function -> switches the button to stop
+                document.getElementById('input-form').requestSubmit(); // submits the form to start /process
             }
         });
 
-        document.getElementById('input-form').addEventListener('submit', () => {
+        document.getElementById('input-form').addEventListener('submit', () => { // event listener for submit
             startProcessing();
         });
 
-        document.addEventListener('htmx:afterRequest', (event) => {
-            if (!event.detail.requestConfig.url.includes('/stop_processing')) {
+        document.addEventListener('htmx:afterRequest', (event) => { // waits of stop button event
+            if (!event.detail.requestConfig.url.includes('/stop_processing')) { // check if not includes /stop_processing
                 stopProcessing();
             }
         });
 
         function startProcessing() {
-            console.log('Switching to Stop button');
+            console.log('Switching to Stop button'); // logs
             const button = document.getElementById('action-button');
             const img = button.querySelector('img');
-            img.src = "{{ url_for('static', filename='images/stop-solid.svg') }}";
+            img.src = "{{ url_for('static', filename='images/stop-solid.svg') }}"; // changes icon to stop
             
-            // Remove submit behavior
-            button.removeAttribute('type');
+            button.removeAttribute('type'); // remove submit behavior
             
-            // Add click handler for stop functionality
+            // add click handler for stop functionality
             button.onclick = function(e) {
                 e.preventDefault();
-                e.stopPropagation();
+                e.stopPropagation(); // stops the click event from propagating (przekazywanie) to parent elements
                 
-                // Make the stop request manually
-                fetch('/stop_processing')
-                    .then(response => response.text())
+                // make the stop request manually
+                fetch('/stop_processing') // send request to /stop_processing -> custom JavaScript instead of htmx attribues
+                    .then(response => response.text()) // parses the response text from server
                     .then(html => {
-                        document.getElementById('output').innerHTML += html;
+                        document.getElementById('output').innerHTML += html; // appends it to the #output
                         stopProcessing();
                     });
             };
@@ -98,13 +97,11 @@
             console.log('Reverting to Start button');
             const button = document.getElementById('action-button');
             const img = button.querySelector('img');
-            img.src = "{{ url_for('static', filename='images/arrow-up-solid.svg') }}";
+            img.src = "{{ url_for('static', filename='images/arrow-up-solid.svg') }}"; // changes back to arrow up
             
-            // Remove stop click handler
-            button.onclick = null;
+            button.onclick = null; // remove custom stop click handler from startProcessing()
             
-            // Restore submit behavior
-            button.setAttribute('type', 'submit');
+            button.setAttribute('type', 'submit'); // restores default submit behavior
         }
     </script>
 </body>

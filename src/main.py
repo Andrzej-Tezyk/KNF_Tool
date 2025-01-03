@@ -30,7 +30,7 @@ model = genai.GenerativeModel(
 )  # another model to be used: "gemini-1.5-flash", "gemini-1.5-flash-8b"
 
 
-app = Flask(__name__, template_folder="templates")
+app = Flask(__name__, template_folder="templates", static_folder="static")
 
 stop_flag = threading.Event()
 
@@ -73,15 +73,15 @@ def process_text() -> Response:
         def generate() -> typing.Generator:
             try:
                 for pdf in pdfs_to_scan:
+                    if stop_flag.is_set():  # check stop flag
+                        yield "<div><p><strong>Processing stopped. Partial results displayed.</strong></p></div>"
+                        break
+
                     if not pdf.exists():
                         yield f"<div><p><strong>Error:</strong> File {pdf.name} not found.</p></div>"
                         continue
 
                     result = process_pdf(prompt, pdf, model)
-
-                    if stop_flag.is_set():  # check stop flag
-                        yield "<div><p><strong>Processing stopped. Partial results displayed.</strong></p></div>"
-                        break
 
                     if "error" in result:
                         yield f"<div><p><strong>Error:</strong> {result['error']}</p></div>"
@@ -119,6 +119,7 @@ def clear_output() -> str:
 @app.route("/stop_processing", methods=["GET"])
 def stop_processing() -> str:
     stop_flag.set()  # set flag to true
+    print("Stop processing triggered!")
     return "<div><p><strong>Processing stopped. Displaying partial results...</strong></p></div>"
 
 

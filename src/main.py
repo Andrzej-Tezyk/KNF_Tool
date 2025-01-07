@@ -89,7 +89,12 @@ def process_text() -> Response:
                         markdown_content = markdown.markdown(result["content"])
                         yield f"""
                         <div class="output-content">
-                            <h3>Result for <em>{result['pdf_name']}</em></h3>
+                            <h3>
+                                Result for <em>{result['pdf_name']}</em>
+                                <button>
+                                    <span class="arrow-icon">➤</span>
+                                </button>
+                            </h3>
                             <div class="markdown-body">{markdown_content}</div>
                         </div>\n\n
                         """
@@ -100,6 +105,8 @@ def process_text() -> Response:
                 print(f"An error occurred in the generate function: {e}")
                 traceback.print_exc()
                 yield "<div><p><strong>Error:</strong> An unexpected error occurred.</p></div>"
+            
+            #yield "<div data-done='true'></div>"
 
         return Response(stream_with_context(generate()), content_type="text/html")
 
@@ -120,7 +127,8 @@ def clear_output() -> str:
 def stop_processing() -> str:
     stop_flag.set()  # set flag to true
     print("Stop processing triggered!")
-    return "<div><p><strong>Processing stopped. Displaying partial results...</strong></p></div>"
+    return "<div></div>"
+    #return "<div><p><strong>Processing stopped. Displaying partial results...</strong></p></div>"
 
 
 if __name__ == "__main__":

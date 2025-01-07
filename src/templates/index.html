@@ -14,12 +14,13 @@
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/logo.ico') }}">
 </head>
 <body>
-    <form id="input-form" hx-post="/process" hx-target="#output">
+    <form id="input-form" hx-post="/process" hx-target="#output" hx-swap="beforeend">
         <div class="container">
             <!-- input section -->
             <div class="input-section">
                 <div class="section-header-wrapper"></div>
                 <div class="input-section-elements">
+                    <label>temporary (for testing)</label>
                     <div class="scrollable-list">
                         {% for pdf in pdf_files %}
                         <div>
@@ -63,6 +64,7 @@
         document.getElementById('input-form').addEventListener('submit', () => { // event listener for submit
             startProcessing();
         });
+        
 
         document.addEventListener('htmx:afterRequest', (event) => { // waits of stop button event
             if (!event.detail.requestConfig.url.includes('/stop_processing')) { // check if not includes /stop_processing

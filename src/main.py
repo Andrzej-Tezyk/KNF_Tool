@@ -105,8 +105,8 @@ def process_text() -> Response:
                 print(f"An error occurred in the generate function: {e}")
                 traceback.print_exc()
                 yield "<div><p><strong>Error:</strong> An unexpected error occurred.</p></div>"
-            
-            #yield "<div data-done='true'></div>"
+
+            # yield "<div data-done='true'></div>"
 
         return Response(stream_with_context(generate()), content_type="text/html")
 
@@ -128,7 +128,7 @@ def stop_processing() -> str:
     stop_flag.set()  # set flag to true
     print("Stop processing triggered!")
     return "<div></div>"
-    #return "<div><p><strong>Processing stopped. Displaying partial results...</strong></p></div>"
+    # return "<div><p><strong>Processing stopped. Displaying partial results...</strong></p></div>"
 
 
 if __name__ == "__main__":

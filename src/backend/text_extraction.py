@@ -33,7 +33,7 @@ def extract_text_from_pdf(pdf_path: Path) -> str:
         return ""
 
 
-def process_pdf(prompt: str, pdf: Path, model: Any) -> dict:
+def process_pdf(prompt: str, pdf: Path, model: Any, output_size: int) -> dict:
     """
     Processes a single PDF document using the provided prompt and returns the result incrementally.
     """
@@ -43,14 +43,15 @@ def process_pdf(prompt: str, pdf: Path, model: Any) -> dict:
 
     try:
         print(f"Document: {pdf.stem} is beeing analyzed.")
+        max_tokens = output_size * 500
         text = extract_text_from_pdf(pdf)
         if len(text) > 10:  # random small number
-            response = model.generate_content(f"{prompt} {text}")
+            response = model.generate_content(f"{prompt} (Please limit the response to approximately {output_size * 100} words) {text}") # , generation_config={"max_output_tokens": max_tokens}
 
         else:
             file_to_send = genai.upload_file(pdf)
             print(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
-            response = model.generate_content([prompt, file_to_send])
+            response = model.generate_content([prompt + f"(Please limit the response to approximately {output_size * 100} words)", file_to_send])
 
         # replace -> sometimes double space between words occure; most likely reason: pdf formating
         response_text = response.text.replace("  ", " ")

@@ -56,6 +56,8 @@ def process_text() -> Response:
 
         stop_flag.clear()  # reset stop flag
 
+        output_size = int(request.form.get("output_size", 5))  # control output size
+
         # get selected files from the form
         selected_files = request.form.getlist("selected_files")
         if not selected_files:
@@ -81,7 +83,7 @@ def process_text() -> Response:
                         yield f"<div><p><strong>Error:</strong> File {pdf.name} not found.</p></div>"
                         continue
 
-                    result = process_pdf(prompt, pdf, model)
+                    result = process_pdf(prompt, pdf, model, output_size)
 
                     if "error" in result:
                         yield f"<div><p><strong>Error:</strong> {result['error']}</p></div>"
@@ -89,9 +91,8 @@ def process_text() -> Response:
                         markdown_content = markdown.markdown(result["content"])
                         yield f"""
                         <div class="output-content">
-                            <h3>
-                                Result for <em>{result['pdf_name']}</em>
-                                <button>
+                            <h3>Result for:&nbsp <em>{result['pdf_name']}</em>
+                                <button class="output-button">
                                     <span class="arrow-icon">➤</span>
                                 </button>
                             </h3>
@@ -106,8 +107,6 @@ def process_text() -> Response:
                 traceback.print_exc()
                 yield "<div><p><strong>Error:</strong> An unexpected error occurred.</p></div>"
 
-            # yield "<div data-done='true'></div>"
-
         return Response(stream_with_context(generate()), content_type="text/html")
 
     except Exception as e:
@@ -118,7 +117,7 @@ def process_text() -> Response:
         )
 
 
-@app.route("/clear_output", methods=["GET"])
+@app.route("/clear_output", methods=["GET"])  # CHANGE THE ENTIRE #OUTPUT
 def clear_output() -> str:
     return ""
 
@@ -127,8 +126,7 @@ def clear_output() -> str:
 def stop_processing() -> str:
     stop_flag.set()  # set flag to true
     print("Stop processing triggered!")
-    return "<div></div>"
-    # return "<div><p><strong>Processing stopped. Displaying partial results...</strong></p></div>"
+    return "<div></div>"  # <p><strong>Processing stopped. Displaying partial results...</strong></p>
 
 
 if __name__ == "__main__":

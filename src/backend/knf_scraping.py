@@ -58,31 +58,33 @@ if response and response.status_code == 200:
     time_html_tag = soup.time
     datetime_atr = time_html_tag["datetime"]  # type: ignore[index]
 
-    pdf_links = []
+    pdf_titles_links = {}
     for link in soup.find_all("a", title=lambda x: x and "Rekomendacja" in x):
         try:
             href = link.get("href")
+            title = link.get("title")
             if href and href.endswith(".pdf"):
                 # not all .pdf are listed on knf.gov.pl
                 if "https" not in href:
                     full_url = KNF_BASE_URL + href
-                    pdf_links.append(full_url)
+                    pdf_titles_links[title] = full_url
                 else:
-                    pdf_links.append(href)
+                    pdf_titles_links[title] = href
         except Exception as e:
             print(f"Problem with link for {link} \n Error messange: {e}\n")
 
-    for pdf_url in pdf_links:
+    for pdf in pdf_titles_links.items():
         try:
-            pdf_response = requests.get(pdf_url, headers=headers)
-            pdf_name = os.path.basename(pdf_url)
+            pdf_response = requests.get(pdf[1], headers=headers)
             # adding datetime from KNF site to file name
-            pdf_path = os.path.join(SCRAPED_FILES_DIR, f"{datetime_atr}_{pdf_name}")
+            pdf_path = os.path.join(
+                SCRAPED_FILES_DIR, f"{datetime_atr}_{pdf[0][0:19]}.pdf"
+            )  # znalezc lepsze rozwiazanie na nazwy plikow
             with open(pdf_path, "wb") as f:
                 f.write(pdf_response.content)
                 print(f"Downloaded: {pdf_path}")
         except Exception as e:
-            print(f"PDF not downloaded: {pdf_url} \n Error messange: {e}\n")
+            print(f"PDF not downloaded: {pdf[1]} \n Error messange: {e}\n")
             traceback.print_exc()
 else:
     print("Failed to retrieve the main page content after retries.")

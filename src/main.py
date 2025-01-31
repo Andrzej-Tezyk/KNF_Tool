@@ -117,7 +117,7 @@ def process_text() -> Response:
         )
 
 
-@app.route("/clear_output", methods=["GET"])
+@app.route("/clear_output", methods=["GET"]) # CHANGE THE ENTIRE #OUTPUT
 def clear_output() -> str:
     return ""
 

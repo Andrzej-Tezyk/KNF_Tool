@@ -118,7 +118,7 @@ textarea {
     height: 50px;
     padding: 0.75rem;
     border: 0 solid var(--border-color); /* better without border? */
-    border-radius: 8px;
+    border-radius: 25px;
     background-color: var(--input-bg-color);
     font-size: 1rem;
     transition: all 0.2s ease-in-out;
@@ -152,7 +152,7 @@ textarea:focus {
 }
 
 .scrollable-list {
-    max-height: 200px;
+    max-height: 500px;
     overflow-y: auto;
     border: 1px solid var(--border-color);
     padding: 0.5rem;
@@ -230,5 +230,5 @@ textarea:focus {
 }
 
 .output-button:hover {
-    transform: none; /* Disable hover effects */
+    transform: none;
 }

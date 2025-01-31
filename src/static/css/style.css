@@ -50,6 +50,7 @@ body {
     background-color: var(--input-bg-color);
     margin: 0.5rem;
     border-radius: 10px;
+    /* box-shadow: 0.5px 0.5px 0.5px #e4e3e3; */
     /* border: 1px solid var(--border-color); */
     overflow: auto;
     box-sizing: border-box;
@@ -156,7 +157,7 @@ textarea:focus {
     overflow-y: auto;
     border: 1px solid var(--border-color);
     padding: 0.5rem;
-    background-color: var(--input-bg-color);
+    background-color: var(--background-color);
     border-radius: 8px;
 }
 
@@ -200,20 +201,14 @@ textarea:focus {
     padding: 1rem;
 }
 
-.slider-section {
+.option-section {
     margin-top: 10px;
     padding: 0.5rem;
 }
 
 #output-size {
-    width: 100%;
+    width: 10%;
     margin-top: 0.25rem;
-}
-
-#slider-value {
-    font-size: 1rem;
-    font-weight: bold;
-    color: var(--primary-color);
 }
 
 .output-button {

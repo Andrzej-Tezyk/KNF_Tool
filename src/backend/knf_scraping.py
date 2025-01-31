@@ -77,7 +77,9 @@ if response and response.status_code == 200:
         try:
             pdf_response = requests.get(pdf[1], headers=headers)
             # adding datetime from KNF site to file name
-            pdf_path = os.path.join(SCRAPED_FILES_DIR, f"{datetime_atr}_{pdf[0][0:19]}.pdf") # znalezc lepsze rozwiazanie na nazwy plikow
+            pdf_path = os.path.join(
+                SCRAPED_FILES_DIR, f"{datetime_atr}_{pdf[0][0:19]}.pdf"
+            )  # znalezc lepsze rozwiazanie na nazwy plikow
             with open(pdf_path, "wb") as f:
                 f.write(pdf_response.content)
                 print(f"Downloaded: {pdf_path}")

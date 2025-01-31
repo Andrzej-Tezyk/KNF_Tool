@@ -56,7 +56,7 @@ def process_text() -> Response:
 
         stop_flag.clear()  # reset stop flag
 
-        output_size = int(request.form.get("output_size", 5)) # control output size
+        output_size = int(request.form.get("output_size", 5))  # control output size
 
         # get selected files from the form
         selected_files = request.form.getlist("selected_files")
@@ -117,7 +117,7 @@ def process_text() -> Response:
         )
 
 
-@app.route("/clear_output", methods=["GET"]) # CHANGE THE ENTIRE #OUTPUT
+@app.route("/clear_output", methods=["GET"])  # CHANGE THE ENTIRE #OUTPUT
 def clear_output() -> str:
     return ""
 
@@ -126,7 +126,7 @@ def clear_output() -> str:
 def stop_processing() -> str:
     stop_flag.set()  # set flag to true
     print("Stop processing triggered!")
-    return "<div></div>" #<p><strong>Processing stopped. Displaying partial results...</strong></p>
+    return "<div></div>"  # <p><strong>Processing stopped. Displaying partial results...</strong></p>
 
 
 if __name__ == "__main__":

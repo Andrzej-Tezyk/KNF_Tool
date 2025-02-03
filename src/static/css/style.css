@@ -188,9 +188,9 @@ textarea:focus {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: var(--primary-color);
-    color: #ffffff;
-    padding: 0.75rem 1rem;
+    background-color: #ffffff;
+    color: var(--primary-color);
+    padding: 0.75rem 1rem 0rem;
     margin: 0;
     border-top-left-radius: 7px;
     border-top-right-radius: 7px;
@@ -198,7 +198,7 @@ textarea:focus {
 }
 
 .output-content .markdown-body {
-    padding: 1rem;
+    padding: 0rem 1rem 1rem;
 }
 
 .option-section {
@@ -221,7 +221,7 @@ textarea:focus {
     justify-content: center;
     padding: 0;
     font-size: inherit;
-    color: inherit;
+    color: #2c5282;
 }
 
 .output-button:hover {

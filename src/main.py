@@ -26,8 +26,8 @@ if not GEMINI_API_KEY:
 
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel(
-    "gemini-2.0-flash-exp", system_instruction=SYSTEM_PROMPT
-)  # another model to be used: "gemini-1.5-flash", "gemini-1.5-flash-8b"
+    "gemini-1.5-flash-8b", system_instruction=SYSTEM_PROMPT
+)  # another model to be used: "gemini-1.5-flash", "gemini-2.0-flash-exp"
 
 
 app = Flask(__name__, template_folder="templates", static_folder="static")

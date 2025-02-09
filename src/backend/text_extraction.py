@@ -43,7 +43,7 @@ def process_pdf(prompt: str, pdf: Path, model: Any, output_size: int) -> dict:
 
     try:
         print(f"Document: {pdf.stem} is beeing analyzed.")
-        #text = extract_text_from_pdf(pdf)
+        # text = extract_text_from_pdf(pdf)
         # if len(text) > 10:  # random small number
         #    response = model.generate_content(
         #        f"{prompt} (Please limit the response to approximately {output_size} words) {text}"

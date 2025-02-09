@@ -43,13 +43,13 @@ def process_pdf(prompt: str, pdf: Path, model: Any, output_size: int) -> dict:
 
     try:
         print(f"Document: {pdf.stem} is beeing analyzed.")
-        text = extract_text_from_pdf(pdf)
-        #if len(text) > 10:  # random small number
+        #text = extract_text_from_pdf(pdf)
+        # if len(text) > 10:  # random small number
         #    response = model.generate_content(
         #        f"{prompt} (Please limit the response to approximately {output_size} words) {text}"
         #    )  # , generation_config={"max_output_tokens": max_tokens}
 
-        #else:
+        # else:
         file_to_send = genai.upload_file(pdf)
         print(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
         response = model.generate_content(

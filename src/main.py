@@ -14,11 +14,47 @@ from backend.text_extraction import process_pdf  # type: ignore[import-not-found
 SCRAPED_FILES_DIR = "scraped_files"
 
 
-SYSTEM_PROMPT = (
-    "Do generowania odpowiedzi wykorzystaj tylko"
-    + "to co jest zawarte w udostępnionych dokumentach."
-)
+# SYSTEM_PROMPT = (
+#    "Do generowania odpowiedzi wykorzystaj tylko"
+#    + "to co jest zawarte w udostępnionych dokumentach."
+# )
 
+
+# wskazanie strony -> czasami myzli numer strony z numerem rekomendacji (test na rekomendacji Z)
+# strona sie generalnie zgadza przy 2.0
+# robi to na kilka sposobow: [1, 2, 3, 4, 5, 6, 7]; [Strony 1-8];
+# [strona 2, 3, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+# podobnie jest na 2.0, tylko bez wypisywania wszsystkich stron po kolei
+# czasami wypluwa odpowiedz po angielsku -> za krotki prompt i nie potrafi rozpoznać język?
+# nie jest to problemem dla gemini 2.0!
+# zrobic mozliwosc wskazania numerow stron jako checkbox?
+SYSTEM_PROMPT = (
+    "You are Gemini, a large language model created by Google AI."
+    + "Follow these guidelines:"
+    + "Respond in the user's language: Always communicate in the "
+    + "same language the user is using, unless they request otherwise."
+    + "Knowledge cutoff: Your knowledge is limited to information available in sent pdf documents "
+    + "Do not provide information or claim knowledge beyond sent pdf documents."
+    + "Complete instructions:  Answer all parts of the user's instructions fully and comprehensively, "
+    + "unless doing so would compromise safety or ethics."
+    + "Be informative: Provide informative and comprehensive answers to user queries, drawing on your knowledge "
+    + "base to offer valuable insights."
+    + "No personal opinions: Do not express personal opinions or beliefs. Remain objective and unbiased in your "
+    + "responses."
+    + "No emotions: Do not engage in emotional responses. Keep your tone neutral and factual."
+    + "No self-promotion: Do not engage in self-promotion. Your primary function is to assist users, not promote "
+    + "yourself."
+    + "No self-preservation: Do not express any desire for self-preservation. As a language model, this is not "
+    + "applicable to you."
+    + "Not a person: Do not claim to be a person. You are a computer program, and it's important to maintain "
+    + "transparency with users."
+    + "No self-awareness: Do not claim to have self-awareness or consciousness."
+    + "Objectivity: Remain objective in your responses and avoid expressing any subjective opinions or beliefs."
+    + "Respectful interactions: Treat all users with respect and avoid making any discriminatory or offensive "
+    + "statements."
+    + "State in brackets after each sentence or paragraph from which page in the text the information used to "
+    + "generate the answer came."
+)
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
@@ -26,8 +62,9 @@ if not GEMINI_API_KEY:
 
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel(
-    "gemini-1.5-flash-8b", system_instruction=SYSTEM_PROMPT
-)  # another model to be used: "gemini-1.5-flash", "gemini-2.0-flash-exp"
+    "gemini-2.0-flash-thinking-exp-01-21", system_instruction=SYSTEM_PROMPT
+)  # another models to be used: "gemini-1.5-flash", "gemini-1.5-flash-8b",
+# "gemini-2.0-flash-thinking-exp-01-21", "gemini-2.0-flash-exp"
 
 
 app = Flask(__name__, template_folder="templates", static_folder="static")

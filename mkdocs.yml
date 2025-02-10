@@ -1,0 +1,16 @@
+site_name: KNF Insight Docs
+
+theme:
+  name: "material"
+
+plugins:
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+
+nav:
+  - index.md
+  - tutorials.md
+  - reference.md
+  - explanation.md

@@ -11,9 +11,28 @@ load_dotenv()
 
 
 def extract_text_from_pdf(pdf_path: Path) -> str:
+    """Extracts text from a PDF file.
+
+    This function reads a PDF file, extracts text from each page, and concatenates
+    the extracted text into a single string. If an error occurs during extraction,
+    it logs the error and returns an empty string.
+
+    Examples:
+        >>> extract_text_from_pdf(Path("document.pdf"))
+        'This is the extracted text from the PDF document.'
+
+    Args:
+        pdf_path: A Path object representing the PDF file to extract text from.
+
+    Returns:
+        A string containing the extracted text from the PDF. If an error occurs,
+        an empty string is returned.
+
+    Raises:
+        Exception: Any exceptions encountered while reading or extracting text
+        from the PDF are logged and handled gracefully.
     """
-    Extract text from a PDF file.
-    """
+
     try:
         with open(pdf_path, "rb") as file:
             pdf = PdfReader(file)
@@ -34,8 +53,31 @@ def extract_text_from_pdf(pdf_path: Path) -> str:
 
 
 def process_pdf(prompt: str, pdf: Path, model: Any, output_size: int) -> dict:
-    """
-    Processes a single PDF document using the provided prompt and returns the result incrementally.
+    """Processes a single PDF document using the provided prompt and returns the result.
+
+    This function uploads a PDF document, sends it to a model with the given prompt,
+    and retrieves a generated response. The response
+    text is cleaned to remove double spaces before being returned.
+
+    Examples:
+        >>> process_pdf("Summarize this document", Path("report.pdf"), model, 100)
+        {'pdf_name': 'report', 'content': 'This document summarizes ...'}
+
+    Args:
+        prompt: A string containing the user’s prompt for processing the document.
+        pdf: A Path object representing the PDF file to be processed.
+        model: A generative AI model used to process the document.
+        output_size: An integer defining the approximate word limit for the response.
+
+    Returns:
+        A dictionary containing:
+        - "pdf_name": The name of the processed PDF (without extension).
+        - "content": The generated response text.
+        - "error": An error message if processing fails.
+
+    Raises:
+        Exception: If an error occurs during processing, it is logged and returned
+        in the response dictionary.
     """
 
     if not prompt:

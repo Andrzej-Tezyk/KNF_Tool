@@ -1,0 +1,9 @@
+https://flask-socketio.readthedocs.io/en/latest/
+https://flask.palletsprojects.com/en/stable/patterns/streaming/
+
+https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_client_applications
+https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_servers
+https://medium.com/@abhishekchaudhary_28536/building-apps-using-flask-socketio-and-javascript-socket-io-part-1-ae448768643
+
+jeszcze jeden link, o ktorym zapomnialem:
+https://medium.com/@abhishekchaudhary_28536/building-apps-using-flask-socketio-and-javascript-socket-io-part-1-ae448768643

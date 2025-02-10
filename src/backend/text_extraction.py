@@ -25,14 +25,14 @@ def extract_text_from_pdf(pdf_path: Path) -> str:
         pdf_path: A Path object representing the PDF file to extract text from.
 
     Returns:
-        A string containing the extracted text from the PDF. If an error occurs, 
+        A string containing the extracted text from the PDF. If an error occurs,
         an empty string is returned.
 
     Raises:
-        Exception: Any exceptions encountered while reading or extracting text 
+        Exception: Any exceptions encountered while reading or extracting text
         from the PDF are logged and handled gracefully.
     """
-    
+
     try:
         with open(pdf_path, "rb") as file:
             pdf = PdfReader(file)

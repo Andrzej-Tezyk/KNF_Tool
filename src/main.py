@@ -62,7 +62,7 @@ if not GEMINI_API_KEY:
 
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel(
-    "gemini-2.0-flash-thinking-exp-01-21", system_instruction=SYSTEM_PROMPT
+    "gemini-1.5-flash", system_instruction=SYSTEM_PROMPT
 )  # another models to be used: "gemini-1.5-flash", "gemini-1.5-flash-8b",
 # "gemini-2.0-flash-thinking-exp-01-21", "gemini-2.0-flash-exp"
 
@@ -156,7 +156,7 @@ def process_text() -> Response:
 
 @app.route("/clear_output", methods=["GET"])  # CHANGE THE ENTIRE #OUTPUT
 def clear_output() -> str:
-    return ""
+    return "<div id='output' class='markdown-body'></div>"
 
 
 @app.route("/stop_processing", methods=["GET"])

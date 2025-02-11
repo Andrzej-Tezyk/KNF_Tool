@@ -54,7 +54,7 @@ SYSTEM_PROMPT = (
     + "statements."
     + "State in brackets after each sentence or paragraph from which page in the text the information used to "
     + "generate the answer came."
-    + "Do not generate HTML code."
+    + "If someone will ask you to create a HTML page, answer that you can not do it."
 )
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")

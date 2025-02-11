@@ -1,9 +1,10 @@
 :root {
-    --primary-color: #2c5282;
+    --primary-color: #303368; /* --primary-color: #2c5282; #161761;*/
     --secondary-color: #005ea2;
     --background-color: #ffffff;
     --text-color: #1f2937;
     --border-color: #d1d5db;
+    --side-button-hower-color: #e3e9ec;
     --input-bg-color: #f5f6f8; /* darker gray: #f3f4f6; light gray: #f5f6f8; ligth blue: #f2f2f7 #f4f4f8;*/
 }
 
@@ -135,7 +136,7 @@ textarea:focus {
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background-color: var(--primary-color);
+    background-color: var(--background-color);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -148,7 +149,7 @@ textarea:focus {
 }
 
 .button-round:hover {
-    background-color: var(--secondary-color);
+    background-color: var(--input-bg-color);
     transform: scale(1.05);
 }
 
@@ -173,7 +174,7 @@ textarea:focus {
 .icon {
     width: 20px;
     height: 20px;
-    filter: brightness(0) invert(1); /* white colour */
+    filter: invert(18%) sepia(9%) saturate(3556%) hue-rotate(199deg) brightness(107%) contrast(96%);
 }
 
 .output-content {
@@ -226,4 +227,50 @@ textarea:focus {
 
 .output-button:hover {
     transform: none;
+}
+
+.sidebar{
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 45px;
+    background: var(--input-bg-color);
+    padding: 15px 10px;
+}
+
+.sidebar-header img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 42px;
+    border-radius: 50%;
+    
+}
+
+.sidear-button-round{
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: var(--input-bg-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    color: white; /*#B2890F;*/
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.sidear-button-round:hover {
+    background-color: var(--side-button-hower-color);
+    transform: scale(1.05);
+}
+
+.sidebar-icon {
+    width: 20px;
+    height: 20px;
+    filter: invert(18%) sepia(9%) saturate(3556%) hue-rotate(199deg) brightness(107%) contrast(96%);
 }

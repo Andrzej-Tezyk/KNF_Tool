@@ -49,8 +49,8 @@ body {
     display: flex;
     flex-direction: column;
     background-color: var(--input-bg-color);
-    margin: 0.5rem;
-    border-radius: 10px;
+    margin: 2.5rem 0.5rem 2.5rem 0.5rem;
+    border-radius: 30px;
     /* box-shadow: 0.5px 0.5px 0.5px #e4e3e3; */
     /* border: 1px solid var(--border-color); */
     overflow: auto;
@@ -107,16 +107,24 @@ body {
     /*border-top: 1px solid var(--border-color);*/
     border-radius: 0 0 10px 10px;
     box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
 }
 
-.input-container {
+.input-area-elements {
+    flex-basis: 750px;
+    background-color: var(--input-bg-color);
     display: flex;
-    align-items: center;
-    gap: 0.75rem;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 0.5rem;
+    border-radius: 30px;
+    padding: 0.35rem;
 }
 
 textarea {
-    flex: 1;
+    flex-basis: 750px;
     height: 50px;
     padding: 0.75rem;
     border: 0 solid var(--border-color); /* better without border? */
@@ -124,19 +132,27 @@ textarea {
     background-color: var(--input-bg-color);
     font-size: 1rem;
     transition: all 0.2s ease-in-out;
+    resize: none;
 }
 
 textarea:focus {
     outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.4);
+    border: none;
 }
+
+/*
+textarea:focus {
+    outline: none !important;
+    border: var(--border-color);
+    box-shadow: 0 0 5px #a3acdf;
+  }
+*/
 
 .button-round {
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background-color: var(--background-color);
+    background-color: var(--input-bg-color);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -146,11 +162,11 @@ textarea:focus {
     color: white; /*#B2890F;*/
     font-weight: bold;
     transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-bottom: 15px;
 }
 
 .button-round:hover {
     background-color: var(--input-bg-color);
-    transform: scale(1.05);
 }
 
 .scrollable-list {

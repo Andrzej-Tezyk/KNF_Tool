@@ -36,12 +36,40 @@ body {
     line-height: 1.5;
 }
 
-.container {
+.flex-container{
     display: flex;
-    height: calc(100vh - 0px); /* no gap on the bottom */
+    height: 100%;
     max-width: 100%;
     box-sizing: border-box;
     gap: 1rem;
+}
+
+.form-flex-container {
+    flex: 1;
+    display: flex;
+    height: calc(100vh - 0px); /* no gap on the bottom */
+    box-sizing: border-box;
+    gap: 1rem;
+}
+
+.sidebar {
+    flex-basis: 2.5%;
+    top: 0;
+    left: 0;
+    background: var(--input-bg-color);
+    padding: 15px 10px;
+}
+
+.inside-form-container {
+    flex: 1;
+    display: flex;
+    height: calc(100vh - 0px); /* no gap on the bottom */
+    box-sizing: border-box;
+    gap: 1rem;
+}
+
+#input-form {
+    flex: 1;
 }
 
 .input-section {
@@ -119,7 +147,7 @@ body {
     justify-content: center;
     align-items: flex-end;
     gap: 0.5rem;
-    border-radius: 30px;
+    border-radius: 35px;
     padding: 0.35rem;
 }
 
@@ -149,6 +177,7 @@ textarea:focus {
 */
 
 .button-round {
+    flex-shrink: 0;
     width: 44px;
     height: 44px;
     border-radius: 50%;
@@ -166,7 +195,8 @@ textarea:focus {
 }
 
 .button-round:hover {
-    background-color: var(--input-bg-color);
+    background-color: var(--side-button-hower-color);
+    transform: scale(1.03);
 }
 
 .scrollable-list {
@@ -245,16 +275,6 @@ textarea:focus {
     transform: none;
 }
 
-.sidebar{
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 45px;
-    background: var(--input-bg-color);
-    padding: 15px 10px;
-}
-
 .sidebar-header img {
     display: block;
     margin-left: auto;
@@ -282,7 +302,7 @@ textarea:focus {
 
 .sidear-button-round:hover {
     background-color: var(--side-button-hower-color);
-    transform: scale(1.05);
+    transform: scale(1.03);
 }
 
 .sidebar-icon {

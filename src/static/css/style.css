@@ -1,9 +1,10 @@
 :root {
-    --primary-color: #2c5282;
+    --primary-color: #303368; /* --primary-color: #2c5282; #161761;*/
     --secondary-color: #005ea2;
     --background-color: #ffffff;
     --text-color: #1f2937;
     --border-color: #d1d5db;
+    --side-button-hower-color: #e3e9ec;
     --input-bg-color: #f5f6f8; /* darker gray: #f3f4f6; light gray: #f5f6f8; ligth blue: #f2f2f7 #f4f4f8;*/
 }
 
@@ -35,12 +36,40 @@ body {
     line-height: 1.5;
 }
 
-.container {
+.flex-container{
     display: flex;
-    height: calc(100vh - 0px); /* no gap on the bottom */
+    height: 100%;
     max-width: 100%;
     box-sizing: border-box;
     gap: 1rem;
+}
+
+.form-flex-container {
+    flex: 1;
+    display: flex;
+    height: calc(100vh - 0px); /* no gap on the bottom */
+    box-sizing: border-box;
+    gap: 1rem;
+}
+
+.sidebar {
+    flex-basis: 2.5%;
+    top: 0;
+    left: 0;
+    background: var(--input-bg-color);
+    padding: 15px 10px;
+}
+
+.inside-form-container {
+    flex: 1;
+    display: flex;
+    height: calc(100vh - 0px); /* no gap on the bottom */
+    box-sizing: border-box;
+    gap: 1rem;
+}
+
+#input-form {
+    flex: 1;
 }
 
 .input-section {
@@ -48,8 +77,8 @@ body {
     display: flex;
     flex-direction: column;
     background-color: var(--input-bg-color);
-    margin: 0.5rem;
-    border-radius: 10px;
+    margin: 2.5rem 0.5rem 2.5rem 0.5rem;
+    border-radius: 30px;
     /* box-shadow: 0.5px 0.5px 0.5px #e4e3e3; */
     /* border: 1px solid var(--border-color); */
     overflow: auto;
@@ -106,16 +135,24 @@ body {
     /*border-top: 1px solid var(--border-color);*/
     border-radius: 0 0 10px 10px;
     box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
 }
 
-.input-container {
+.input-area-elements {
+    flex-basis: 750px;
+    background-color: var(--input-bg-color);
     display: flex;
-    align-items: center;
-    gap: 0.75rem;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 0.5rem;
+    border-radius: 35px;
+    padding: 0.35rem;
 }
 
 textarea {
-    flex: 1;
+    flex-basis: 750px;
     height: 50px;
     padding: 0.75rem;
     border: 0 solid var(--border-color); /* better without border? */
@@ -123,19 +160,28 @@ textarea {
     background-color: var(--input-bg-color);
     font-size: 1rem;
     transition: all 0.2s ease-in-out;
+    resize: none;
 }
 
 textarea:focus {
     outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.4);
+    border: none;
 }
 
+/*
+textarea:focus {
+    outline: none !important;
+    border: var(--border-color);
+    box-shadow: 0 0 5px #a3acdf;
+  }
+*/
+
 .button-round {
+    flex-shrink: 0;
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background-color: var(--primary-color);
+    background-color: var(--input-bg-color);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -145,11 +191,12 @@ textarea:focus {
     color: white; /*#B2890F;*/
     font-weight: bold;
     transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-bottom: 15px;
 }
 
 .button-round:hover {
-    background-color: var(--secondary-color);
-    transform: scale(1.05);
+    background-color: var(--side-button-hower-color);
+    transform: scale(1.03);
 }
 
 .scrollable-list {
@@ -173,7 +220,7 @@ textarea:focus {
 .icon {
     width: 20px;
     height: 20px;
-    filter: brightness(0) invert(1); /* white colour */
+    filter: invert(18%) sepia(9%) saturate(3556%) hue-rotate(199deg) brightness(107%) contrast(96%);
 }
 
 .output-content {
@@ -226,4 +273,40 @@ textarea:focus {
 
 .output-button:hover {
     transform: none;
+}
+
+.sidebar-header img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 42px;
+    border-radius: 50%;
+    
+}
+
+.sidear-button-round{
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: var(--input-bg-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    color: white; /*#B2890F;*/
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.sidear-button-round:hover {
+    background-color: var(--side-button-hower-color);
+    transform: scale(1.03);
+}
+
+.sidebar-icon {
+    width: 20px;
+    height: 20px;
+    filter: invert(18%) sepia(9%) saturate(3556%) hue-rotate(199deg) brightness(107%) contrast(96%);
 }

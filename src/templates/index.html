@@ -20,7 +20,7 @@
                 <img src="{{ url_for('static', filename='images/logo.ico') }}" alt="logo">
             </div>
             <br>
-            <button class="sidear-button-round">
+            <button class="sidear-button-round" onclick="myFunction()">
                 <img class="sidebar-icon" src="{{ url_for('static', filename='images/sliders-solid.svg') }}">
             </button>
             <br>
@@ -42,7 +42,7 @@
             <form id="input-form" hx-post="/process" hx-target="#output" hx-swap="beforeend">
                 <div class="inside-form-container">
                     <!-- input section -->
-                    <div class="input-section">
+                    <div class="input-section" id="input-section">
                         <div class="section-header-wrapper"></div>
                         <div class="input-section-elements">
                             <label><strong>FILES:</strong></label>
@@ -125,6 +125,7 @@
             };
         }
 
+
         function stopProcessing() {
             console.log('Reverting to Start button');
             const button = document.getElementById('action-button');
@@ -135,6 +136,16 @@
             
             button.setAttribute('type', 'submit'); // restores default submit behavior
         }
+
+
+        function myFunction() {
+            var x = document.getElementById("input-section");
+            if (x.style.display === "none") {
+                x.style.display = "block";
+            } else {
+                x.style.display = "none";
+            }
+        }        
     </script>
 </body>
 

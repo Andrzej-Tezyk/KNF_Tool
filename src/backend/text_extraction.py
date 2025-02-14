@@ -30,7 +30,7 @@ def extract_text_from_pdf(pdf_path: Path) -> str:
 
     Raises:
         Exception: Any exceptions encountered while reading or extracting text
-        from the PDF are logged and handled gracefully.
+        from the PDF are logged and handled.
     """
 
     try:

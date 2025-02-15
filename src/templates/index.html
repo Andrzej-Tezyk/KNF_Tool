@@ -20,7 +20,7 @@
                 <img src="{{ url_for('static', filename='images/logo.ico') }}" alt="logo">
             </div>
 
-            <button class="sidear-button-round" onclick="myFunction()" id="sidebar-icon">
+            <button class="sidear-button-round" onclick="myFunction()" id="sidebar-icon" title="Open Sidebar">
                 <img class="sidebar-icon" src="{{ url_for('static', filename='images/sidebar-show.svg') }}">
             </button>
 
@@ -33,19 +33,21 @@
                 </button>
                 
                 <button class="sidear-button-round">
-                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/message-regular.svg') }}">
+                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/rocketchat-brands-solid.svg') }}">
                 </button>
 
                 <button class="sidear-button-round">
                     <img class="sidebar-icon" src="{{ url_for('static', filename='images/code-compare-solid.svg') }}">
                 </button>
-
-                <button class="sidear-button-round">
-                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/file-regular.svg') }}">
-                </button>
-
+                <br>
             </div>
 
+            <button class="sidear-button-round" id="settings-sidebar-button">
+                <img class="sidebar-icon" src="{{ url_for('static', filename='images/circle-question-regular.svg') }}">
+            </button>
+            <button class="sidear-button-round">
+                <img class="sidebar-icon" src="{{ url_for('static', filename='images/file-regular.svg') }}">
+            </button>
             <button class="sidear-button-round" id="settings-sidebar-button">
                 <img class="sidebar-icon" src="{{ url_for('static', filename='images/gear-solid.svg') }}">
             </button>
@@ -171,7 +173,7 @@
             } else {
                 setTimeout(() => {
                     inputSection.style.flex = "0 0 22%";
-                    sideMenuButtons.style.flex = "1 0 auto"; // shrink after fade
+                    sideMenuButtons.style.flex = "0 0 auto"; // shrink after fade
                 }, 1); // wait for opacity transition before shrinking
                 setTimeout(() => {
                     inputSection.style.opacity = "1"; 

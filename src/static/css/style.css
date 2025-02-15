@@ -58,6 +58,20 @@ body {
     left: 0;
     background: var(--input-bg-color);
     padding: 15px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    align-items: center;
+}
+
+.side-menu-buttons-container {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    transition: flex 0.3s ease-out, opacity 0.3s ease-out;
+    justify-content: flex-start;
+    align-items: center;
 }
 
 .inside-form-container {
@@ -83,7 +97,7 @@ body {
     /* border: 1px solid var(--border-color); */
     overflow: auto;
     box-sizing: border-box;
-    transition: flex 0.3s ease-out, opacity 0.3s ease-out;
+    transition: opacity 0.3s ease-out;
     position: relative;
     overflow: hidden;
 }
@@ -103,7 +117,7 @@ body {
     /* border: 1px solid var(--border-color); */
     overflow: hidden;
     position: relative;
-    transition: flex 0.1s ease-in-out;
+    /*transition: flex 0.5s ease-in-out;*/
 }
 
 .section-header-wrapper {
@@ -321,4 +335,18 @@ textarea:focus {
     width: 20px;
     height: 20px;
     filter: invert(18%) sepia(9%) saturate(3556%) hue-rotate(199deg) brightness(107%) contrast(96%);
+}
+
+.sidebar-arrow-down {
+    width: 15px;
+    height: 15px;
+    filter: invert(18%) sepia(9%) saturate(3556%) hue-rotate(199deg) brightness(107%) contrast(96%);
+}
+
+#sidebar-icon {
+    margin-top: 1.25rem;
+}
+
+#settings-sidebar-button{
+    
 }

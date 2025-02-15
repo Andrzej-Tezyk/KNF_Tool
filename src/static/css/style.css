@@ -6,6 +6,8 @@
     --border-color: #d1d5db;
     --side-button-hower-color: #e3e9ec;
     --input-bg-color: #f5f6f8; /* darker gray: #f3f4f6; light gray: #f5f6f8; ligth blue: #f2f2f7 #f4f4f8;*/
+    --tooltip-background: #e3e9ec;
+    --tooltip-font-color: black;
 }
 
 *::-webkit-scrollbar {
@@ -99,9 +101,8 @@ body {
     overflow: auto;
     box-sizing: border-box;
     transition: opacity 0.3s ease-out;
-    position: relative;
     overflow: hidden;
-    box-shadow: 0.5px 1px 2px 1px rgba(128, 127, 127, 0.2);
+    box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
 }
 
 .input-section-elements {
@@ -118,7 +119,6 @@ body {
     border-radius: 10px;
     /* border: 1px solid var(--border-color); */
     overflow: hidden;
-    position: relative;
     /*transition: flex 0.5s ease-in-out;*/
 }
 
@@ -172,11 +172,11 @@ body {
     gap: 0.5rem;
     border-radius: 35px;
     padding: 0.35rem;
-    box-shadow: 0px 1px 2px 0px rgba(128, 127, 127, 0.2);
+    box-shadow: 0px 3px 5px 0px rgba(128, 127, 127, 0.2);
 }
 
 .input-area-elements:hover {
-    box-shadow: 0px 1px 2px 0px rgba(43, 43, 43, 0.2);
+    box-shadow: 0px 3px 5px 0px rgba(92, 92, 92, 0.2);
 }
 
 textarea {
@@ -274,7 +274,6 @@ textarea:focus {
     margin: 0;
     border-top-left-radius: 7px;
     border-top-right-radius: 7px;
-    position: relative;
 }
 
 .output-content .markdown-body {
@@ -353,34 +352,111 @@ textarea:focus {
 #sidebar-icon:hover::before {
     content: attr(data-tooltip);
     position: absolute;
+    left: 3.5rem;
+    color: var(--tooltip-font-color);
+    font-size: small;
+    background-color: var(--tooltip-background);
+    margin: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 10px;
+    width: max-content;
+    border: solid var(--border-color);
+    border-width: 0.2px;
+    box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
 }
 
 #sliders-button:hover::before {
     content: attr(data-tooltip);
     position: absolute;
+    left: 3.5rem;
+    color: var(--tooltip-font-color);
+    font-size: small;
+    background-color: var(--tooltip-background);
+    margin: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 10px;
+    width: max-content;
+    border: solid var(--border-color);
+    border-width: 0.2px;
+    box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
 }
 
 #chat-button:hover::before {
     content: attr(data-tooltip);
     position: absolute;
+    left: 3.5rem;
+    color: var(--tooltip-font-color);
+    font-size: small;
+    background-color: var(--tooltip-background);
+    margin: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 10px;
+    width: max-content;
+    border: solid var(--border-color);
+    border-width: 0.2px;
+    box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
 }
 
 #compare-button:hover::before {
     content: attr(data-tooltip);
     position: absolute;
+    left: 3.5rem;
+    color: var(--tooltip-font-color);
+    font-size: small;
+    background-color: var(--tooltip-background);
+    margin: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 10px;
+    width: max-content;
+    border: solid var(--border-color);
+    border-width: 0.2px;
+    box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
 }
 
 #info-button:hover::before {
     content: attr(data-tooltip);
     position: absolute;
+    left: 3.5rem;
+    color: var(--tooltip-font-color);
+    font-size: small;
+    background-color: var(--tooltip-background);
+    margin: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 10px;
+    width: max-content;
+    border: solid var(--border-color);
+    border-width: 0.2px;
+    box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
 }
 
 #file-button:hover::before {
     content: attr(data-tooltip);
     position: absolute;
+    left: 3.5rem;
+    color: var(--tooltip-font-color);
+    font-size: small;
+    background-color: var(--tooltip-background);
+    margin: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 10px;
+    width: max-content;
+    border: solid var(--border-color);
+    border-width: 0.2px;
+    box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
 }
 
 #settings-sidebar-button:hover::before {
     content: attr(data-tooltip);
     position: absolute;
+    left: 3.5rem;
+    color: var(--tooltip-font-color);
+    font-size: small;
+    background-color: var(--tooltip-background);
+    margin: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 10px;
+    width: max-content;
+    border: solid var(--border-color);
+    border-width: 0.2px;
+    box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
 }

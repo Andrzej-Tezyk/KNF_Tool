@@ -62,6 +62,7 @@ body {
     flex-direction: column;
     gap: 0.4rem;
     align-items: center;
+    box-shadow: 0.75px 0 0 0 rgba(175, 174, 174, 0.2);
 }
 
 .side-menu-buttons-container {
@@ -100,6 +101,7 @@ body {
     transition: opacity 0.3s ease-out;
     position: relative;
     overflow: hidden;
+    box-shadow: 0.5px 1px 2px 1px rgba(128, 127, 127, 0.2);
 }
 
 .input-section-elements {
@@ -170,6 +172,11 @@ body {
     gap: 0.5rem;
     border-radius: 35px;
     padding: 0.35rem;
+    box-shadow: 0px 1px 2px 0px rgba(128, 127, 127, 0.2);
+}
+
+.input-area-elements:hover {
+    box-shadow: 0px 1px 2px 0px rgba(43, 43, 43, 0.2);
 }
 
 textarea {
@@ -343,6 +350,37 @@ textarea:focus {
     filter: invert(18%) sepia(9%) saturate(3556%) hue-rotate(199deg) brightness(107%) contrast(96%);
 }
 
-/*#sidebar-icon {
-    margin-top: 1.25rem;
-}*/
+#sidebar-icon:hover::before {
+    content: attr(data-tooltip);
+    position: absolute;
+}
+
+#sliders-button:hover::before {
+    content: attr(data-tooltip);
+    position: absolute;
+}
+
+#chat-button:hover::before {
+    content: attr(data-tooltip);
+    position: absolute;
+}
+
+#compare-button:hover::before {
+    content: attr(data-tooltip);
+    position: absolute;
+}
+
+#info-button:hover::before {
+    content: attr(data-tooltip);
+    position: absolute;
+}
+
+#file-button:hover::before {
+    content: attr(data-tooltip);
+    position: absolute;
+}
+
+#settings-sidebar-button:hover::before {
+    content: attr(data-tooltip);
+    position: absolute;
+}

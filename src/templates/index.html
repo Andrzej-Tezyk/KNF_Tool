@@ -20,7 +20,7 @@
                 <img src="{{ url_for('static', filename='images/logo.ico') }}" alt="logo">
             </div>
 
-            <button class="sidear-button-round" onclick="myFunction()" id="sidebar-icon" title="Open Sidebar">
+            <button class="sidear-button-round" onclick="myFunction()" id="sidebar-icon" data-tooltip="Open Sidebar">
                 <img class="sidebar-icon" src="{{ url_for('static', filename='images/sidebar-show.svg') }}">
             </button>
 
@@ -28,24 +28,24 @@
 
                 <img class="sidebar-arrow-down" src="{{ url_for('static', filename='images/caret-down-solid.svg') }}">
 
-                <button class="sidear-button-round">
+                <button class="sidear-button-round" id="sliders-button">
                     <img class="sidebar-icon" src="{{ url_for('static', filename='images/sliders-solid.svg') }}">
                 </button>
                 
-                <button class="sidear-button-round">
+                <button class="sidear-button-round" id="chat-button">
                     <img class="sidebar-icon" src="{{ url_for('static', filename='images/rocketchat-brands-solid.svg') }}">
                 </button>
 
-                <button class="sidear-button-round">
+                <button class="sidear-button-round" id="compare-button">
                     <img class="sidebar-icon" src="{{ url_for('static', filename='images/code-compare-solid.svg') }}">
                 </button>
                 <br>
             </div>
 
-            <button class="sidear-button-round" id="settings-sidebar-button">
+            <button class="sidear-button-round" id="info-button">
                 <img class="sidebar-icon" src="{{ url_for('static', filename='images/circle-question-regular.svg') }}">
             </button>
-            <button class="sidear-button-round">
+            <button class="sidear-button-round" id="file-button">
                 <img class="sidebar-icon" src="{{ url_for('static', filename='images/file-regular.svg') }}">
             </button>
             <button class="sidear-button-round" id="settings-sidebar-button">

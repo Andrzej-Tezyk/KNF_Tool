@@ -83,10 +83,15 @@ body {
     /* border: 1px solid var(--border-color); */
     overflow: auto;
     box-sizing: border-box;
+    transition: flex 0.3s ease-out, opacity 0.3s ease-out;
+    position: relative;
+    overflow: hidden;
 }
 
 .input-section-elements {
     padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
 }
 
 .output-section {
@@ -98,6 +103,7 @@ body {
     /* border: 1px solid var(--border-color); */
     overflow: hidden;
     position: relative;
+    transition: flex 0.1s ease-in-out;
 }
 
 .section-header-wrapper {
@@ -125,7 +131,7 @@ body {
     margin-bottom: 0;
 }
 
-.input-form-container {
+.input-form-container { /* ZBEDNY??? */
     position: relative;
     bottom: 0;
     left: 0;
@@ -141,7 +147,8 @@ body {
 }
 
 .input-area-elements {
-    flex-basis: 750px;
+    flex-basis: 700px;
+    flex-shrink: 0;
     background-color: var(--input-bg-color);
     display: flex;
     justify-content: center;
@@ -155,7 +162,7 @@ textarea {
     flex-basis: 750px;
     height: 50px;
     padding: 0.75rem;
-    border: 0 solid var(--border-color); /* better without border? */
+    border: 0 solid var(--border-color);
     border-radius: 25px;
     background-color: var(--input-bg-color);
     font-size: 1rem;
@@ -200,12 +207,17 @@ textarea:focus {
 }
 
 .scrollable-list {
+    flex-shrink: 0;
     max-height: 500px;
     overflow-y: auto;
     border: 1px solid var(--border-color);
     padding: 0.5rem;
     background-color: var(--background-color);
     border-radius: 8px;
+}
+
+.option-section {
+    flex-shrink: 0;
 }
 
 .scrollable-list::-webkit-scrollbar {

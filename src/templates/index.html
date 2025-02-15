@@ -57,10 +57,10 @@
                                 </div>
                                 {% endfor %}
                             </div>
-                        </div>
-                        <div class="option-section">
-                            <label for="output-size"><strong>Response size in words:  </strong></label>
-                            <input type="text" id="output-size" name="output_size" minlength="2" maxlength="5" size="2" value="100">
+                            <div class="option-section">
+                                <label for="output-size"><strong>Response size in words:  </strong></label>
+                                <input type="text" id="output-size" name="output_size" minlength="2" maxlength="5" size="2" value="100">
+                            </div>
                         </div>
                     </div>
 
@@ -139,13 +139,28 @@
 
 
         function myFunction() {
-            var x = document.getElementById("input-section");
-            if (x.style.display === "none") {
-                x.style.display = "block";
+            var inputSection = document.querySelector(".input-section");
+
+            if (inputSection.style.flex === "0 0 22%" || inputSection.style.flex === "") {
+                inputSection.style.opacity = "0"; // fade out first
+
+                setTimeout(() => {
+                    inputSection.style.flex = "0 0 0%"; // shrink after fade
+                }, 300); // wait for opacity transition before shrinking
+
+                setTimeout(() => {
+                    inputSection.style.display = "none"; // hide after shrinking
+                }, 400); // ensure full transition before hiding
             } else {
-                x.style.display = "none";
+                setTimeout(() => {
+                    inputSection.style.flex = "0 0 22%"; // shrink after fade
+                }, 1); // wait for opacity transition before shrinking
+                setTimeout(() => {
+                    inputSection.style.opacity = "1"; // fade in
+                }, 1); // delay to trigger CSS transition
+                inputSection.style.display = "flex"; // visible first
             }
-        }        
+        }
     </script>
 </body>
 

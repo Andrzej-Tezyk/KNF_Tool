@@ -105,6 +105,13 @@ body {
     box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
 }
 
+
+
+.input-section, .side-menu-buttons-container {
+    display: none;
+}
+
+
 .input-section-elements {
     padding: 0.5rem;
     display: flex;

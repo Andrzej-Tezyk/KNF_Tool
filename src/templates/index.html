@@ -157,30 +157,22 @@
             var inputSection = document.querySelector(".input-section");
             var sideMenuButtons = document.querySelector(".side-menu-buttons-container");
 
-            if (inputSection.style.flex === "0 0 22%" || inputSection.style.flex === "") {
-                inputSection.style.opacity = "0"; // fade out first
-                sideMenuButtons.style.opacity = "0"; // fade out first
+            if (inputSection.style.display === "none" || inputSection.style.display === "") {
+                inputSection.style.display = "flex";
+                sideMenuButtons.style.display = "flex";
 
                 setTimeout(() => {
-                    inputSection.style.flex = "0 0 0%";
-                    sideMenuButtons.style.flex = "0 0 0%"; // shrink after fade
-                }, 200); // wait for opacity transition before shrinking
+                    inputSection.style.opacity = "1";
+                    sideMenuButtons.style.opacity = "1";
+                }, 200); // for smooth transition
+            } else {
+                inputSection.style.opacity = "0";
+                sideMenuButtons.style.opacity = "0";
 
                 setTimeout(() => {
                     inputSection.style.display = "none";
-                    sideMenuButtons.style.display = "none"; // hide after shrinking
-                }, 200); // ensure full transition before hiding
-            } else {
-                setTimeout(() => {
-                    inputSection.style.flex = "0 0 22%";
-                    sideMenuButtons.style.flex = "0 0 auto"; // shrink after fade
-                }, 1); // wait for opacity transition before shrinking
-                setTimeout(() => {
-                    inputSection.style.opacity = "1"; 
-                    sideMenuButtons.style.opacity = "1";// fade in
-                }, 1); // delay to trigger CSS transition
-                inputSection.style.display = "flex";
-                sideMenuButtons.style.display = "flex"; // visible first
+                    sideMenuButtons.style.display = "none";
+                }, 200); // hide after fade out
             }
         }
     </script>

@@ -6,6 +6,8 @@
     --border-color: #d1d5db;
     --side-button-hower-color: #e3e9ec;
     --input-bg-color: #f5f6f8; /* darker gray: #f3f4f6; light gray: #f5f6f8; ligth blue: #f2f2f7 #f4f4f8;*/
+    --tooltip-background: #e3e9ec;
+    --tooltip-font-color: black;
 }
 
 *::-webkit-scrollbar {
@@ -58,6 +60,30 @@ body {
     left: 0;
     background: var(--input-bg-color);
     padding: 15px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0.75px 0 0 0 rgba(175, 174, 174, 0.2);
+}
+
+.side-menu-buttons-container {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    transition: flex 0.7s ease-out, opacity 0.7s ease-out;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.sidebar-bottom-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: auto;
+    padding-bottom: 10px;
 }
 
 .inside-form-container {
@@ -83,10 +109,17 @@ body {
     /* border: 1px solid var(--border-color); */
     overflow: auto;
     box-sizing: border-box;
-    transition: flex 0.3s ease-out, opacity 0.3s ease-out;
-    position: relative;
+    transition: opacity 0.3s ease-out;
     overflow: hidden;
+    box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
 }
+
+
+
+.input-section, .side-menu-buttons-container {
+    display: none;
+}
+
 
 .input-section-elements {
     padding: 0.5rem;
@@ -102,8 +135,7 @@ body {
     border-radius: 10px;
     /* border: 1px solid var(--border-color); */
     overflow: hidden;
-    position: relative;
-    transition: flex 0.1s ease-in-out;
+    /*transition: flex 0.5s ease-in-out;*/
 }
 
 .section-header-wrapper {
@@ -156,6 +188,11 @@ body {
     gap: 0.5rem;
     border-radius: 35px;
     padding: 0.35rem;
+    box-shadow: 0px 3px 5px 0px rgba(128, 127, 127, 0.2);
+}
+
+.input-area-elements:hover {
+    box-shadow: 0px 3px 5px 0px rgba(92, 92, 92, 0.2);
 }
 
 textarea {
@@ -253,7 +290,6 @@ textarea:focus {
     margin: 0;
     border-top-left-radius: 7px;
     border-top-right-radius: 7px;
-    position: relative;
 }
 
 .output-content .markdown-body {
@@ -321,4 +357,122 @@ textarea:focus {
     width: 20px;
     height: 20px;
     filter: invert(18%) sepia(9%) saturate(3556%) hue-rotate(199deg) brightness(107%) contrast(96%);
+}
+
+.sidebar-arrow-down {
+    width: 15px;
+    height: 15px;
+    filter: invert(18%) sepia(9%) saturate(3556%) hue-rotate(199deg) brightness(107%) contrast(96%);
+}
+
+#sidebar-icon:hover::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 3.5rem;
+    color: var(--tooltip-font-color);
+    font-size: small;
+    background-color: var(--tooltip-background);
+    margin: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 10px;
+    width: max-content;
+    border: solid var(--border-color);
+    border-width: 0.2px;
+    box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
+}
+
+#sliders-button:hover::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 3.5rem;
+    color: var(--tooltip-font-color);
+    font-size: small;
+    background-color: var(--tooltip-background);
+    margin: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 10px;
+    width: max-content;
+    border: solid var(--border-color);
+    border-width: 0.2px;
+    box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
+}
+
+#chat-button:hover::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 3.5rem;
+    color: var(--tooltip-font-color);
+    font-size: small;
+    background-color: var(--tooltip-background);
+    margin: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 10px;
+    width: max-content;
+    border: solid var(--border-color);
+    border-width: 0.2px;
+    box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
+}
+
+#compare-button:hover::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 3.5rem;
+    color: var(--tooltip-font-color);
+    font-size: small;
+    background-color: var(--tooltip-background);
+    margin: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 10px;
+    width: max-content;
+    border: solid var(--border-color);
+    border-width: 0.2px;
+    box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
+}
+
+#info-button:hover::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 3.5rem;
+    color: var(--tooltip-font-color);
+    font-size: small;
+    background-color: var(--tooltip-background);
+    margin: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 10px;
+    width: max-content;
+    border: solid var(--border-color);
+    border-width: 0.2px;
+    box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
+}
+
+#file-button:hover::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 3.5rem;
+    color: var(--tooltip-font-color);
+    font-size: small;
+    background-color: var(--tooltip-background);
+    margin: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 10px;
+    width: max-content;
+    border: solid var(--border-color);
+    border-width: 0.2px;
+    box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
+}
+
+#settings-sidebar-button:hover::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 3.5rem;
+    color: var(--tooltip-font-color);
+    font-size: small;
+    background-color: var(--tooltip-background);
+    margin: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 10px;
+    width: max-content;
+    border: solid var(--border-color);
+    border-width: 0.2px;
+    box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
 }

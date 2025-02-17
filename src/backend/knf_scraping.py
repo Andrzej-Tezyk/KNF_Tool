@@ -40,7 +40,7 @@ USER_AGENT_LIST = [
 SCRAPED_FILES_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def windows_safe_filename(filename):
+def windows_safe_filename(filename: str) -> str:
     """Removes invalid characters and limits filename length."""
     filename = filename.replace("\n", " ")
     filename = re.sub(r'[<>:"/\\|?*]', "", filename)

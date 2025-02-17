@@ -123,7 +123,7 @@ def process_text() -> Response:
 
                     result = process_pdf(prompt, pdf, model, output_size)
 
-                    pdf_name_to_show = result['pdf_name'][11:]
+                    pdf_name_to_show = result["pdf_name"][11:]
 
                     if "error" in result:
                         yield f"<div><p><strong>Error:</strong> {result['error']}</p></div>"

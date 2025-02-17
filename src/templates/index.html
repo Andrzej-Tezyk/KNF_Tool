@@ -62,18 +62,6 @@
                     <div class="input-section" id="input-section">
                         <div class="section-header-wrapper"></div>
                         <div class="input-section-elements">
-                            <label><strong>FILES:</strong></label>
-                            <div class="scrollable-list">
-                                {% for pdf in pdf_files %}
-                                <div>
-                                    <input type="checkbox" 
-                                            id="{{ pdf }}" 
-                                            name="selected_files" 
-                                            value="{{ pdf }}">
-                                    <label for="{{ pdf }}">{{ pdf }}</label>
-                                </div>
-                                {% endfor %}
-                            </div>
                             <div class="option-section">
                                 <label for="output-size"><strong>Response size in words:  </strong></label>
                                 <input type="text" id="output-size" name="output_size" minlength="2" maxlength="5" size="2" value="100">
@@ -94,6 +82,27 @@
                                     <img class="icon" src="{{ url_for('static', filename='images/trash-can-solid.svg') }}">
                                 </button>
                             </div>
+                            <div class="bottom-panel" id="bottom-panel">
+                                <div class="bottom-panel-header">
+                                    <div class="bottom-panel-checkbox-buttons">
+                                        <button type="button" class="bottom-panel-button" onclick="selectAllFiles()">Select All</button>
+                                        <button type="button" class="bottom-panel-button" onclick="uncheckAllFiles()">Uncheck All</button>
+                                    </div>
+                                    <button class="sidear-button-round" type="button" onclick="toggleBottomPanel()">
+                                        <img class="icon" src="{{ url_for('static', filename='images/circle-xmark-regular.svg') }}">
+                                    </button>
+                                </div>
+                                <div class="documents-list">
+                                    <div class="scrollable-list">
+                                        {% for pdf in pdf_files %}
+                                        <div class="file-item">
+                                            <input type="checkbox" class="file-checkbox" id="{{ pdf }}" name="selected_files" value="{{ pdf }}">
+                                            <label for="{{ pdf }}">{{ pdf[11:-4] }}</label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -101,6 +110,31 @@
         </div>
     </div>
     <script>
+        document.getElementById("file-button").addEventListener("click", toggleBottomPanel);
+
+        function toggleBottomPanel() {
+            const panel = document.getElementById("bottom-panel");
+            if (panel.style.bottom === "0px") {
+                panel.style.bottom = "-100%";
+            } else {
+                panel.style.bottom = "0px";
+            }
+        }
+
+        function selectAllFiles() {
+            const checkboxes = document.querySelectorAll(".file-checkbox"); // select all checkboxes inside the scrollable list
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = true; // all checkboxes are checked
+            });
+        }
+
+        function uncheckAllFiles() {
+            const checkboxes = document.querySelectorAll(".file-checkbox"); // select all checkboxes inside the scrollable list
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false; // all checkboxes are checked
+            });
+        }
+
         document.getElementById('input').addEventListener('keydown', (event) => {
             if (event.key === 'Enter' && !event.shiftKey) { // triggers when Enter is pressed while the input field is focused -> Shift+Enter is allowed
                 event.preventDefault(); // not to create a new line

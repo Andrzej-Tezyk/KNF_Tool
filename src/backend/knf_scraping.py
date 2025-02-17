@@ -2,6 +2,7 @@ import os
 import random
 import traceback
 from pathlib import Path
+import re
 
 import requests
 from bs4 import BeautifulSoup
@@ -39,6 +40,13 @@ USER_AGENT_LIST = [
 SCRAPED_FILES_DIR.mkdir(parents=True, exist_ok=True)
 
 
+def windows_safe_filename(filename: str) -> str:
+    """Removes invalid characters and limits filename length."""
+    filename = filename.replace("\n", " ")
+    filename = re.sub(r'[<>:"/\\|?*]', "", filename)
+    return filename
+
+
 response = None
 for _ in range(NUM_RETRIES):
     try:
@@ -62,7 +70,7 @@ if response and response.status_code == 200:
     for link in soup.find_all("a", title=lambda x: x and "Rekomendacja" in x):
         try:
             href = link.get("href")
-            title = link.get("title")
+            title = link.get_text(strip=True)
             if href and href.endswith(".pdf"):
                 # not all .pdf are listed on knf.gov.pl
                 if "https" not in href:
@@ -73,18 +81,19 @@ if response and response.status_code == 200:
         except Exception as e:
             print(f"Problem with link for {link} \n Error messange: {e}\n")
 
-    for pdf in pdf_titles_links.items():
+    for title, url in pdf_titles_links.items():
         try:
-            pdf_response = requests.get(pdf[1], headers=headers)
+            pdf_response = requests.get(url, headers=headers)
+            safe_title = windows_safe_filename(title) if title else "unknown"
             # adding datetime from KNF site to file name
             pdf_path = os.path.join(
-                SCRAPED_FILES_DIR, f"{datetime_atr}_{pdf[0][0:19]}.pdf"
-            )  # znalezc lepsze rozwiazanie na nazwy plikow
+                SCRAPED_FILES_DIR, f"{datetime_atr}_{safe_title[:-11]}.pdf"
+            )
             with open(pdf_path, "wb") as f:
                 f.write(pdf_response.content)
                 print(f"Downloaded: {pdf_path}")
         except Exception as e:
-            print(f"PDF not downloaded: {pdf[1]} \n Error messange: {e}\n")
+            print(f"PDF not downloaded: {url} \n Error messange: {e}\n")
             traceback.print_exc()
 else:
     print("Failed to retrieve the main page content after retries.")

@@ -123,13 +123,15 @@ def process_text() -> Response:
 
                     result = process_pdf(prompt, pdf, model, output_size)
 
+                    pdf_name_to_show = result['pdf_name'][11:]
+
                     if "error" in result:
                         yield f"<div><p><strong>Error:</strong> {result['error']}</p></div>"
                     elif "content" in result:
                         markdown_content = markdown.markdown(result["content"])
                         yield f"""
                         <div class="output-content">
-                            <h3>Result for:&nbsp <em>{result['pdf_name']}</em>
+                            <h3>Result for:&nbsp <em>{pdf_name_to_show}</em>
                                 <button class="output-button">
                                     <span class="arrow-icon">➤</span>
                                 </button>

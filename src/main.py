@@ -8,7 +8,7 @@ import markdown
 from flask import Flask, request, render_template, Response, stream_with_context
 import google.generativeai as genai  # type: ignore[import-untyped]
 from backend.text_extraction import process_pdf  # type: ignore[import-not-found]
-
+from flask_socketio import SocketIO, emit
 
 # directory with pdf files
 SCRAPED_FILES_DIR = "scraped_files"
@@ -70,6 +70,7 @@ model = genai.GenerativeModel(
 
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
+socketio = SocketIO(app)
 
 stop_flag = threading.Event()
 
@@ -82,7 +83,8 @@ def index() -> str:
 
 
 @app.route("/process", methods=["POST"])
-def process_text() -> Response:
+def process_text(data):# -> Response:
+    print("start processing")
     try:
         # get the input prompt
         prompt = request.form["input"]
@@ -111,44 +113,72 @@ def process_text() -> Response:
         # result: Path("scraped_files/example.pdf") -> when used with Path object
         pdfs_to_scan = [pdf_dir / file_name for file_name in selected_files]
 
-        def generate() -> typing.Generator:
-            try:
-                for pdf in pdfs_to_scan:
-                    if stop_flag.is_set():  # check stop flag
-                        yield "<div><p><strong>Processing stopped. Partial results displayed.</strong></p></div>"
+        #def generate() -> typing.Generator:
+        try:
+            for index, pdf in enumerate(pdfs_to_scan):
+                if stop_flag.is_set():  # check stop flag
+                    yield "<div><p><strong>Processing stopped. Partial results displayed.</strong></p></div>"
+                    break
+
+                if not pdf.exists():
+                    yield f"<div><p><strong>Error:</strong> File {pdf.name} not found.</p></div>"
+                    continue
+
+                pdf_name_to_show = str(pdf)
+
+                container_html = f"""
+                    <div class="output-content">
+                        <div class="output-header">Result for:&nbsp <em>{pdf_name_to_show}</em>
+                            <button class="output-button">
+                                <span class="arrow-icon">➤</span>
+                            </button>
+                        </div>
+                        <div class="markdown-body"
+                        id="content-pdf{index}">
+                        </div>
+                    </div>\n\n
+                    """
+                print("new container", container_html) 
+                socketio.emit('new_container', {'html': container_html})
+                
+                accumulated_text = ""
+                for result_chunk in process_pdf(prompt, pdf, model, output_size):
+                    if "error" in result_chunk:
+                        yield f"<div><p><strong>Error:</strong> {result_chunk['error']}</p></div>"
                         break
+                    elif "content" in result_chunk:
+                        print("chunk", result_chunk["content"])
+                        accumulated_text += result_chunk['content']
+                        markdown_content = markdown.markdown(accumulated_text)
+                        socketio.emit('update_content', {
+                            'container_id': f'content-pdf{index}',
+                            'html': markdown_content
+                            })
 
-                    if not pdf.exists():
-                        yield f"<div><p><strong>Error:</strong> File {pdf.name} not found.</p></div>"
-                        continue
-
-                    result = process_pdf(prompt, pdf, model, output_size)
-
-                    pdf_name_to_show = result["pdf_name"][11:]
-
-                    if "error" in result:
-                        yield f"<div><p><strong>Error:</strong> {result['error']}</p></div>"
-                    elif "content" in result:
-                        markdown_content = markdown.markdown(result["content"])
-                        yield f"""
-                        <div class="output-content">
-                            <div class="output-header">Result for:&nbsp <em>{pdf_name_to_show}</em>
-                                <button class="output-button">
-                                    <span class="arrow-icon">➤</span>
-                                </button>
-                            </div>
-                            <div class="markdown-body">{markdown_content}</div>
-                        </div>\n\n
-                        """
+                # if "error" in result:
+                #     yield f"<div><p><strong>Error:</strong> {result['error']}</p></div>"
+                # elif "content" in result:
+                #     markdown_content = markdown.markdown(result["content"])
+                #     yield f"""
+                #     <div class="output-content">
+                #         <div class="output-header">Result for:&nbsp <em>{pdf_name_to_show}</em>
+                #             <button class="output-button">
+                #                 <span class="arrow-icon">➤</span>
+                #             </button>
+                #         </div>
+                #         <div class="markdown-body">{markdown_content}</div>
+                #     </div>\n\n
+                #     """
                     else:
                         yield "<div><p><strong>Error:</strong> Unexpected result format.</p></div>"
+                        break
 
-            except Exception as e:
-                print(f"An error occurred in the generate function: {e}")
-                traceback.print_exc()
-                yield "<div><p><strong>Error:</strong> An unexpected error occurred.</p></div>"
+        except Exception as e:
+            print(f"An error occurred in the generate function: {e}")
+            traceback.print_exc()
+            yield "<div><p><strong>Error:</strong> An unexpected error occurred.</p></div>"
 
-        return Response(stream_with_context(generate()), content_type="text/html")
+        #return Response(stream_with_context(generate()), content_type="text/html")
 
     except Exception as e:
         return Response(
@@ -171,4 +201,4 @@ def stop_processing() -> str:
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    socketio.run(app, host='0.0.0.0')

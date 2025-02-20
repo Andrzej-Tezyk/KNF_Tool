@@ -98,16 +98,16 @@ def process_pdf(prompt: str, pdf: Path, model: Any, output_size: int) -> dict:
             [
                 prompt
                 + f"(Please limit the response to approximately {output_size} words)",
-                file_to_send,
-            ]
+                file_to_send, 
+            ],
+            stream=True
         )
-
-        # replace -> sometimes double space between words occure; most likely reason: pdf formating
-        response_text = response.text.replace("  ", " ")
+        for response_chunk in response:
+            # replace -> sometimes double space between words occure; most likely reason: pdf formating
+            response_chunk_text = response_chunk.text.replace("  ", " ")
+            yield {"pdf_name": pdf.stem, "content": response_chunk_text}
         print(f"Response for: {pdf.stem} was saved!\n")
-        time.sleep(1)  # to lower number api requests to model per sec
-        return {"pdf_name": pdf.stem, "content": response_text}
-
+        time.sleep(1) # to lower number api requests to model per sec
     except Exception as e:
         print(f"There is a problem with {pdf.stem}. \n Error message: {e}\n")
         traceback.print_exc()

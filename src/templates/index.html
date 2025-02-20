@@ -82,8 +82,10 @@
 
                     <!-- output section -->
                     <div class="output-section">
-                        <div id="output" class="markdown-body"></div>
-                        <div class="input-form-container">
+                        <div id="output" class="markdown-body">
+                            <!-- output containers -->
+                        </div>
+                        <div class="input-from-container">
                             <div class="input-area-elements">
                                 <textarea id="input" name="input" placeholder="Type your prompt here..." required></textarea>
                                 <button id="action-button" type="submit" class="button-round">
@@ -121,6 +123,31 @@
         </div>
     </div>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const socket = io();
+            
+            socket.on('new_container', function(data) {
+                outputDiv.insertAdjacentHTML('beforeend', data.html);
+            });
+            
+            socket.on('update_content', function(data) {
+                const container = document.getElementById(data.container_id);
+                if (container) {
+                    container.innerHTML = data.html;
+                }
+            });
+
+            // socket.on('message', function(data) {
+            //     outputDiv.innerHTML += data.html;
+            // });
+
+            // button click handler
+            // processBtn.addEventListener('click', function() {
+            //     outputDiv.innerHTML = ''; // clear previous output
+            //     socket.emit('start_processing');
+            // });
+            });
+
         document.getElementById("file-button").addEventListener("click", toggleBottomPanel);
 
         function toggleBottomPanel() {
@@ -179,9 +206,9 @@
                 
                 // make the stop request manually
                 fetch('/stop_processing') // send request to /stop_processing -> custom JavaScript instead of htmx attribues
-                    .then(response => response.text()) // parses the response text from server
+                    //.then(response => response.text()) // parses the response text from server
                     .then(html => {
-                        document.getElementById('output').innerHTML += html; // appends it to the #output
+                        //document.getElementById('output').innerHTML += html; // appends it to the #output
                         stopProcessing();
                     });
             };

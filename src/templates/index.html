@@ -46,8 +46,8 @@
                 <button class="sidear-button-round" id="info-button" data-tooltip="How to prompt?">
                     <img class="sidebar-icon" src="{{ url_for('static', filename='images/circle-question-regular.svg') }}">
                 </button>
-                <button class="sidear-button-round" id="file-button" data-tooltip="Documents">
-                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/file-regular.svg') }}">
+                <button type="button" class="sidear-button-round" id="clean-button" hx-get="/clear_output" hx-target="#output" hx-swap="outerHTML" data-tooltip="Clean Output">
+                    <img class="icon" src="{{ url_for('static', filename='images/trash-can-solid.svg') }}">
                 </button>
                 <button class="sidear-button-round" id="settings-sidebar-button" data-tooltip="Settings">
                     <img class="sidebar-icon" src="{{ url_for('static', filename='images/gear-solid.svg') }}">
@@ -60,11 +60,22 @@
                 <div class="inside-form-container">
                     <!-- input section -->
                     <div class="input-section" id="input-section">
-                        <div class="section-header-wrapper"></div>
+                        <div class="section-header-wrapper">
+                            <h3 class="side-tab-h3">Advanced Options</h3>
+                        </div>
                         <div class="input-section-elements">
                             <div class="option-section">
-                                <label for="output-size"><strong>Response size in words:  </strong></label>
-                                <input type="text" id="output-size" name="output_size" minlength="2" maxlength="5" size="2" value="100">
+
+                                <div class="show-pages-checkbox-container">
+                                    <label for="output-size">Response size in words:  </label>
+                                    <input type="text" id="output-size" name="output_size" minlength="2" maxlength="5" size="2" value="100">
+                                </div>
+
+                                <div class="show-pages-checkbox-container">
+                                    <input type="checkbox" id="show-pages" name="show-pages">
+                                    <label for="show-pages">Show pages</label>
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -78,8 +89,8 @@
                                 <button id="action-button" type="submit" class="button-round">
                                     <img class="icon" src="{{ url_for('static', filename='images/arrow-up-solid.svg') }}">
                                 </button>
-                                <button type="button" class="button-round" hx-get="/clear_output" hx-target="#output" hx-swap="outerHTML">
-                                    <img class="icon" src="{{ url_for('static', filename='images/trash-can-solid.svg') }}">
+                                <button class="button-round" id="file-button" data-tooltip="Documents" type="button"> <!-- to avoid sending the form -->
+                                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/file-regular.svg') }}">
                                 </button>
                             </div>
                             <div class="bottom-panel" id="bottom-panel">

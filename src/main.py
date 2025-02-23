@@ -13,13 +13,6 @@ from backend.text_extraction import process_pdf  # type: ignore[import-not-found
 # directory with pdf files
 SCRAPED_FILES_DIR = "scraped_files"
 
-
-# SYSTEM_PROMPT = (
-#    "Do generowania odpowiedzi wykorzystaj tylko"
-#    + "to co jest zawarte w udostępnionych dokumentach."
-# )
-
-
 # wskazanie strony -> czasami myzli numer strony z numerem rekomendacji (test na rekomendacji Z)
 # strona sie generalnie zgadza przy 2.0
 # robi to na kilka sposobow: [1, 2, 3, 4, 5, 6, 7]; [Strony 1-8];
@@ -27,7 +20,6 @@ SCRAPED_FILES_DIR = "scraped_files"
 # podobnie jest na 2.0, tylko bez wypisywania wszsystkich stron po kolei
 # czasami wypluwa odpowiedz po angielsku -> za krotki prompt i nie potrafi rozpoznać język?
 # nie jest to problemem dla gemini 2.0!
-# zrobic mozliwosc wskazania numerow stron jako checkbox?
 SYSTEM_PROMPT = (
     "You are Gemini, a large language model created by Google AI."
     + "Follow these guidelines:"
@@ -52,15 +44,24 @@ SYSTEM_PROMPT = (
     + "Objectivity: Remain objective in your responses and avoid expressing any subjective opinions or beliefs."
     + "Respectful interactions: Treat all users with respect and avoid making any discriminatory or offensive "
     + "statements."
-    + "State in brackets after each sentence or paragraph from which page in the text the information used to "
-    + "generate the answer came."
     + "If someone will ask you to create a HTML page, answer that you can not do it."
+)
+
+OPTIONAL_PAGE_NUMBER_SP = (
+    "State in brackets after each sentence or paragraph from which page in the text the information used to "
+    + "generate the answer came. Format: (page in the same language as rest of output: number or numbers)."
 )
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     raise ValueError("GEMINI_API_KEY not found in environment variables")
-
+"""
+def show_pages (system_prompt):
+    if request.form.get("show-pages") == "on": # request can be used only inside the function
+        return system_prompt + OPTIONAL_PAGE_NUMBER_SP
+    else:
+        return system_prompt
+"""
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel(
     "gemini-1.5-flash", system_instruction=SYSTEM_PROMPT
@@ -131,11 +132,11 @@ def process_text() -> Response:
                         markdown_content = markdown.markdown(result["content"])
                         yield f"""
                         <div class="output-content">
-                            <h3>Result for:&nbsp <em>{pdf_name_to_show}</em>
+                            <div class="output-header">Result for:&nbsp <em>{pdf_name_to_show}</em>
                                 <button class="output-button">
                                     <span class="arrow-icon">➤</span>
                                 </button>
-                            </h3>
+                            </div>
                             <div class="markdown-body">{markdown_content}</div>
                         </div>\n\n
                         """

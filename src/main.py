@@ -3,6 +3,7 @@ import threading
 from pathlib import Path
 import traceback
 import os
+import json
 
 import markdown
 from flask import Flask, request, render_template, Response, stream_with_context
@@ -82,12 +83,15 @@ def index() -> str:
     return render_template("index.html", pdf_files=pdf_files)
 
 
-@app.route("/process", methods=["POST"])
-def process_text(data):# -> Response:
+@socketio.on('start_processing')
+def process_text():# -> Response:
     print("start processing")
     try:
         # get the input prompt
+        print(1)
+        print(request.form["input"])
         prompt = request.form["input"]
+        print(2)
         if not prompt:
             return Response(
                 "<div><p><strong>Error:</strong> No input provided.</p></div>",
@@ -201,4 +205,4 @@ def stop_processing() -> str:
 
 
 if __name__ == "__main__":
-    socketio.run(app, host='0.0.0.0')
+    socketio.run(app, debug=True)

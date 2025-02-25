@@ -56,7 +56,7 @@
             
         </aside>
         <div class="form-flex-container">
-            <form id="input-form" hx-post="/process" hx-target="#output" hx-swap="beforeend">
+            <!-- <form id="input-form" hx-post="/process" hx-target="#output" hx-swap="beforeend"> -->
                 <div class="inside-form-container">
                     <!-- input section -->
                     <div class="input-section" id="input-section">
@@ -84,11 +84,12 @@
                     <div class="output-section">
                         <div id="output" class="markdown-body">
                             <!-- output containers -->
+                            bajo jajo
                         </div>
                         <div class="input-from-container">
                             <div class="input-area-elements">
                                 <textarea id="input" name="input" placeholder="Type your prompt here..." required></textarea>
-                                <button id="action-button" type="submit" class="button-round">
+                                <button id="action-button"> <!-- type="submit" class="button-round"> -->
                                     <img class="icon" src="{{ url_for('static', filename='images/arrow-up-solid.svg') }}">
                                 </button>
                                 <button class="button-round" id="file-button" data-tooltip="Documents" type="button"> <!-- to avoid sending the form -->
@@ -119,12 +120,15 @@
                         </div>
                     </div>
                 </div>
-            </form>
+            <!-- </form> -->
         </div>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const socket = io();
+            const outputDiv = document.getElementById('output');
+            const processBtn = document.getElementById('action-button');
             
             socket.on('new_container', function(data) {
                 outputDiv.insertAdjacentHTML('beforeend', data.html);
@@ -136,6 +140,11 @@
                     container.innerHTML = data.html;
                 }
             });
+
+            processBtn.addEventListener('click', function() {
+                    outputDiv.innerHTML = ''; // clear previous output
+                    socket.emit('start_processing');
+                });
 
             // socket.on('message', function(data) {
             //     outputDiv.innerHTML += data.html;
@@ -173,82 +182,82 @@
             });
         }
 
-        document.getElementById('input').addEventListener('keydown', (event) => {
-            if (event.key === 'Enter' && !event.shiftKey) { // triggers when Enter is pressed while the input field is focused -> Shift+Enter is allowed
-                event.preventDefault(); // not to create a new line
-                startProcessing(); // use function -> switches the button to stop
-                document.getElementById('input-form').requestSubmit(); // submits the form to start /process
-            }
-        });
+        // document.getElementById('input').addEventListener('keydown', (event) => {
+        //     if (event.key === 'Enter' && !event.shiftKey) { // triggers when Enter is pressed while the input field is focused -> Shift+Enter is allowed
+        //         event.preventDefault(); // not to create a new line
+        //         startProcessing(); // use function -> switches the button to stop
+        //         document.getElementById('input-form').requestSubmit(); // submits the form to start /process
+        //     }
+        // });
 
-        document.getElementById('input-form').addEventListener('submit', () => { // event listener for submit
-            startProcessing();
-        });
+        // document.getElementById('input-form').addEventListener('submit', () => { // event listener for submit
+        //     startProcessing();
+        // });
 
-        document.addEventListener('htmx:afterRequest', (event) => { // waits of stop button event
-            if (!event.detail.requestConfig.url.includes('/stop_processing')) { // check if not includes /stop_processing
-                stopProcessing();
-            }
-        });
+        // document.addEventListener('htmx:afterRequest', (event) => { // waits of stop button event
+        //     if (!event.detail.requestConfig.url.includes('/stop_processing')) { // check if not includes /stop_processing
+        //         stopProcessing();
+        //     }
+        // });
 
-        function startProcessing() {
-            console.log('Switching to Stop button'); // logs
-            const button = document.getElementById('action-button');
-            const img = button.querySelector('img');
-            img.src = "{{ url_for('static', filename='images/stop-solid.svg') }}"; // changes icon to stop
+        // function startProcessing() {
+        //     console.log('Switching to Stop button'); // logs
+        //     const button = document.getElementById('action-button');
+        //     const img = button.querySelector('img');
+        //     img.src = "{{ url_for('static', filename='images/stop-solid.svg') }}"; // changes icon to stop
             
-            button.removeAttribute('type'); // remove submit behavior
+        //     button.removeAttribute('type'); // remove submit behavior
             
-            // add click handler for stop functionality
-            button.onclick = function(e) {
-                e.preventDefault();
-                e.stopPropagation(); // stops the click event from propagating (przekazywanie) to parent elements
+        //     // add click handler for stop functionality
+        //     button.onclick = function(e) {
+        //         e.preventDefault();
+        //         e.stopPropagation(); // stops the click event from propagating (przekazywanie) to parent elements
                 
-                // make the stop request manually
-                fetch('/stop_processing') // send request to /stop_processing -> custom JavaScript instead of htmx attribues
-                    //.then(response => response.text()) // parses the response text from server
-                    .then(html => {
-                        //document.getElementById('output').innerHTML += html; // appends it to the #output
-                        stopProcessing();
-                    });
-            };
-        }
+        //         // make the stop request manually
+        //         fetch('/stop_processing') // send request to /stop_processing -> custom JavaScript instead of htmx attribues
+        //             //.then(response => response.text()) // parses the response text from server
+        //             .then(html => {
+        //                 //document.getElementById('output').innerHTML += html; // appends it to the #output
+        //                 stopProcessing();
+        //             });
+        //     };
+        // }
 
 
-        function stopProcessing() {
-            console.log('Reverting to Start button');
-            const button = document.getElementById('action-button');
-            const img = button.querySelector('img');
-            img.src = "{{ url_for('static', filename='images/arrow-up-solid.svg') }}"; // changes back to arrow up
+        // function stopProcessing() {
+        //     console.log('Reverting to Start button');
+        //     const button = document.getElementById('action-button');
+        //     const img = button.querySelector('img');
+        //     img.src = "{{ url_for('static', filename='images/arrow-up-solid.svg') }}"; // changes back to arrow up
             
-            button.onclick = null; // remove custom stop click handler from startProcessing()
+        //     button.onclick = null; // remove custom stop click handler from startProcessing()
             
-            button.setAttribute('type', 'submit'); // restores default submit behavior
-        }
+        //     button.setAttribute('type', 'submit'); // restores default submit behavior
+        // }
 
 
-        function myFunction() {
-            var inputSection = document.querySelector(".input-section");
-            var sideMenuButtons = document.querySelector(".side-menu-buttons-container");
+        // function myFunction() {
+        //     var inputSection = document.querySelector(".input-section");
+        //     var sideMenuButtons = document.querySelector(".side-menu-buttons-container");
 
-            if (inputSection.style.display === "none" || inputSection.style.display === "") {
-                inputSection.style.display = "flex";
-                sideMenuButtons.style.display = "flex";
+        //     if (inputSection.style.display === "none" || inputSection.style.display === "") {
+        //         inputSection.style.display = "flex";
+        //         sideMenuButtons.style.display = "flex";
 
-                setTimeout(() => {
-                    inputSection.style.opacity = "1";
-                    sideMenuButtons.style.opacity = "1";
-                }, 200); // for smooth transition
-            } else {
-                inputSection.style.opacity = "0";
-                sideMenuButtons.style.opacity = "0";
+        //         setTimeout(() => {
+        //             inputSection.style.opacity = "1";
+        //             sideMenuButtons.style.opacity = "1";
+        //         }, 200); // for smooth transition
+        //     } else {
+        //         inputSection.style.opacity = "0";
+        //         sideMenuButtons.style.opacity = "0";
 
-                setTimeout(() => {
-                    inputSection.style.display = "none";
-                    sideMenuButtons.style.display = "none";
-                }, 200); // hide after fade out
-            }
-        }
+        //         setTimeout(() => {
+        //             inputSection.style.display = "none";
+        //             sideMenuButtons.style.display = "none";
+        //         }, 200); // hide after fade out
+        //     }
+        // }
     </script>
 </body>
 

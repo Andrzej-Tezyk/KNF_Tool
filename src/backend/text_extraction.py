@@ -9,7 +9,6 @@ from PyPDF2 import PdfReader
 
 load_dotenv()
 
-
 def extract_text_from_pdf(pdf_path: Path) -> str:
     """Extracts text from a PDF file.
 
@@ -94,6 +93,7 @@ def process_pdf(prompt: str, pdf: Path, model: Any, output_size: int) -> dict:
         # else:
         file_to_send = genai.upload_file(pdf)
         print(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
+        output_size = 300
         response = model.generate_content(
             [
                 prompt

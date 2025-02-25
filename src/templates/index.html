@@ -12,123 +12,16 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/logo.ico') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    
 </head>
 <body>
-    <div class="flex-container">
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <img src="{{ url_for('static', filename='images/logo.ico') }}" alt="logo">
-            </div>
-
-            <button class="sidear-button-round" onclick="myFunction()" id="sidebar-icon" data-tooltip="Open Sidebar">
-                <img class="sidebar-icon" src="{{ url_for('static', filename='images/sidebar-show.svg') }}">
-            </button>
-
-            <div class="side-menu-buttons-container">
-
-                <img class="sidebar-arrow-down" src="{{ url_for('static', filename='images/caret-down-solid.svg') }}">
-
-                <button class="sidear-button-round" id="sliders-button" data-tooltip="Advanced Options">
-                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/sliders-solid.svg') }}">
-                </button>
-                
-                <button class="sidear-button-round" id="chat-button" data-tooltip="Prompt Enchanter">
-                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/rocketchat-brands-solid.svg') }}">
-                </button>
-
-                <button class="sidear-button-round" id="compare-button" data-tooltip="Compare Documents">
-                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/code-compare-solid.svg') }}">
-                </button>
-                <br>
-            </div>
-
-            <div class="sidebar-bottom-buttons">
-                <button class="sidear-button-round" id="info-button" data-tooltip="How to prompt?">
-                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/circle-question-regular.svg') }}">
-                </button>
-                <!-- <button type="button" class="sidear-button-round" id="clean-button" hx-get="/clear_output" hx-target="#output" hx-swap="outerHTML" data-tooltip="Clean Output">
-                    <img class="icon" src="{{ url_for('static', filename='images/trash-can-solid.svg') }}">
-                </button> -->
-                <button class="sidear-button-round" id="settings-sidebar-button" data-tooltip="Settings">
-                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/gear-solid.svg') }}">
-                </button>
-            </div>
-            
-        </aside>
-        <div class="form-flex-container">
-            <!-- <form id="input-form" hx-post="/process" hx-target="#output" hx-swap="beforeend"> -->
-                <div class="inside-form-container">
-                    <!-- input section -->
-                    <div class="input-section" id="input-section">
-                        <div class="section-header-wrapper">
-                            <h3 class="side-tab-h3">Advanced Options</h3>
-                        </div>
-                        <div class="input-section-elements">
-                            <div class="option-section">
-
-                                <div class="show-pages-checkbox-container">
-                                    <label for="output-size">Response size in words:  </label>
-                                    <input type="text" id="output-size" name="output_size" minlength="2" maxlength="5" size="2" value="100">
-                                </div>
-
-                                <div class="show-pages-checkbox-container">
-                                    <input type="checkbox" id="show-pages" name="show-pages">
-                                    <label for="show-pages">Show pages</label>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- output section -->
-                    <div class="output-section">
-                        <div id="output" class="markdown-body">
-                            <!-- output containers -->
-                            bajo jajo
-                        </div>
-                        <div class="input-from-container">
-                            <div class="input-area-elements">
-                                <textarea id="input" name="input" placeholder="Type your prompt here..." required></textarea>
-                                <button id="action-button"> <!-- type="submit" class="button-round"> -->
-                                    <img class="icon" src="{{ url_for('static', filename='images/arrow-up-solid.svg') }}">
-                                </button>
-                                <button class="button-round" id="file-button" data-tooltip="Documents" type="button"> <!-- to avoid sending the form -->
-                                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/file-regular.svg') }}">
-                                </button>
-                            </div>
-                            <div class="bottom-panel" id="bottom-panel">
-                                <div class="bottom-panel-header">
-                                    <div class="bottom-panel-checkbox-buttons">
-                                        <button type="button" class="bottom-panel-button" onclick="selectAllFiles()">Select All</button>
-                                        <button type="button" class="bottom-panel-button" onclick="uncheckAllFiles()">Uncheck All</button>
-                                    </div>
-                                    <button class="sidear-button-round" type="button" onclick="toggleBottomPanel()">
-                                        <img class="icon" src="{{ url_for('static', filename='images/circle-xmark-regular.svg') }}">
-                                    </button>
-                                </div>
-                                <div class="documents-list">
-                                    <div class="scrollable-list">
-                                        {% for pdf in pdf_files %}
-                                        <div class="file-item">
-                                            <input type="checkbox" class="file-checkbox" id="{{ pdf }}" name="selected_files" value="{{ pdf }}">
-                                            <label for="{{ pdf }}">{{ pdf[11:-4] }}</label>
-                                        </div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            <!-- </form> -->
-        </div>
-    </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const socket = io.connect('http://127.0.0.1:5000');
             const outputDiv = document.getElementById('output');
             const processBtn = document.getElementById('action-button');
+            const toggleBottomPanelBtn = document.getElementById('toggleBottomPanelBtn');
             
             socket.on('new_container', function(data) {
                 outputDiv.insertAdjacentHTML('beforeend', data.html);
@@ -143,9 +36,30 @@
 
             processBtn.addEventListener('click', function() {
                     const input = document.getElementById('input').value;
-                    outputDiv.innerHTML = input; // clear previous output
-                    socket.emit('start_processing', { input: input });
+                    let selectedFiles = [];
+                    document.querySelectorAll('.file-checkbox:checked').forEach((checkbox) => {
+                        selectedFiles.push(checkbox.value);
+                    });
+                    //outputDiv.innerHTML = ''; // clear previous output
+                    socket.emit('start_processing', { input: input, pdfFiles: selectedFiles });
                 });
+
+            // document.getElementById('input').addEventListener('keydown', (event) => {
+            //     if (event.key === 'Enter' && !event.shiftKey) { // triggers when Enter is pressed while the input field is focused -> Shift+Enter is allowed
+            //         // event.preventDefault(); // not to create a new line
+            //         // startProcessing(); // use function -> switches the button to stop
+            //         // document.getElementById('input-form').requestSubmit(); // submits the form to start /process
+            //         const input = document.getElementById('input').value;
+            //         //outputDiv.innerHTML = ''; // clear previous output
+            //         socket.emit('start_processing', { input: input });
+            //     }
+            // });
+
+            // document.getElementById('input-form').addEventListener('submit', () => { // event listener for submit
+            //     const input = document.getElementById('input').value;
+            //     //outputDiv.innerHTML = ''; // clear previous output
+            //     socket.emit('start_processing', { input: input });
+            // });
 
             // socket.on('message', function(data) {
             //     outputDiv.innerHTML += data.html;
@@ -156,32 +70,57 @@
             //     outputDiv.innerHTML = ''; // clear previous output
             //     socket.emit('start_processing');
             // });
-            });
+            document.getElementById("file-button").addEventListener("click", toggleBottomPanel);
+            document.getElementById("hidePanel-button").addEventListener("click", toggleBottomPanel);
+            document.getElementById("selectAllBtn").addEventListener("click", selectAllFiles);
+            document.getElementById("uncheckAllBtn").addEventListener("click", uncheckAllFiles);
 
-        document.getElementById("file-button").addEventListener("click", toggleBottomPanel);
+            function toggleBottomPanel() {
+                const panel = document.getElementById("bottom-panel");
+                if (panel.style.bottom === "0px") {
+                    panel.style.bottom = "-100%";
+                } else {
+                    panel.style.bottom = "0px";
+                }
+            }
 
-        function toggleBottomPanel() {
-            const panel = document.getElementById("bottom-panel");
-            if (panel.style.bottom === "0px") {
-                panel.style.bottom = "-100%";
+            function selectAllFiles() {
+                const checkboxes = document.querySelectorAll(".file-checkbox"); // select all checkboxes inside the scrollable list
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = true; // all checkboxes are checked
+                });
+            }
+
+            function uncheckAllFiles() {
+                const checkboxes = document.querySelectorAll(".file-checkbox"); // select all checkboxes inside the scrollable list
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = false; // all checkboxes are checked
+                });
+            }
+
+            function myFunction() {
+            var inputSection = document.querySelector(".input-section");
+            var sideMenuButtons = document.querySelector(".side-menu-buttons-container");
+
+            if (inputSection.style.display === "none" || inputSection.style.display === "") {
+                inputSection.style.display = "flex";
+                sideMenuButtons.style.display = "flex";
+
+                setTimeout(() => {
+                    inputSection.style.opacity = "1";
+                    sideMenuButtons.style.opacity = "1";
+                }, 200); // for smooth transition
             } else {
-                panel.style.bottom = "0px";
+                inputSection.style.opacity = "0";
+                sideMenuButtons.style.opacity = "0";
+
+                setTimeout(() => {
+                    inputSection.style.display = "none";
+                    sideMenuButtons.style.display = "none";
+                }, 200); // hide after fade out
             }
         }
-
-        function selectAllFiles() {
-            const checkboxes = document.querySelectorAll(".file-checkbox"); // select all checkboxes inside the scrollable list
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = true; // all checkboxes are checked
-            });
-        }
-
-        function uncheckAllFiles() {
-            const checkboxes = document.querySelectorAll(".file-checkbox"); // select all checkboxes inside the scrollable list
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = false; // all checkboxes are checked
-            });
-        }
+        });
 
         // document.getElementById('input').addEventListener('keydown', (event) => {
         //     if (event.key === 'Enter' && !event.shiftKey) { // triggers when Enter is pressed while the input field is focused -> Shift+Enter is allowed
@@ -236,30 +175,114 @@
         //     button.setAttribute('type', 'submit'); // restores default submit behavior
         // }
 
-
-        // function myFunction() {
-        //     var inputSection = document.querySelector(".input-section");
-        //     var sideMenuButtons = document.querySelector(".side-menu-buttons-container");
-
-        //     if (inputSection.style.display === "none" || inputSection.style.display === "") {
-        //         inputSection.style.display = "flex";
-        //         sideMenuButtons.style.display = "flex";
-
-        //         setTimeout(() => {
-        //             inputSection.style.opacity = "1";
-        //             sideMenuButtons.style.opacity = "1";
-        //         }, 200); // for smooth transition
-        //     } else {
-        //         inputSection.style.opacity = "0";
-        //         sideMenuButtons.style.opacity = "0";
-
-        //         setTimeout(() => {
-        //             inputSection.style.display = "none";
-        //             sideMenuButtons.style.display = "none";
-        //         }, 200); // hide after fade out
-        //     }
-        // }
     </script>
-</body>
+    <div class="flex-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="{{ url_for('static', filename='images/logo.ico') }}" alt="logo">
+            </div>
 
+            <button class="sidear-button-round" onclick="myFunction()" id="sidebar-icon" data-tooltip="Open Sidebar">
+                <img class="sidebar-icon" src="{{ url_for('static', filename='images/sidebar-show.svg') }}">
+            </button>
+
+            <div class="side-menu-buttons-container">
+
+                <img class="sidebar-arrow-down" src="{{ url_for('static', filename='images/caret-down-solid.svg') }}">
+
+                <button class="sidear-button-round" id="sliders-button" data-tooltip="Advanced Options">
+                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/sliders-solid.svg') }}">
+                </button>
+                
+                <button class="sidear-button-round" id="chat-button" data-tooltip="Prompt Enchanter">
+                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/rocketchat-brands-solid.svg') }}">
+                </button>
+
+                <button class="sidear-button-round" id="compare-button" data-tooltip="Compare Documents">
+                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/code-compare-solid.svg') }}">
+                </button>
+                <br>
+            </div>
+
+            <div class="sidebar-bottom-buttons">
+                <button class="sidear-button-round" id="info-button" data-tooltip="How to prompt?">
+                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/circle-question-regular.svg') }}">
+                </button>
+                <button type="button" class="sidear-button-round" id="clean-button" hx-get="/clear_output" hx-target="#output" hx-swap="outerHTML" data-tooltip="Clean Output">
+                    <img class="icon" src="{{ url_for('static', filename='images/trash-can-solid.svg') }}">
+                </button>
+                <button class="sidear-button-round" id="settings-sidebar-button" data-tooltip="Settings">
+                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/gear-solid.svg') }}">
+                </button>
+            </div>
+            
+        </aside>
+        <div class="form-flex-container">
+            <!-- <form id="input-form" hx-post="/process" hx-target="#output" hx-swap="beforeend"> -->
+                <div class="inside-form-container">
+                    <!-- input section -->
+                    <div class="input-section" id="input-section">
+                        <div class="section-header-wrapper">
+                            <h3 class="side-tab-h3">Advanced Options</h3>
+                        </div>
+                        <div class="input-section-elements">
+                            <div class="option-section">
+
+                                <div class="show-pages-checkbox-container">
+                                    <label for="output-size">Response size in words:  </label>
+                                    <input type="text" id="output-size" name="output_size" minlength="2" maxlength="5" size="2" value="100">
+                                </div>
+
+                                <div class="show-pages-checkbox-container">
+                                    <input type="checkbox" id="show-pages" name="show-pages">
+                                    <label for="show-pages">Show pages</label>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- output section -->
+                    <div class="output-section">
+                        <div id="output" class="markdown-body">
+                            <!-- output containers -->
+                        </div>
+                        <div class="input-from-container">
+                            <div class="input-area-elements">
+                                <textarea id="input" name="input" placeholder="Type your prompt here..." required></textarea>
+                                <button id="action-button"> <!-- type="submit" class="button-round"> -->
+                                    <img class="icon" src="{{ url_for('static', filename='images/arrow-up-solid.svg') }}">
+                                </button>
+                                <button class="button-round" id="file-button" data-tooltip="Documents" type="button"> <!-- to avoid sending the form -->
+                                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/file-regular.svg') }}">
+                                </button>
+                            </div>
+                            <div class="bottom-panel" id="bottom-panel">
+                                <div class="bottom-panel-header">
+                                    <div class="bottom-panel-checkbox-buttons">
+                                        <button id="selectAllBtn" type="button" class="bottom-panel-button">Select All</button>
+                                        <button id="uncheckAllBtn" type="button" class="bottom-panel-button">Uncheck All</button>
+                                    </div>
+                                    <button id="hidePanel-button" class="sidear-button-round" type="button"> <!-- onclick="toggleBottomPanel()"> -->
+                                        <img class="icon" src="{{ url_for('static', filename='images/circle-xmark-regular.svg') }}">
+                                    </button>
+                                </div>
+                                <div class="documents-list">
+                                    <div class="scrollable-list">
+                                        {% for pdf in pdf_files %}
+                                        <div class="file-item">
+                                            <input type="checkbox" class="file-checkbox" id="{{ pdf }}" name="selected_files" value="{{ pdf }}">
+                                            <label for="{{ pdf }}">{{ pdf[11:-4] }}</label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <!-- </form> -->
+        </div>
+    </div>
+</body>
 </html>

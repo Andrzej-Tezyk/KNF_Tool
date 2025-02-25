@@ -46,9 +46,9 @@
                 <button class="sidear-button-round" id="info-button" data-tooltip="How to prompt?">
                     <img class="sidebar-icon" src="{{ url_for('static', filename='images/circle-question-regular.svg') }}">
                 </button>
-                <button type="button" class="sidear-button-round" id="clean-button" hx-get="/clear_output" hx-target="#output" hx-swap="outerHTML" data-tooltip="Clean Output">
+                <!-- <button type="button" class="sidear-button-round" id="clean-button" hx-get="/clear_output" hx-target="#output" hx-swap="outerHTML" data-tooltip="Clean Output">
                     <img class="icon" src="{{ url_for('static', filename='images/trash-can-solid.svg') }}">
-                </button>
+                </button> -->
                 <button class="sidear-button-round" id="settings-sidebar-button" data-tooltip="Settings">
                     <img class="sidebar-icon" src="{{ url_for('static', filename='images/gear-solid.svg') }}">
                 </button>
@@ -126,7 +126,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const socket = io();
+            const socket = io.connect('http://127.0.0.1:5000');
             const outputDiv = document.getElementById('output');
             const processBtn = document.getElementById('action-button');
             
@@ -142,8 +142,9 @@
             });
 
             processBtn.addEventListener('click', function() {
-                    outputDiv.innerHTML = ''; // clear previous output
-                    socket.emit('start_processing');
+                    const input = document.getElementById('input').value;
+                    outputDiv.innerHTML = input; // clear previous output
+                    socket.emit('start_processing', { input: input });
                 });
 
             // socket.on('message', function(data) {

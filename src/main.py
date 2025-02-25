@@ -71,20 +71,21 @@ model = genai.GenerativeModel(
 
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
-socketio = SocketIO(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 stop_flag = threading.Event()
 
 
 @app.route("/")
 def index() -> str:
+    print('start')
     pdf_dir = Path(SCRAPED_FILES_DIR)
     pdf_files = [pdf.name for pdf in pdf_dir.glob("*.pdf")] if pdf_dir.exists() else []
     return render_template("index.html", pdf_files=pdf_files)
 
 
 @socketio.on('start_processing')
-def process_text():# -> Response:
+def process_text(data):# -> Response:
     print("start processing")
     try:
         # get the input prompt
@@ -192,16 +193,16 @@ def process_text():# -> Response:
         )
 
 
-@app.route("/clear_output", methods=["GET"])  # CHANGE THE ENTIRE #OUTPUT
-def clear_output() -> str:
-    return "<div id='output' class='markdown-body'></div>"
+# @app.route("/clear_output", methods=["GET"])  # CHANGE THE ENTIRE #OUTPUT
+# def clear_output() -> str:
+#     return "<div id='output' class='markdown-body'></div>"
 
 
-@app.route("/stop_processing", methods=["GET"])
-def stop_processing() -> str:
-    stop_flag.set()  # set flag to true
-    print("Stop processing triggered!")
-    return "<div></div>"  # <p><strong>Processing stopped. Displaying partial results...</strong></p>
+# @app.route("/stop_processing", methods=["GET"])
+# def stop_processing() -> str:
+#     stop_flag.set()  # set flag to true
+#     print("Stop processing triggered!")
+#     return "<div></div>"  # <p><strong>Processing stopped. Displaying partial results...</strong></p>
 
 
 if __name__ == "__main__":

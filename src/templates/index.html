@@ -12,15 +12,139 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/logo.ico') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    
 </head>
 <body>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const socket = io.connect('http://127.0.0.1:5000');
+            const outputDiv = document.getElementById('output');
+            const processBtn = document.getElementById('action-button');
+            const toggleBottomPanelBtn = document.getElementById('toggleBottomPanelBtn');
+            
+            socket.on('new_container', function(data) {
+                outputDiv.insertAdjacentHTML('beforeend', data.html);
+            });
+            
+            socket.on('update_content', function(data) {
+                const container = document.getElementById(data.container_id);
+                if (container) {
+                    container.innerHTML = data.html;
+                }
+            });
+
+            socket.on('stream_stopped', function(data) {
+                const button = document.getElementById('action-button');
+                const img = button.querySelector('img');
+                img.src = "{{ url_for('static', filename='images/arrow-up-solid.svg') }}";
+                button.addEventListener("click", startProcessing);
+            });
+
+            processBtn.addEventListener('click', startProcessing)
+            document.getElementById("file-button").addEventListener("click", toggleBottomPanel);
+            document.getElementById("hidePanel-button").addEventListener("click", toggleBottomPanel);
+            document.getElementById("selectAllBtn").addEventListener("click", selectAllFiles);
+            document.getElementById("uncheckAllBtn").addEventListener("click", uncheckAllFiles);
+            document.getElementById("sidebar-icon").addEventListener("click", myFunction);
+
+            // document.getElementById('input').addEventListener('keydown', (event) => {
+            //     if (event.key === 'Enter' && !event.shiftKey) { // triggers when Enter is pressed while the input field is focused -> Shift+Enter is allowed
+            //         // event.preventDefault(); // not to create a new line
+            //         // startProcessing(); // use function -> switches the button to stop
+            //         // document.getElementById('input-form').requestSubmit(); // submits the form to start /process
+            //         const input = document.getElementById('input').value;
+            //         //outputDiv.innerHTML = ''; // clear previous output
+            //         socket.emit('start_processing', { input: input });
+            //     }
+            // });
+
+            // document.getElementById('input-form').addEventListener('submit', () => { // event listener for submit
+            //     const input = document.getElementById('input').value;
+            //     //outputDiv.innerHTML = ''; // clear previous output
+            //     socket.emit('start_processing', { input: input });
+            // });
+            
+            function startProcessing() {
+                //console.log('Switching to Stop button'); // logs
+                const button = document.getElementById('action-button');
+            
+                let input = document.getElementById('input').value;
+                let output_size = document.getElementById('output-size').value;
+                let selectedFiles = [];
+                document.querySelectorAll('.file-checkbox:checked').forEach((checkbox) => {
+                    selectedFiles.push(checkbox.value);
+                });
+                //outputDiv.innerHTML = ''; // clear previous output
+                socket.emit('start_processing', { input: input, pdfFiles: selectedFiles, output_size: output_size });
+                
+                const img = button.querySelector('img');
+                img.src = "{{ url_for('static', filename='images/stop-solid.svg') }}"; // changes icon to stop
+
+                button.removeEventListener("click", startProcessing)
+                button.addEventListener("click", stopProcessing)
+            }
+
+            function stopProcessing() {
+                const button = document.getElementById('action-button');
+                socket.emit('stop_processing');
+                button.removeEventListener("click", stopProcessing);
+            }
+
+            function toggleBottomPanel() {
+                const panel = document.getElementById("bottom-panel");
+                if (panel.style.bottom === "0px") {
+                    panel.style.bottom = "-100%";
+                } else {
+                    panel.style.bottom = "0px";
+                }
+            }
+
+            function selectAllFiles() {
+                const checkboxes = document.querySelectorAll(".file-checkbox"); // select all checkboxes inside the scrollable list
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = true; // all checkboxes are checked
+                });
+            }
+
+            function uncheckAllFiles() {
+                const checkboxes = document.querySelectorAll(".file-checkbox"); // select all checkboxes inside the scrollable list
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = false; // all checkboxes are checked
+                });
+            }
+
+            function myFunction() {
+            var inputSection = document.querySelector(".input-section");
+            var sideMenuButtons = document.querySelector(".side-menu-buttons-container");
+
+            if (inputSection.style.display === "none" || inputSection.style.display === "") {
+                inputSection.style.display = "flex";
+                sideMenuButtons.style.display = "flex";
+
+                setTimeout(() => {
+                    inputSection.style.opacity = "1";
+                    sideMenuButtons.style.opacity = "1";
+                }, 200); // for smooth transition
+            } else {
+                inputSection.style.opacity = "0";
+                sideMenuButtons.style.opacity = "0";
+
+                setTimeout(() => {
+                    inputSection.style.display = "none";
+                    sideMenuButtons.style.display = "none";
+                }, 200); // hide after fade out
+            }
+        }
+        });
+    </script>
     <div class="flex-container">
         <aside class="sidebar">
             <div class="sidebar-header">
                 <img src="{{ url_for('static', filename='images/logo.ico') }}" alt="logo">
             </div>
 
-            <button class="sidear-button-round" onclick="myFunction()" id="sidebar-icon" data-tooltip="Open Sidebar">
+            <button  class="sidear-button-round" id="sidebar-icon" data-tooltip="Open Sidebar">
                 <img class="sidebar-icon" src="{{ url_for('static', filename='images/sidebar-show.svg') }}">
             </button>
 
@@ -56,7 +180,7 @@
             
         </aside>
         <div class="form-flex-container">
-            <form id="input-form" hx-post="/process" hx-target="#output" hx-swap="beforeend">
+            <!-- <form id="input-form" hx-post="/process" hx-target="#output" hx-swap="beforeend"> -->
                 <div class="inside-form-container">
                     <!-- input section -->
                     <div class="input-section" id="input-section">
@@ -82,11 +206,13 @@
 
                     <!-- output section -->
                     <div class="output-section">
-                        <div id="output" class="markdown-body"></div>
-                        <div class="input-form-container">
+                        <div id="output" class="markdown-body">
+                            <!-- output containers -->
+                        </div>
+                        <div class="input-from-container">
                             <div class="input-area-elements">
                                 <textarea id="input" name="input" placeholder="Type your prompt here..." required></textarea>
-                                <button id="action-button" type="submit" class="button-round">
+                                <button id="action-button" class="button-round"> <!-- type="submit" class="button-round"> -->
                                     <img class="icon" src="{{ url_for('static', filename='images/arrow-up-solid.svg') }}">
                                 </button>
                                 <button class="button-round" id="file-button" data-tooltip="Documents" type="button"> <!-- to avoid sending the form -->
@@ -96,10 +222,10 @@
                             <div class="bottom-panel" id="bottom-panel">
                                 <div class="bottom-panel-header">
                                     <div class="bottom-panel-checkbox-buttons">
-                                        <button type="button" class="bottom-panel-button" onclick="selectAllFiles()">Select All</button>
-                                        <button type="button" class="bottom-panel-button" onclick="uncheckAllFiles()">Uncheck All</button>
+                                        <button id="selectAllBtn" type="button" class="bottom-panel-button">Select All</button>
+                                        <button id="uncheckAllBtn" type="button" class="bottom-panel-button">Uncheck All</button>
                                     </div>
-                                    <button class="sidear-button-round" type="button" onclick="toggleBottomPanel()">
+                                    <button id="hidePanel-button" class="sidear-button-round" type="button"> <!-- onclick="toggleBottomPanel()"> -->
                                         <img class="icon" src="{{ url_for('static', filename='images/circle-xmark-regular.svg') }}">
                                     </button>
                                 </div>
@@ -117,112 +243,8 @@
                         </div>
                     </div>
                 </div>
-            </form>
+            <!-- </form> -->
         </div>
     </div>
-    <script>
-        document.getElementById("file-button").addEventListener("click", toggleBottomPanel);
-
-        function toggleBottomPanel() {
-            const panel = document.getElementById("bottom-panel");
-            if (panel.style.bottom === "0px") {
-                panel.style.bottom = "-100%";
-            } else {
-                panel.style.bottom = "0px";
-            }
-        }
-
-        function selectAllFiles() {
-            const checkboxes = document.querySelectorAll(".file-checkbox"); // select all checkboxes inside the scrollable list
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = true; // all checkboxes are checked
-            });
-        }
-
-        function uncheckAllFiles() {
-            const checkboxes = document.querySelectorAll(".file-checkbox"); // select all checkboxes inside the scrollable list
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = false; // all checkboxes are checked
-            });
-        }
-
-        document.getElementById('input').addEventListener('keydown', (event) => {
-            if (event.key === 'Enter' && !event.shiftKey) { // triggers when Enter is pressed while the input field is focused -> Shift+Enter is allowed
-                event.preventDefault(); // not to create a new line
-                startProcessing(); // use function -> switches the button to stop
-                document.getElementById('input-form').requestSubmit(); // submits the form to start /process
-            }
-        });
-
-        document.getElementById('input-form').addEventListener('submit', () => { // event listener for submit
-            startProcessing();
-        });
-
-        document.addEventListener('htmx:afterRequest', (event) => { // waits of stop button event
-            if (!event.detail.requestConfig.url.includes('/stop_processing')) { // check if not includes /stop_processing
-                stopProcessing();
-            }
-        });
-
-        function startProcessing() {
-            console.log('Switching to Stop button'); // logs
-            const button = document.getElementById('action-button');
-            const img = button.querySelector('img');
-            img.src = "{{ url_for('static', filename='images/stop-solid.svg') }}"; // changes icon to stop
-            
-            button.removeAttribute('type'); // remove submit behavior
-            
-            // add click handler for stop functionality
-            button.onclick = function(e) {
-                e.preventDefault();
-                e.stopPropagation(); // stops the click event from propagating (przekazywanie) to parent elements
-                
-                // make the stop request manually
-                fetch('/stop_processing') // send request to /stop_processing -> custom JavaScript instead of htmx attribues
-                    .then(response => response.text()) // parses the response text from server
-                    .then(html => {
-                        document.getElementById('output').innerHTML += html; // appends it to the #output
-                        stopProcessing();
-                    });
-            };
-        }
-
-
-        function stopProcessing() {
-            console.log('Reverting to Start button');
-            const button = document.getElementById('action-button');
-            const img = button.querySelector('img');
-            img.src = "{{ url_for('static', filename='images/arrow-up-solid.svg') }}"; // changes back to arrow up
-            
-            button.onclick = null; // remove custom stop click handler from startProcessing()
-            
-            button.setAttribute('type', 'submit'); // restores default submit behavior
-        }
-
-
-        function myFunction() {
-            var inputSection = document.querySelector(".input-section");
-            var sideMenuButtons = document.querySelector(".side-menu-buttons-container");
-
-            if (inputSection.style.display === "none" || inputSection.style.display === "") {
-                inputSection.style.display = "flex";
-                sideMenuButtons.style.display = "flex";
-
-                setTimeout(() => {
-                    inputSection.style.opacity = "1";
-                    sideMenuButtons.style.opacity = "1";
-                }, 200); // for smooth transition
-            } else {
-                inputSection.style.opacity = "0";
-                sideMenuButtons.style.opacity = "0";
-
-                setTimeout(() => {
-                    inputSection.style.display = "none";
-                    sideMenuButtons.style.display = "none";
-                }, 200); // hide after fade out
-            }
-        }
-    </script>
 </body>
-
 </html>

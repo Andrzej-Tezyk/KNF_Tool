@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 from collections.abc import Generator
 
-import google.generativeai as genai
+import google.generativeai as genai  # type: ignore[import-untyped]
 from dotenv import load_dotenv
 from PyPDF2 import PdfReader
 

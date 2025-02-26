@@ -4,7 +4,7 @@ import os
 
 import markdown
 from flask import Flask, render_template
-import google.generativeai as genai
+import google.generativeai as genai  # type: ignore[import-untyped]
 from backend.text_extraction import process_pdf  # type: ignore[import-not-found]
 from flask_socketio import SocketIO
 

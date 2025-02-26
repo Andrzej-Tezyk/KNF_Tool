@@ -88,7 +88,7 @@ def index() -> str:
     return render_template("index.html", pdf_files=pdf_files)
 
 @socketio.on('start_processing')
-def process_text(data):# -> Response:
+def process_text(data):
     try:
         global output_index
         output_index += 1
@@ -117,26 +117,18 @@ def process_text(data):# -> Response:
         print(f'selected files: {selected_files}')
         print(f'output size: {output_size}')
 
-        #stop_flag.clear()  # reset stop flag
-
-        #output_size = int(request.form.get("output_size", 5))  # control output size
-
-        # get selected files from the form
-        #selected_files = request.form.getlist("selected_files")
         if not selected_files:
             print(f"no selected files")
             socketio.emit('error', {'message': 'No selected files'})
             return 
 
-        # get the directory of PDFs and filter only the selected files
         pdf_dir = Path(SCRAPED_FILES_DIR)
-        # result: Path("scraped_files/example.pdf") -> when used with Path object
+    
         pdfs_to_scan = [pdf_dir / file_name for file_name in selected_files]
-        #pdfs_to_scan = list(pdf_dir.glob("*.pdf"))
+        
         for pdf in pdfs_to_scan:
             print(pdf)
 
-        #def generate() -> typing.Generator:
         try:
             for index, pdf in enumerate(pdfs_to_scan):
                 if streaming == False:
@@ -160,8 +152,8 @@ def process_text(data):# -> Response:
                 
                 accumulated_text = ""
                 for result_chunk in process_pdf(prompt, pdf, model, output_size):
-                    # if streaming == False:
-                    #     break
+                    if streaming == False:
+                        break
                     if "error" in result_chunk:
                         socketio.emit('error', {'message': 'error in chunk response'})
                         return 

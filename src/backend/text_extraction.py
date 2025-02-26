@@ -2,12 +2,14 @@ import time
 import traceback
 from pathlib import Path
 from typing import Any
+from collections.abc import Generator
 
-import google.generativeai as genai  # type: ignore[import-untyped]
+import google.generativeai as genai
 from dotenv import load_dotenv
 from PyPDF2 import PdfReader
 
 load_dotenv()
+
 
 def extract_text_from_pdf(pdf_path: Path) -> str:
     """Extracts text from a PDF file.
@@ -51,7 +53,7 @@ def extract_text_from_pdf(pdf_path: Path) -> str:
         return ""
 
 
-def process_pdf(prompt: str, pdf: Path, model: Any, output_size: int) -> dict:
+def process_pdf(prompt: str, pdf: Path, model: Any, output_size: int) -> Generator:
     """Processes a single PDF document using the provided prompt and returns the result.
 
     This function uploads a PDF document, sends it to a model with the given prompt,
@@ -80,34 +82,36 @@ def process_pdf(prompt: str, pdf: Path, model: Any, output_size: int) -> dict:
     """
 
     if not prompt:
-        return {"error": "No prompt provided"}
+        yield {"error": "No prompt provided"}
 
-    try:
-        print(f"Document: {pdf.stem} is beeing analyzed.")
-        # text = extract_text_from_pdf(pdf)
-        # if len(text) > 10:  # random small number
-        #    response = model.generate_content(
-        #        f"{prompt} (Please limit the response to approximately {output_size} words) {text}"
-        #    )  # , generation_config={"max_output_tokens": max_tokens}
+    else:
+        try:
+            print(f"Document: {pdf.stem} is beeing analyzed.")
+            # text = extract_text_from_pdf(pdf)
+            # if len(text) > 10:  # random small number
+            #    response = model.generate_content(
+            #        f"{prompt} (Please limit the response to approximately {output_size} words) {text}"
+            #    )  # , generation_config={"max_output_tokens": max_tokens}
 
-        # else:
-        file_to_send = genai.upload_file(pdf)
-        print(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
-        response = model.generate_content(
-            [
-                prompt
-                + f"(Please limit the response to approximately {output_size} words)",
-                file_to_send, 
-            ],
-            stream=True
-        )
-        for response_chunk in response:
-            # replace -> sometimes double space between words occure; most likely reason: pdf formating
-            response_chunk_text = response_chunk.text.replace("  ", " ")
-            yield {"pdf_name": pdf.stem, "content": response_chunk_text}
-        print(f"Response for: {pdf.stem} was saved!\n")
-        time.sleep(1) # to lower number api requests to model per sec
-    except Exception as e:
-        print(f"There is a problem with {pdf.stem}. \n Error message: {e}\n")
-        traceback.print_exc()
-        return {"error": f"An error occurred while processing {pdf.stem}: {str(e)}"}
+            # else:
+            file_to_send = genai.upload_file(pdf)
+            print(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
+            response = model.generate_content(
+                [
+                    prompt
+                    + f"(Please limit the response to approximately {output_size} words)",
+                    file_to_send,
+                ],
+                stream=True,
+            )
+            for response_chunk in response:
+                # replace -> sometimes double space between words occure; most likely reason: pdf formating
+                response_chunk_text = response_chunk.text.replace("  ", " ")
+                yield {"pdf_name": pdf.stem, "content": response_chunk_text}
+            print(f"Response for: {pdf.stem} was saved!\n")
+            time.sleep(1)  # to lower number api requests to model per sec
+
+        except Exception as e:
+            print(f"There is a problem with {pdf.stem}. \n Error message: {e}\n")
+            traceback.print_exc()
+            yield {"error": f"An error occurred while processing {pdf.stem}: {str(e)}"}

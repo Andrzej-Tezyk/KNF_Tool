@@ -75,10 +75,14 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 stop_flag = threading.Event()
 
-
 @app.route("/")
 def index() -> str:
     print('start')
+    global streaming
+    streaming = False
+    global output_index
+    output_index = -1
+
     pdf_dir = Path(SCRAPED_FILES_DIR)
     pdf_files = [pdf.name for pdf in pdf_dir.glob("*.pdf")] if pdf_dir.exists() else []
     return render_template("index.html", pdf_files=pdf_files)
@@ -86,8 +90,13 @@ def index() -> str:
 @socketio.on('start_processing')
 def process_text(data):# -> Response:
     try:
+        global output_index
+        output_index += 1
+        global streaming
+        streaming = True
         prompt = data.get('input')
         selected_files = data.get('pdfFiles')
+        output_size = data.get('output_size')
         if not prompt:
             print(f"no prompt provided")
             socketio.emit('error', {'message': 'No input provided'})
@@ -98,9 +107,19 @@ def process_text(data):# -> Response:
             socketio.emit('error', {'message': 'No selectedd files'})
             return
 
-        stop_flag.clear()  # reset stop flag
+        if not output_size:
+            print(f"no chosen output size, set to 100")
+            output_size = 100
+        
+        output_size = int(output_size)
 
-        output_size = int(request.form.get("output_size", 5))  # control output size
+        print(f'prompt: {prompt}')
+        print(f'selected files: {selected_files}')
+        print(f'output size: {output_size}')
+
+        #stop_flag.clear()  # reset stop flag
+
+        #output_size = int(request.form.get("output_size", 5))  # control output size
 
         # get selected files from the form
         #selected_files = request.form.getlist("selected_files")
@@ -120,14 +139,8 @@ def process_text(data):# -> Response:
         #def generate() -> typing.Generator:
         try:
             for index, pdf in enumerate(pdfs_to_scan):
-                # if stop_flag.is_set():  # check stop flag
-                #     yield "<div><p><strong>Processing stopped. Partial results displayed.</strong></p></div>"
-                #     break
-
-                # if not pdf.exists():
-                #     yield f"<div><p><strong>Error:</strong> File {pdf.name} not found.</p></div>"
-                #    continue
-
+                if streaming == False:
+                    break
                 pdf_name_to_show = str(pdf)
 
                 container_html = f"""
@@ -138,7 +151,7 @@ def process_text(data):# -> Response:
                             </button>
                         </div>
                         <div class="markdown-body"
-                        id="content-pdf{index}">
+                        id="content-pdf{index}_{output_index}">
                         </div>
                     </div>\n\n
                     """
@@ -147,6 +160,8 @@ def process_text(data):# -> Response:
                 
                 accumulated_text = ""
                 for result_chunk in process_pdf(prompt, pdf, model, output_size):
+                    # if streaming == False:
+                    #     break
                     if "error" in result_chunk:
                         socketio.emit('error', {'message': 'error in chunk response'})
                         return 
@@ -155,50 +170,36 @@ def process_text(data):# -> Response:
                         accumulated_text += result_chunk['content']
                         markdown_content = markdown.markdown(accumulated_text)
                         socketio.emit('update_content', {
-                            'container_id': f'content-pdf{index}',
+                            'container_id': f'content-pdf{index}_{output_index}',
                             'html': markdown_content
                             })
-
-                # if "error" in result:
-                #     yield f"<div><p><strong>Error:</strong> {result['error']}</p></div>"
-                # elif "content" in result:
-                #     markdown_content = markdown.markdown(result["content"])
-                #     yield f"""
-                #     <div class="output-content">
-                #         <div class="output-header">Result for:&nbsp <em>{pdf_name_to_show}</em>
-                #             <button class="output-button">
-                #                 <span class="arrow-icon">➤</span>
-                #             </button>
-                #         </div>
-                #         <div class="markdown-body">{markdown_content}</div>
-                #     </div>\n\n
-                #     """
                     else:
                         socketio.emit('error', {'message': 'unexpected error'})
                         return 
-
+            if streaming == False:
+                socketio.emit('stream_stopped')
         except Exception as e:
             print(f"An error occurred in the generate function: {e}")
             traceback.print_exc()
             socketio.emit('error', {'message': f'An unexpected error occurred: {str(e)}'})
 
-        #return Response(stream_with_context(generate()), content_type="text/html")
+        streaming = False
+        socketio.emit('stream_stopped')
 
     except Exception as e:
         print(f"An error occurred in the generate function: {e}")
         traceback.print_exc()
         socketio.emit('error', {'message': f'An unexpected error occurred: {str(e)}'})
 
-# @app.route("/clear_output", methods=["GET"])  # CHANGE THE ENTIRE #OUTPUT
-# def clear_output() -> str:
-#     return "<div id='output' class='markdown-body'></div>"
+@socketio.on('stop_processing')
+def handle_stop():
+    global streaming
+    streaming = False
+    print("Processing Stopped by User")
 
-
-# @app.route("/stop_processing", methods=["GET"])
-# def stop_processing() -> str:
-#     stop_flag.set()  # set flag to true
-#     print("Stop processing triggered!")
-#     return "<div></div>"  # <p><strong>Processing stopped. Displaying partial results...</strong></p>
+@app.route("/clear_output", methods=["GET"])  # CHANGE THE ENTIRE #OUTPUT
+def clear_output() -> str:
+    return "<div id='output' class='markdown-body'></div>"
 
 
 if __name__ == "__main__":

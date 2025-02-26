@@ -34,15 +34,19 @@
                 }
             });
 
-            processBtn.addEventListener('click', function() {
-                    const input = document.getElementById('input').value;
-                    let selectedFiles = [];
-                    document.querySelectorAll('.file-checkbox:checked').forEach((checkbox) => {
-                        selectedFiles.push(checkbox.value);
-                    });
-                    //outputDiv.innerHTML = ''; // clear previous output
-                    socket.emit('start_processing', { input: input, pdfFiles: selectedFiles });
-                });
+            socket.on('stream_stopped', function(data) {
+                const button = document.getElementById('action-button');
+                const img = button.querySelector('img');
+                img.src = "{{ url_for('static', filename='images/arrow-up-solid.svg') }}";
+                button.addEventListener("click", startProcessing);
+            });
+
+            processBtn.addEventListener('click', startProcessing)
+            document.getElementById("file-button").addEventListener("click", toggleBottomPanel);
+            document.getElementById("hidePanel-button").addEventListener("click", toggleBottomPanel);
+            document.getElementById("selectAllBtn").addEventListener("click", selectAllFiles);
+            document.getElementById("uncheckAllBtn").addEventListener("click", uncheckAllFiles);
+            document.getElementById("sidebar-icon").addEventListener("click", myFunction);
 
             // document.getElementById('input').addEventListener('keydown', (event) => {
             //     if (event.key === 'Enter' && !event.shiftKey) { // triggers when Enter is pressed while the input field is focused -> Shift+Enter is allowed
@@ -70,10 +74,32 @@
             //     outputDiv.innerHTML = ''; // clear previous output
             //     socket.emit('start_processing');
             // });
-            document.getElementById("file-button").addEventListener("click", toggleBottomPanel);
-            document.getElementById("hidePanel-button").addEventListener("click", toggleBottomPanel);
-            document.getElementById("selectAllBtn").addEventListener("click", selectAllFiles);
-            document.getElementById("uncheckAllBtn").addEventListener("click", uncheckAllFiles);
+            
+            function startProcessing() {
+                //console.log('Switching to Stop button'); // logs
+                const button = document.getElementById('action-button');
+            
+                let input = document.getElementById('input').value;
+                let output_size = document.getElementById('output-size').value;
+                let selectedFiles = [];
+                document.querySelectorAll('.file-checkbox:checked').forEach((checkbox) => {
+                    selectedFiles.push(checkbox.value);
+                });
+                //outputDiv.innerHTML = ''; // clear previous output
+                socket.emit('start_processing', { input: input, pdfFiles: selectedFiles, output_size: output_size });
+                
+                const img = button.querySelector('img');
+                img.src = "{{ url_for('static', filename='images/stop-solid.svg') }}"; // changes icon to stop
+
+                button.removeEventListener("click", startProcessing)
+                button.addEventListener("click", stopProcessing)
+            }
+
+            function stopProcessing() {
+                const button = document.getElementById('action-button');
+                socket.emit('stop_processing');
+                button.removeEventListener("click", stopProcessing);
+            }
 
             function toggleBottomPanel() {
                 const panel = document.getElementById("bottom-panel");
@@ -182,7 +208,7 @@
                 <img src="{{ url_for('static', filename='images/logo.ico') }}" alt="logo">
             </div>
 
-            <button class="sidear-button-round" onclick="myFunction()" id="sidebar-icon" data-tooltip="Open Sidebar">
+            <button  class="sidear-button-round" id="sidebar-icon" data-tooltip="Open Sidebar">
                 <img class="sidebar-icon" src="{{ url_for('static', filename='images/sidebar-show.svg') }}">
             </button>
 
@@ -250,7 +276,7 @@
                         <div class="input-from-container">
                             <div class="input-area-elements">
                                 <textarea id="input" name="input" placeholder="Type your prompt here..." required></textarea>
-                                <button id="action-button"> <!-- type="submit" class="button-round"> -->
+                                <button id="action-button" class="button-round"> <!-- type="submit" class="button-round"> -->
                                     <img class="icon" src="{{ url_for('static', filename='images/arrow-up-solid.svg') }}">
                                 </button>
                                 <button class="button-round" id="file-button" data-tooltip="Documents" type="button"> <!-- to avoid sending the form -->

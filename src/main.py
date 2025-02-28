@@ -187,12 +187,5 @@ def handle_stop() -> None:
     print("Processing Stopped by User")
 
 
-@app.route("/clear_output", methods=["GET"])  # CHANGE THE ENTIRE #OUTPUT
-def clear_output() -> str:
-    global streaming
-    streaming = False
-    return "<div id='output' class='markdown-body'></div>"
-
-
 if __name__ == "__main__":
     socketio.run(app, debug=True)

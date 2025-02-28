@@ -23,6 +23,7 @@
             const processBtn = document.getElementById('action-button');
             const toggleBottomPanelBtn = document.getElementById('toggleBottomPanelBtn');
             const inputText = document.getElementById('input');
+            const clearBtn = document.getElementById('clean-button');
             
             socket.on('new_container', function(data) {
                 outputDiv.insertAdjacentHTML('beforeend', data.html);
@@ -50,6 +51,12 @@
             document.getElementById("uncheckAllBtn").addEventListener("click", uncheckAllFiles);
             document.getElementById("sidebar-icon").addEventListener("click", myFunction);
             inputText.addEventListener('keydown', handleInputKeydown);
+            clearBtn.addEventListener('click', clearOutput);
+
+            function clearOutput() {
+                stopProcessing()
+                outputDiv.innerHTML = ''; // clear previous output
+            }
 
             function handleInputKeydown(event) {
                 if (event.key === 'Enter' && !event.shiftKey) {
@@ -63,7 +70,6 @@
                     document.querySelectorAll('.file-checkbox:checked').forEach((checkbox) => {
                         selectedFiles.push(checkbox.value);
                     });
-                    //outputDiv.innerHTML = ''; // clear previous output
                     socket.emit('start_processing', { input: input, pdfFiles: selectedFiles, output_size: output_size });
 
                     const img = button.querySelector('img');
@@ -72,18 +78,6 @@
                     button.addEventListener("click", stopProcessing)
                 }
             }
-
-            
-            // document.getElementById('input').addEventListener('keydown', (event) => {
-            //     if (event.key === 'Enter' && !event.shiftKey) { // triggers when Enter is pressed while the input field is focused -> Shift+Enter is allowed
-            //         // event.preventDefault(); // not to create a new line
-            //         // startProcessing(); // use function -> switches the button to stop
-            //         // document.getElementById('input-form').requestSubmit(); // submits the form to start /process
-            //         const input = document.getElementById('input').value;
-            //         //outputDiv.innerHTML = ''; // clear previous output
-            //         socket.emit('start_processing', { input: input });
-            //     }
-            // });
             
             function startProcessing() {
                 const button = document.getElementById('action-button');
@@ -191,7 +185,7 @@
                 <button class="sidear-button-round" id="info-button" data-tooltip="How to prompt?">
                     <img class="sidebar-icon" src="{{ url_for('static', filename='images/circle-question-regular.svg') }}">
                 </button>
-                <button type="button" class="sidear-button-round" id="clean-button" hx-get="/clear_output" hx-target="#output" hx-swap="outerHTML" data-tooltip="Clean Output">
+                <button type="button" class="sidear-button-round" id="clean-button">
                     <img class="icon" src="{{ url_for('static', filename='images/trash-can-solid.svg') }}">
                 </button>
                 <button class="sidear-button-round" id="settings-sidebar-button" data-tooltip="Settings">

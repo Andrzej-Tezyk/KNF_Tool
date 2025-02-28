@@ -1,3 +1,4 @@
 1) Enter default behavior
 2) Bug when submitting without files or input -> socket is runing endlesly
 3) close bottom tab on Esc
+4) too slow -> implement RAG

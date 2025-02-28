@@ -79,12 +79,12 @@ def index() -> str:
     print("start")
     pdf_dir = Path(SCRAPED_FILES_DIR)
     pdf_files = [pdf.name for pdf in pdf_dir.glob("*.pdf")] if pdf_dir.exists() else []
-    print(pdf_files)
     return render_template("index.html", pdf_files=pdf_files)
 
 
 @socketio.on("start_processing")
 def process_text(data: dict) -> None:
+    print("idzie")
     try:
         global output_index
         output_index += 1
@@ -189,6 +189,8 @@ def handle_stop() -> None:
 
 @app.route("/clear_output", methods=["GET"])  # CHANGE THE ENTIRE #OUTPUT
 def clear_output() -> str:
+    global streaming
+    streaming = False
     return "<div id='output' class='markdown-body'></div>"
 
 

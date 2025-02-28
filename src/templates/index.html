@@ -22,6 +22,7 @@
             const outputDiv = document.getElementById('output');
             const processBtn = document.getElementById('action-button');
             const toggleBottomPanelBtn = document.getElementById('toggleBottomPanelBtn');
+            const inputText = document.getElementById('input');
             
             socket.on('new_container', function(data) {
                 outputDiv.insertAdjacentHTML('beforeend', data.html);
@@ -39,6 +40,7 @@
                 const img = button.querySelector('img');
                 img.src = "{{ url_for('static', filename='images/arrow-up-solid.svg') }}";
                 button.addEventListener("click", startProcessing);
+                inputText.addEventListener('keydown', handleInputKeydown);
             });
 
             processBtn.addEventListener('click', startProcessing)
@@ -47,7 +49,31 @@
             document.getElementById("selectAllBtn").addEventListener("click", selectAllFiles);
             document.getElementById("uncheckAllBtn").addEventListener("click", uncheckAllFiles);
             document.getElementById("sidebar-icon").addEventListener("click", myFunction);
+            inputText.addEventListener('keydown', handleInputKeydown);
 
+            function handleInputKeydown(event) {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                    const button = document.getElementById('action-button');
+                    button.removeEventListener("click", startProcessing)
+                    inputText.removeEventListener('keydown', handleInputKeydown);
+
+                    let input = document.getElementById('input').value;
+                    let output_size = document.getElementById('output-size').value;
+                    let selectedFiles = [];
+                    document.querySelectorAll('.file-checkbox:checked').forEach((checkbox) => {
+                        selectedFiles.push(checkbox.value);
+                    });
+                    //outputDiv.innerHTML = ''; // clear previous output
+                    socket.emit('start_processing', { input: input, pdfFiles: selectedFiles, output_size: output_size });
+
+                    const img = button.querySelector('img');
+                    img.src = "{{ url_for('static', filename='images/stop-solid.svg') }}"; // changes icon to stop
+
+                    button.addEventListener("click", stopProcessing)
+                }
+            }
+
+            
             // document.getElementById('input').addEventListener('keydown', (event) => {
             //     if (event.key === 'Enter' && !event.shiftKey) { // triggers when Enter is pressed while the input field is focused -> Shift+Enter is allowed
             //         // event.preventDefault(); // not to create a new line
@@ -58,16 +84,12 @@
             //         socket.emit('start_processing', { input: input });
             //     }
             // });
-
-            // document.getElementById('input-form').addEventListener('submit', () => { // event listener for submit
-            //     const input = document.getElementById('input').value;
-            //     //outputDiv.innerHTML = ''; // clear previous output
-            //     socket.emit('start_processing', { input: input });
-            // });
             
             function startProcessing() {
-                //console.log('Switching to Stop button'); // logs
                 const button = document.getElementById('action-button');
+              
+                button.removeEventListener("click", startProcessing)
+                inputText.removeEventListener('keydown', handleInputKeydown);
             
                 let input = document.getElementById('input').value;
                 let output_size = document.getElementById('output-size').value;
@@ -75,13 +97,12 @@
                 document.querySelectorAll('.file-checkbox:checked').forEach((checkbox) => {
                     selectedFiles.push(checkbox.value);
                 });
-                //outputDiv.innerHTML = ''; // clear previous output
+                
                 socket.emit('start_processing', { input: input, pdfFiles: selectedFiles, output_size: output_size });
                 
                 const img = button.querySelector('img');
                 img.src = "{{ url_for('static', filename='images/stop-solid.svg') }}"; // changes icon to stop
 
-                button.removeEventListener("click", startProcessing)
                 button.addEventListener("click", stopProcessing)
             }
 

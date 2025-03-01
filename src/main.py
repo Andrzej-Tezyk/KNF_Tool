@@ -100,7 +100,7 @@ def process_text(data: dict) -> None:
 
         if not selected_files or selected_files == []:
             print("no selected files")
-            socketio.emit("error", {"message": "No selectedd files"})
+            socketio.emit("error", {"message": "No files selected"})
             return
 
         if not output_size:
@@ -128,7 +128,7 @@ def process_text(data: dict) -> None:
 
                 container_html = f"""
                     <div class="output-content">
-                        <div class="output-header">Result for:&nbsp <em>{pdf_name_to_show}</em>
+                        <div class="output-header">{pdf_name_to_show[25:-4]}
                             <button class="output-button">
                                 <span class="arrow-icon">➤</span>
                             </button>

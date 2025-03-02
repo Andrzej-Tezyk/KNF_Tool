@@ -115,3 +115,25 @@ def process_pdf(prompt: str, pdf: Path, model: Any, output_size: int) -> Generat
             print(f"There is a problem with {pdf.stem}. \n Error message: {e}\n")
             traceback.print_exc()
             yield {"error": f"An error occurred while processing {pdf.stem}: {str(e)}"}
+
+
+""" problem with markdown formatting when using this approach
+            # split its text into smaller sub-chunks
+            for response_chunk in response:
+                # clean up the chunk text (removes extra spaces)
+                chunk_text = response_chunk.text.replace("  ", " ")
+                words = chunk_text.split()
+                sub_chunk = ""
+                for word in words:
+                    sub_chunk = sub_chunk + " " + word if sub_chunk else word
+                    if len(sub_chunk.split()) >= 3: # size of subchunk here
+                        yield {"pdf_name": pdf.stem, "content": sub_chunk + " "}
+                        sub_chunk = ""
+                        time.sleep(0.2)
+                # yield remaining words
+                if sub_chunk:
+                    yield {"pdf_name": pdf.stem, "content": sub_chunk + " "}
+                    time.sleep(0.1)
+            print(f"Response for: {pdf.stem} was saved!\n")
+            time.sleep(1)  # lower API request rate per sec
+"""

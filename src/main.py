@@ -132,12 +132,12 @@ def process_text(data: dict) -> None:
                 container_title = pdf_name_to_show[25:-4]
 
                 container_html = render_template(
-                        "output.html",
-                        container_title=container_title,
-                        index=index,
-                        output_index=output_index
-                    )
-                
+                    "output.html",
+                    container_title=container_title,
+                    index=index,
+                    output_index=output_index,
+                )
+
                 print(f"new container for: {pdf_name_to_show}")
                 socketio.emit("new_container", {"html": container_html})
 
@@ -145,7 +145,9 @@ def process_text(data: dict) -> None:
                 for result_chunk in process_pdf(prompt, pdf, model, output_size):
                     if not streaming:
                         break
-                    if "error" in result_chunk: # czy tu chodzi o slowo error w odpowiedzi? jezeli tak to do sprawdzenia
+                    if (
+                        "error" in result_chunk
+                    ):  # czy tu chodzi o slowo error w odpowiedzi? jezeli tak to do sprawdzenia
                         socketio.emit("error", {"message": "error in chunk response"})
                         return
                     elif "content" in result_chunk:

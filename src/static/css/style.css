@@ -599,7 +599,7 @@ textarea:focus {
     transform: scale(1.03);
 }
 
-.list-of-choosen-files{
+.list-of-choosen-files {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -613,4 +613,8 @@ textarea:focus {
     overflow: hidden; /* long text doesn’t overflow */
     text-overflow: ellipsis; /* ellipsis if text is too long */
     background-color: var(--background-color);
+}
+
+.input-area-elements #input {
+    font-family: 'Segoe UI'; /* 'Inter', 'Segoe UI', Roboto, Arial, sans-serif; */
 }

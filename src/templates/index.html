@@ -18,7 +18,7 @@
 <body>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const socket = io.connect('http://127.0.0.1:5000');
+            const socket = io.connect('http://127.0.0.1:5000'); // DO ZMIANY
             const outputDiv = document.getElementById('output');
             const processBtn = document.getElementById('action-button');
             const toggleBottomPanelBtn = document.getElementById('toggleBottomPanelBtn');
@@ -49,7 +49,7 @@
             document.getElementById("hidePanel-button").addEventListener("click", toggleBottomPanel);
             document.getElementById("selectAllBtn").addEventListener("click", selectAllFiles);
             document.getElementById("uncheckAllBtn").addEventListener("click", uncheckAllFiles);
-            document.getElementById("sidebar-icon").addEventListener("click", myFunction);
+            document.getElementById("sidebar-icon").addEventListener("click", closeOpenSidebar);
             inputText.addEventListener('keydown', handleInputKeydown);
             clearBtn.addEventListener('click', clearOutput);
 
@@ -130,7 +130,7 @@
                 });
             }
 
-            function myFunction() {
+            function closeOpenSidebar() {
             var inputSection = document.querySelector(".input-section");
             var sideMenuButtons = document.querySelector(".side-menu-buttons-container");
 

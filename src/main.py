@@ -84,7 +84,7 @@ def index() -> str:
 
 @socketio.on("start_processing")
 def process_text(data: dict) -> None:
-    print("idzie")
+    print("started")
     try:
         global output_index
         output_index += 1
@@ -96,11 +96,15 @@ def process_text(data: dict) -> None:
         if not prompt:
             print("no prompt provided")
             socketio.emit("error", {"message": "No input provided"})
+            streaming = False
+            socketio.emit("stream_stopped")
             return
 
         if not selected_files or selected_files == []:
             print("no selected files")
             socketio.emit("error", {"message": "No files selected"})
+            streaming = False
+            socketio.emit("stream_stopped")
             return
 
         if not output_size:
@@ -141,7 +145,7 @@ def process_text(data: dict) -> None:
                 for result_chunk in process_pdf(prompt, pdf, model, output_size):
                     if not streaming:
                         break
-                    if "error" in result_chunk:
+                    if "error" in result_chunk: # czy tu chodzi o slowo error w odpowiedzi? jezeli tak to do sprawdzenia
                         socketio.emit("error", {"message": "error in chunk response"})
                         return
                     elif "content" in result_chunk:

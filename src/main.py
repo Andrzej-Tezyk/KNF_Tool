@@ -125,19 +125,15 @@ def process_text(data: dict) -> None:
                 if not streaming:
                     break
                 pdf_name_to_show = str(pdf)
+                container_title = pdf_name_to_show[25:-4]
 
-                container_html = f"""
-                    <div class="output-content">
-                        <div class="output-header">{pdf_name_to_show[25:-4]}
-                            <button class="output-button">
-                                <span class="arrow-icon">➤</span>
-                            </button>
-                        </div>
-                        <div class="markdown-body"
-                        id="content-pdf{index}_{output_index}">
-                        </div>
-                    </div>\n\n
-                    """
+                container_html = render_template(
+                        "output.html",
+                        container_title=container_title,
+                        index=index,
+                        output_index=output_index
+                    )
+                
                 print(f"new container for: {pdf_name_to_show}")
                 socketio.emit("new_container", {"html": container_html})
 

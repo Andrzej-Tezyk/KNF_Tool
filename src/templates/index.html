@@ -116,6 +116,15 @@
                 }
             }
 
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    const panel = document.getElementById("bottom-panel");
+                    if (panel && panel.style.bottom === "0px") { // check if the panel is open
+                        toggleBottomPanel();
+                    }
+                }
+            });
+
             function selectAllFiles() {
                 const checkboxes = document.querySelectorAll(".file-checkbox"); // select all checkboxes inside the scrollable list
                 checkboxes.forEach(checkbox => {

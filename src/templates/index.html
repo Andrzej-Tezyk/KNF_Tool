@@ -218,7 +218,7 @@
                 <button class="sidear-button-round" id="info-button" data-tooltip="How to prompt?">
                     <img class="sidebar-icon" src="{{ url_for('static', filename='images/circle-question-regular.svg') }}">
                 </button>
-                <button type="button" class="sidear-button-round" id="clean-button">
+                <button type="button" class="sidear-button-round" id="clean-button" data-tooltip="Clear Output">
                     <img class="icon" src="{{ url_for('static', filename='images/trash-can-solid.svg') }}">
                 </button>
                 <button class="sidear-button-round" id="settings-sidebar-button" data-tooltip="Settings">
@@ -274,7 +274,7 @@
                                         <button id="selectAllBtn" type="button" class="bottom-panel-button">Select All</button>
                                         <button id="uncheckAllBtn" type="button" class="bottom-panel-button">Uncheck All</button>
                                     </div>
-                                    <button id="hidePanel-button" class="sidear-button-round" type="button"> <!-- onclick="toggleBottomPanel()"> -->
+                                    <button id="hidePanel-button" class="sidear-button-round" type="button" data-tooltip="Or press Escape"> <!-- onclick="toggleBottomPanel()"> -->
                                         <img class="icon" src="{{ url_for('static', filename='images/circle-xmark-regular.svg') }}">
                                     </button>
                                 </div>

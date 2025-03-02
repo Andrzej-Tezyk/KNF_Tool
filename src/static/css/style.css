@@ -491,6 +491,22 @@ textarea:focus {
     box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
 }
 
+#hidePanel-button:hover::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    right: 3.5rem;
+    color: var(--tooltip-font-color);
+    font-size: small;
+    background-color: var(--tooltip-background);
+    margin: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 10px;
+    width: max-content;
+    border: solid var(--border-color);
+    border-width: 0.2px;
+    box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
+}
+
 .bottom-panel {
     position: fixed;
     bottom: -100%; /* initially hidden */

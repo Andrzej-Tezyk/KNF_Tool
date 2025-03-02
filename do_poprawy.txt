@@ -1,5 +1,11 @@
-1) Enter default behavior
-2) Bug when submitting without files or input -> socket is runing endlesly
-3) close bottom tab on Esc
-4) yield lesser chunks
-5) too slow -> implement RAG
+1) sprawić, żeby tekst pojawiał się wolniej na frontend (zakomentowany kod działa, ale konfliktuje z elementami markdown nie pozwalając na poprawne formatowanie)
+
+2) znaleźć sposób na puszczenie socketu na codespace (rozwiązanie to prawdopodbnie zmiana tej linijki const socket = io.connect('http://127.0.0.1:5000');)
+
+3) napisać komentarze """ """ do funkcji w main, dostosować komentarz w text_extraction
+
+4) ogarąć funkcje w sidepanel'u:
+ - czy uwzględniamy output size checkbox -> jeżeli tak, to dropdown z wyborem zdania/slowa -> pole tekstowe dla liczby
+ - checkbox dla numerów stron (kod w main zakomentowany -> dodać do funkcji, ma byc w event)
+ - wybór modelu
+ - textbox dla temperatury + dodać konfiguracje w funkcji generate_content w text_extraction + krótkie wyjaśnienie jak działa temperatura z co będzie jak jest 0.8 - 1, 0.6 - 0.8 coś w tym stylu, tylko bardziej sensowne

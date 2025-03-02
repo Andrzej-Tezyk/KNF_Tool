@@ -53,6 +53,10 @@
             inputText.addEventListener('keydown', handleInputKeydown);
             clearBtn.addEventListener('click', clearOutput);
 
+            document.querySelectorAll('.file-checkbox').forEach((checkbox) => { // eventlisteners for all file checkboxes
+                checkbox.addEventListener('change', updateSelectedFilesDisplay);
+            });
+
             function clearOutput() {
                 stopProcessing()
                 outputDiv.innerHTML = ''; // clear previous output
@@ -130,6 +134,7 @@
                 checkboxes.forEach(checkbox => {
                     checkbox.checked = true; // all checkboxes are checked
                 });
+                updateSelectedFilesDisplay(); // update choosen files
             }
 
             function uncheckAllFiles() {
@@ -137,6 +142,7 @@
                 checkboxes.forEach(checkbox => {
                     checkbox.checked = false; // all checkboxes are checked
                 });
+                updateSelectedFilesDisplay(); // update choosen files
             }
 
             function closeOpenSidebar() {
@@ -161,6 +167,23 @@
                 }, 200); // hide after fade out
             }
         }
+
+        function updateSelectedFilesDisplay() { // update checkboxes
+            const selectedFilesContainer = document.getElementById('selected-files');
+            if (selectedFilesContainer) {
+                let selectedFiles = [];
+                document.querySelectorAll('.file-checkbox:checked').forEach((checkbox) => {
+                    let fullName = checkbox.value; // shorten documents names
+                    let shortName = fullName;
+                    if (fullName.length > 15 && fullName.includes('_')) {
+                        shortName = fullName.slice(11, 25);
+                    }
+                    selectedFiles.push(shortName);
+                });
+                selectedFilesContainer.textContent = selectedFiles.join(', ');
+            }
+        }
+
         });
     </script>
     <div class="flex-container">
@@ -244,6 +267,7 @@
                                     <img class="sidebar-icon" src="{{ url_for('static', filename='images/file-regular.svg') }}">
                                 </button>
                             </div>
+                            
                             <div class="bottom-panel" id="bottom-panel">
                                 <div class="bottom-panel-header">
                                     <div class="bottom-panel-checkbox-buttons">
@@ -265,6 +289,9 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        <div class="list-of-choosen-files">
+                            <div id="selected-files"></div> <!-- selected files go here -->
                         </div>
                     </div>
                 </div>

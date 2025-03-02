@@ -290,6 +290,8 @@ textarea:focus {
 
 .output-content .markdown-body {
     padding: 0rem 1rem 1rem;
+    background-color: var(--background-color);
+    color: black;
 }
 
 .option-section {

@@ -11,3 +11,4 @@ markdown==3.7
 mkdocs==1.6.1
 mkdocs-material==9.6.4
 mkdocstrings-python==1.16.0
+Flask-SocketIO==5.5.1

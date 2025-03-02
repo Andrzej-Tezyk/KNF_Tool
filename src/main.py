@@ -1,14 +1,12 @@
-import typing
-import threading
 from pathlib import Path
 import traceback
 import os
 
 import markdown
-from flask import Flask, request, render_template, Response, stream_with_context
+from flask import Flask, render_template
 import google.generativeai as genai  # type: ignore[import-untyped]
 from backend.text_extraction import process_pdf  # type: ignore[import-not-found]
-
+from flask_socketio import SocketIO
 
 # directory with pdf files
 SCRAPED_FILES_DIR = "scraped_files"
@@ -70,105 +68,126 @@ model = genai.GenerativeModel(
 
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
+socketio = SocketIO(app, cors_allowed_origins="*")
 
-stop_flag = threading.Event()
+streaming: bool = False
+output_index: int = -1
 
 
 @app.route("/")
 def index() -> str:
+    print("start")
     pdf_dir = Path(SCRAPED_FILES_DIR)
     pdf_files = [pdf.name for pdf in pdf_dir.glob("*.pdf")] if pdf_dir.exists() else []
     return render_template("index.html", pdf_files=pdf_files)
 
 
-@app.route("/process", methods=["POST"])
-def process_text() -> Response:
+@socketio.on("start_processing")
+def process_text(data: dict) -> None:
+    print("started")
     try:
-        # get the input prompt
-        prompt = request.form["input"]
+        global output_index
+        output_index += 1
+        global streaming
+        streaming = True
+        prompt = data.get("input")
+        selected_files = data.get("pdfFiles")
+        output_size = data.get("output_size")
         if not prompt:
-            return Response(
-                "<div><p><strong>Error:</strong> No input provided.</p></div>",
-                status=400,
-                mimetype="text/html",
-            )
+            print("no prompt provided")
+            socketio.emit("error", {"message": "No input provided"})
+            streaming = False
+            socketio.emit("stream_stopped")
+            return
 
-        stop_flag.clear()  # reset stop flag
+        if not selected_files or selected_files == []:
+            print("no selected files")
+            socketio.emit("error", {"message": "No files selected"})
+            streaming = False
+            socketio.emit("stream_stopped")
+            return
 
-        output_size = int(request.form.get("output_size", 5))  # control output size
+        if not output_size:
+            print("no chosen output size, set to 100")
+            output_size = 100
 
-        # get selected files from the form
-        selected_files = request.form.getlist("selected_files")
-        if not selected_files:
-            return Response(
-                "<div><p><strong>Error:</strong> No files selected for processing.</p></div>",
-                status=400,
-                mimetype="text/html",
-            )
+        output_size = int(output_size)
 
-        # get the directory of PDFs and filter only the selected files
+        print(f"prompt: {prompt}")
+        print(f"selected files: {selected_files}")
+        print(f"output size: {output_size}")
+
         pdf_dir = Path(SCRAPED_FILES_DIR)
-        # result: Path("scraped_files/example.pdf") -> when used with Path object
+
         pdfs_to_scan = [pdf_dir / file_name for file_name in selected_files]
 
-        def generate() -> typing.Generator:
-            try:
-                for pdf in pdfs_to_scan:
-                    if stop_flag.is_set():  # check stop flag
-                        yield "<div><p><strong>Processing stopped. Partial results displayed.</strong></p></div>"
+        for pdf in pdfs_to_scan:
+            print(pdf)
+
+        try:
+            for index, pdf in enumerate(pdfs_to_scan):
+                if not streaming:
+                    break
+                pdf_name_to_show = str(pdf)
+                container_title = pdf_name_to_show[25:-4]
+
+                container_html = render_template(
+                    "output.html",
+                    container_title=container_title,
+                    index=index,
+                    output_index=output_index,
+                )
+
+                print(f"new container for: {pdf_name_to_show}")
+                socketio.emit("new_container", {"html": container_html})
+
+                accumulated_text = ""
+                for result_chunk in process_pdf(prompt, pdf, model, output_size):
+                    if not streaming:
                         break
-
-                    if not pdf.exists():
-                        yield f"<div><p><strong>Error:</strong> File {pdf.name} not found.</p></div>"
-                        continue
-
-                    result = process_pdf(prompt, pdf, model, output_size)
-
-                    pdf_name_to_show = result["pdf_name"][11:]
-
-                    if "error" in result:
-                        yield f"<div><p><strong>Error:</strong> {result['error']}</p></div>"
-                    elif "content" in result:
-                        markdown_content = markdown.markdown(result["content"])
-                        yield f"""
-                        <div class="output-content">
-                            <div class="output-header">Result for:&nbsp <em>{pdf_name_to_show}</em>
-                                <button class="output-button">
-                                    <span class="arrow-icon">➤</span>
-                                </button>
-                            </div>
-                            <div class="markdown-body">{markdown_content}</div>
-                        </div>\n\n
-                        """
+                    if (
+                        "error" in result_chunk
+                    ):  # czy tu chodzi o slowo error w odpowiedzi? jezeli tak to do sprawdzenia
+                        socketio.emit("error", {"message": "error in chunk response"})
+                        return
+                    elif "content" in result_chunk:
+                        print(f'recived chunk: {result_chunk["content"]}')
+                        accumulated_text += result_chunk["content"]
+                        markdown_content = markdown.markdown(accumulated_text)
+                        socketio.emit(
+                            "update_content",
+                            {
+                                "container_id": f"content-pdf{index}_{output_index}",
+                                "html": markdown_content,
+                            },
+                        )
                     else:
-                        yield "<div><p><strong>Error:</strong> Unexpected result format.</p></div>"
+                        socketio.emit("error", {"message": "unexpected error"})
+                        return
+            if not streaming:
+                socketio.emit("stream_stopped")
+        except Exception as e:
+            print(f"An error occurred in the generate function: {e}")
+            traceback.print_exc()
+            socketio.emit(
+                "error", {"message": f"An unexpected error occurred: {str(e)}"}
+            )
 
-            except Exception as e:
-                print(f"An error occurred in the generate function: {e}")
-                traceback.print_exc()
-                yield "<div><p><strong>Error:</strong> An unexpected error occurred.</p></div>"
-
-        return Response(stream_with_context(generate()), content_type="text/html")
+        streaming = False
+        socketio.emit("stream_stopped")
 
     except Exception as e:
-        return Response(
-            f"<div><p><strong>Error:</strong> {str(e)}</p></div>",
-            status=500,
-            mimetype="text/html",
-        )
+        print(f"An error occurred in the generate function: {e}")
+        traceback.print_exc()
+        socketio.emit("error", {"message": f"An unexpected error occurred: {str(e)}"})
 
 
-@app.route("/clear_output", methods=["GET"])  # CHANGE THE ENTIRE #OUTPUT
-def clear_output() -> str:
-    return "<div id='output' class='markdown-body'></div>"
-
-
-@app.route("/stop_processing", methods=["GET"])
-def stop_processing() -> str:
-    stop_flag.set()  # set flag to true
-    print("Stop processing triggered!")
-    return "<div></div>"  # <p><strong>Processing stopped. Displaying partial results...</strong></p>
+@socketio.on("stop_processing")
+def handle_stop() -> None:
+    global streaming
+    streaming = False
+    print("Processing Stopped by User")
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    socketio.run(app, debug=True)

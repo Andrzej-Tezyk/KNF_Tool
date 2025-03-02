@@ -60,6 +60,7 @@
 
             function handleInputKeydown(event) {
                 if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault(); // prevent going to a new line
                     const button = document.getElementById('action-button');
                     button.removeEventListener("click", startProcessing)
                     inputText.removeEventListener('keydown', handleInputKeydown);

@@ -126,15 +126,3 @@ def process_pdf(prompt: str, pdf: Path, model: Any, output_size: int) -> Generat
             print(f"There is a problem with {pdf.stem}. \n Error message: {e}\n")
             traceback.print_exc()
             yield {"error": f"An error occurred while processing {pdf.stem}: {str(e)}"}
-
-
-""" problem with markdown formatting when using this approach
-
-            for response_chunk in response:
-                # replace -> sometimes double space between words occure; most likely reason: pdf formating
-                response_chunk_text = response_chunk.text.replace("  ", " ")
-                yield {"pdf_name": pdf.stem, "content": response_chunk_text}
-            print(f"Response for: {pdf.stem} was saved!\n")
-            time.sleep(1)  # to lower number api requests to model per sec
-
-"""

@@ -112,7 +112,7 @@ def process_pdf(prompt: str, pdf: Path, model: Any, output_size: int) -> Generat
                 sub_chunk = ""
                 for word in words:
                     sub_chunk = sub_chunk + " " + word if sub_chunk else word
-                    if len(sub_chunk.split()) >= 3: # size of subchunk here
+                    if len(sub_chunk.split()) >= 3:  # size of subchunk here
                         yield {"pdf_name": pdf.stem, "content": sub_chunk + " "}
                         sub_chunk = ""
                         time.sleep(0.2)

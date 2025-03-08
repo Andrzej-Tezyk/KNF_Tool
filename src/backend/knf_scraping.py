@@ -15,10 +15,10 @@ def windows_safe_filename(filename: str) -> str:
     return filename
 
 
-def scrape_knf(num_retries, user_agent_list):
+def scrape_knf(num_retries: int, user_agent_list: list) -> None:
 
     scraped_files_dir = Path("scraped_files")
-    
+
     knf_base_url = "https://www.knf.gov.pl"
     knf_recommendations_url = (
         f"{knf_base_url}/dla_rynku/regulacje_i_praktyka/rekomendacje_i"
@@ -63,7 +63,7 @@ def scrape_knf(num_retries, user_agent_list):
                 print(f"Problem with link for {link} \n Error messange: {e}\n")
 
         for title, url in pdf_titles_links.items():
-            if len(title) > 1: # temporary: scraping needs deeper rework;
+            if len(title) > 1:  # temporary: scraping needs deeper rework;
                 try:
                     pdf_response = requests.get(url, headers=headers)
                     safe_title = windows_safe_filename(title) if title else "unknown"

@@ -103,7 +103,7 @@ def process_pdf(prompt: str, pdf: Path, model: Any, output_size: int) -> Generat
                     file_to_send,
                 ],
                 stream=True,
-            )
+            )  
             for response_chunk in response:
                 # replace -> sometimes double space between words occure; most likely reason: pdf formating
                 response_chunk_text = response_chunk.text.replace("  ", " ")

@@ -171,12 +171,71 @@
                             <div id="selected-files"></div> <!-- selected files go here -->
                         </div>
                         <div id="tutorialPopup">
-                            <div class="hide-tutorial-btn-flex-contanier">
+                            <div class="header-tutorial-flex-contanier">
+                                <h3>LLM Prompting Tutorial</h3>
                                 <button id="hideTutorial-button" class="sidear-button-round" type="button" data-tooltip="Or press Escape">
                                     <img class="icon" src="{{ url_for('static', filename='images/circle-xmark-regular.svg') }}">
                                 </button>
                             </div>
-                            <h2>LLM Prompting Tutorial</h2>
+                            <div class="tutorial-text">
+                                <div class="tutorial-text-paragraph">
+                                    <h4>Understand the context</h4>
+                                    <p>Financial regulations for banks can be complex. Before writing your prompt, ensure you understand:</p>
+                                    <ol>
+                                        <li><strong>The document’s scope.</strong> What regulation or specific section are you targeting?</li>
+                                        <li><strong>Your objective.</strong> Are you looking for a summary, clarification of a term, compliance details, or an interpretation of a clause?</li>
+                                    </ol>
+                                    <em>Tip: Think of your prompt as a question to an expert who is familiar with banking regulations.</em>
+                                </div>
+
+                                <div class="tutorial-text-paragraph">
+                                    <h4>Be specific and targeted</h4>
+                                    <p>General queries might lead to vague or off-target responses. Instead, use specific language.</p>
+                                    <ol>
+                                        <li><strong>Identify the regulation.</strong> Instead of “Explain bank rules,” say “Explain the capital adequacy requirements in Recommendation X.”</li>
+                                        <li><strong>Mention sections or terms.</strong> For example, “What are the implications of the liquidity coverage ratio as described in Section 4.2 of the regulation?”</li>
+                                    </ol>
+                                    <em>Example: “Can you summarize the key requirements related to risk management in the KNF guidelines, focusing on the minimum liquidity coverage ratio?”</em>
+                                </div>    
+
+                                <div class="tutorial-text-paragraph">
+                                    <h4>Structure your prompt clearly</h4>
+                                    <p>A well-structured prompt can guide the model more effectively.</p>
+                                    <ol>
+                                        <li><strong>Bullet points or lists.</strong> When asking for multiple points or criteria, format your request in a list.</li>
+                                        <li><strong>Step-by-step requests.</strong> If the regulation is complex, ask for a breakdown of the topic into understandable steps or segments.</li>
+                                    </ol>
+                                    <em>Example: “Please outline: 1) The key risk factors outlined in the regulation. 2) The steps banks must take to mitigate these risks. 3) Any penalties for non-compliance.”</em>
+                                </div>
+
+                                <div class="tutorial-text-paragraph">
+                                    <h4>Use open-ended and specific questions</h4>
+                                    <p>Balance is key. Open-ended questions allow the model to provide comprehensive answers, while specificity keeps responses focused.</p>
+                                    <ol>
+                                        <li><strong>Open-ended.</strong> “What are the emerging trends in financial regulation for banks?”</li>
+                                        <li><strong>Specific.</strong> “What are the minimum capital requirements for banks under the Basel III framework?”</li>
+                                    </ol>
+                                </div>
+
+                                <div class="tutorial-text-paragraph">
+                                    <h4>Iterate and refine</h4>
+                                    <p>Your first prompt may not yield the perfect answer. Use the LLM’s feedback.</p>
+                                    <ol>
+                                        <li><strong>Clarify ambiguities.</strong> If the response is too broad, refine your query with additional context.</li>
+                                        <li><strong>Ask follow-up questions.</strong> Narrow down further details in subsequent prompts.</li>
+                                    </ol>
+                                    <em>Tip: If a prompt returns too much unrelated information, add a clarifying sentence such as “Focus solely on the implications for mid-sized banks.”</em>
+                                </div>
+
+                                <div class="tutorial-text-paragraph">
+                                    <h4>Incorporate industry jargon carefully</h4>
+                                    <p>While financial terminology is necessary, ensure you’re not overloading your prompt.</p>
+                                    <ol>
+                                        <li><strong>Balance technicality.</strong> Use standard terms, but if a term is very technical or obscure, briefly define it.</li>
+                                        <li><strong>Maintain readability.</strong> The prompt should be understandable for the LLM without ambiguity.</li>
+                                    </ol>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -220,7 +279,8 @@
             document.getElementById("sidebar-icon").addEventListener("click", closeOpenSidebar);
             inputText.addEventListener('keydown', handleInputKeydown);
             clearBtn.addEventListener('click', clearOutput);
-            document.getElementById("info-button").addEventListener("click", showHidePopup);
+            document.getElementById("info-button").addEventListener("click", showHidePopupTutorial);
+            document.getElementById("hideTutorial-button").addEventListener("click", closePopupTutorial);
 
             var checkBox = document.getElementById("change_lebgth");
             var select = document.getElementById("words-sentence-select");
@@ -403,8 +463,34 @@
         });
     </script>
     <script>
-        function showHidePopup() {
-            const popup = document.getElementById("")
+        function showHidePopupTutorial() {
+            var popup = document.getElementById("tutorialPopup")
+
+            if (popup.style.display === "none" || popup.style.display === "") {
+                popup.style.display = "flex";
+
+                setTimeout(() => {
+                    popup.style.opacity = "1";
+                }, 200); // for smooth transition
+            } else {
+                popup.style.opacity = "0";
+
+                setTimeout(() => {
+                    popup.style.display = "none";
+                }, 200); // hide after fade out
+            }
+        }
+        
+        function closePopupTutorial () {
+            var popup = document.getElementById("tutorialPopup")
+
+            if (popup.style.display === "flex") {
+                popup.style.display = "none";
+
+                setTimeout(() => {
+                    popup.style.opacity = "0";
+                }, 200); // for smooth transition
+            }
         }
     </script>
 </body>

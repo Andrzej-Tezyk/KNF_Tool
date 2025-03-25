@@ -52,6 +52,7 @@
             document.getElementById("sidebar-icon").addEventListener("click", closeOpenSidebar);
             inputText.addEventListener('keydown', handleInputKeydown);
             clearBtn.addEventListener('click', clearOutput);
+            document.getElementById("info-button").addEventListener("click", showHidePopup);
 
             document.querySelectorAll('.file-checkbox').forEach((checkbox) => { // eventlisteners for all file checkboxes
                 checkbox.addEventListener('change', updateSelectedFilesDisplay);
@@ -186,6 +187,11 @@
 
         });
     </script>
+    <script>
+        function showHidePopup() {
+            const popup = document.getElementById("")
+        }
+    </script>
     <div class="flex-container">
         <aside class="sidebar">
             <div class="sidebar-header">
@@ -274,7 +280,7 @@
                                         <button id="selectAllBtn" type="button" class="bottom-panel-button">Select All</button>
                                         <button id="uncheckAllBtn" type="button" class="bottom-panel-button">Uncheck All</button>
                                     </div>
-                                    <button id="hidePanel-button" class="sidear-button-round" type="button" data-tooltip="Or press Escape"> <!-- onclick="toggleBottomPanel()"> -->
+                                    <button id="hidePanel-button" class="sidear-button-round" type="button" data-tooltip="Or press Escape">
                                         <img class="icon" src="{{ url_for('static', filename='images/circle-xmark-regular.svg') }}">
                                     </button>
                                 </div>
@@ -292,6 +298,14 @@
                         </div>
                         <div class="list-of-choosen-files">
                             <div id="selected-files"></div> <!-- selected files go here -->
+                        </div>
+                        <div id="tutorialPopup">
+                            <div class="hide-tutorial-btn-flex-contanier">
+                                <button id="hideTutorial-button" class="sidear-button-round" type="button" data-tooltip="Or press Escape">
+                                    <img class="icon" src="{{ url_for('static', filename='images/circle-xmark-regular.svg') }}">
+                                </button>
+                            </div>
+                            <h2>LLM Prompting Tutorial</h2>
                         </div>
                     </div>
                 </div>

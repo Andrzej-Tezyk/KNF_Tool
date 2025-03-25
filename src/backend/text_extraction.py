@@ -103,7 +103,7 @@ def process_pdf(prompt: str, pdf: Path, model: Any, output_size: int) -> Generat
                     file_to_send,
                 ],
                 stream=True,
-            )  
+            )
             # split its text into smaller sub-chunks
             for response_chunk in response:
                 # clean up the chunk text (removes extra spaces)

@@ -4,12 +4,36 @@ import os
 
 import markdown
 from flask import Flask, render_template
+from flask_socketio import SocketIO
 import google.generativeai as genai  # type: ignore[import-untyped]
 from backend.text_extraction import process_pdf  # type: ignore[import-not-found]
-from flask_socketio import SocketIO
+from backend.knf_scraping import scrape_knf  # type: ignore[import-not-found]
 
 # directory with pdf files
 SCRAPED_FILES_DIR = "scraped_files"
+
+NUM_RETRIES = 5
+
+# agents to avoid being blocked by the website
+USER_AGENT_LIST = [
+    (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        + "(KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36"
+    ),
+    (
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4_2 like Mac OS X) AppleWebKit/"
+        + "605.1.15 (KHTML, like Gecko) Version/14.0.3 Mobile/15E148 Safari/604.1"
+    ),
+    "Mozilla/4.0 (compatible; MSIE 9.0; Windows NT 6.1)",
+    (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        + "(KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36 Edg/87.0.664.75"
+    ),
+    (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        + "(KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.18363"
+    ),
+]
 
 # wskazanie strony -> czasami myzli numer strony z numerem rekomendacji (test na rekomendacji Z)
 # strona sie generalnie zgadza przy 2.0
@@ -65,6 +89,14 @@ model = genai.GenerativeModel(
     "gemini-1.5-flash", system_instruction=SYSTEM_PROMPT
 )  # another models to be used: "gemini-1.5-flash", "gemini-1.5-flash-8b",
 # "gemini-2.0-flash-thinking-exp-01-21", "gemini-2.0-flash-exp"
+
+
+PROJECT_ROOT = Path(__file__).parent.parent  # go up 2 times
+
+scraped_dir = PROJECT_ROOT / "scraped_files"
+
+if not scraped_dir.exists():
+    scrape_knf(NUM_RETRIES, USER_AGENT_LIST)
 
 
 app = Flask(__name__, template_folder="templates", static_folder="static")

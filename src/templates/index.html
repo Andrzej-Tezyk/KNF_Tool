@@ -279,11 +279,18 @@
                     inputText.removeEventListener('keydown', handleInputKeydown);
 
                     let input = document.getElementById('input').value;
-                    let output_size = document.getElementById('output-size').value;
+                    //let output_size = document.getElementById('output-size').value;
                     let selectedFiles = [];
                     document.querySelectorAll('.file-checkbox:checked').forEach((checkbox) => {
                         selectedFiles.push(checkbox.value);
                     });
+
+
+
+                    let output_size = 1000;
+
+
+
                     socket.emit('start_processing', { input: input, pdfFiles: selectedFiles, output_size: output_size });
 
                     const img = button.querySelector('img');
@@ -300,7 +307,7 @@
                 inputText.removeEventListener('keydown', handleInputKeydown);
             
                 let input = document.getElementById('input').value;
-                let output_size = document.getElementById('output-size').value;
+                //let output_size = document.getElementById('output-size').value;
                 let selectedFiles = [];
                 document.querySelectorAll('.file-checkbox:checked').forEach((checkbox) => {
                     selectedFiles.push(checkbox.value);
@@ -400,6 +407,5 @@
             const popup = document.getElementById("")
         }
     </script>
-
 </body>
 </html>

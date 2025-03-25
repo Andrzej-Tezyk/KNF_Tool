@@ -141,7 +141,7 @@ def process_text(data: dict) -> None:
 
         if not output_size:
             print("no chosen output size, set to 100")
-            output_size = 100
+            output_size = 1000
 
         output_size = int(output_size)
 

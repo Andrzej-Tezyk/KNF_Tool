@@ -268,7 +268,7 @@
                 const img = button.querySelector('img');
                 img.src = "{{ url_for('static', filename='images/arrow-up-solid.svg') }}";
                 button.addEventListener("click", startProcessing);
-                inputText.addEventListener('keydown', handleInputKeydown);
+                inputText.addEventListener('keydown', startProcessing);
             });
 
             processBtn.addEventListener('click', startProcessing)
@@ -277,7 +277,7 @@
             document.getElementById("selectAllBtn").addEventListener("click", selectAllFiles);
             document.getElementById("uncheckAllBtn").addEventListener("click", uncheckAllFiles);
             document.getElementById("sidebar-icon").addEventListener("click", closeOpenSidebar);
-            inputText.addEventListener('keydown', handleInputKeydown);
+            inputText.addEventListener('keydown', startProcessing);
             clearBtn.addEventListener('click', clearOutput);
             document.getElementById("info-button").addEventListener("click", showHidePopupTutorial);
             document.getElementById("hideTutorial-button").addEventListener("click", closePopupTutorial);
@@ -331,54 +331,32 @@
                 outputDiv.innerHTML = ''; // clear previous output
             }
 
-            function handleInputKeydown(event) {
+            let output_size = 1000; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+            
+            function startProcessing() {
                 if (event.key === 'Enter' && !event.shiftKey) {
                     event.preventDefault(); // prevent going to a new line
+                    
                     const button = document.getElementById('action-button');
+                
                     button.removeEventListener("click", startProcessing)
-                    inputText.removeEventListener('keydown', handleInputKeydown);
-
+                    inputText.removeEventListener('keydown', startProcessing);
+                
                     let input = document.getElementById('input').value;
                     //let output_size = document.getElementById('output-size').value;
                     let selectedFiles = [];
                     document.querySelectorAll('.file-checkbox:checked').forEach((checkbox) => {
                         selectedFiles.push(checkbox.value);
                     });
-
-
-
-                    let output_size = 1000;
-
-
-
+                    
                     socket.emit('start_processing', { input: input, pdfFiles: selectedFiles, output_size: output_size });
-
+                    
                     const img = button.querySelector('img');
                     img.src = "{{ url_for('static', filename='images/stop-solid.svg') }}"; // changes icon to stop
 
                     button.addEventListener("click", stopProcessing)
                 }
-            }
-            
-            function startProcessing() {
-                const button = document.getElementById('action-button');
-              
-                button.removeEventListener("click", startProcessing)
-                inputText.removeEventListener('keydown', handleInputKeydown);
-            
-                let input = document.getElementById('input').value;
-                //let output_size = document.getElementById('output-size').value;
-                let selectedFiles = [];
-                document.querySelectorAll('.file-checkbox:checked').forEach((checkbox) => {
-                    selectedFiles.push(checkbox.value);
-                });
-                
-                socket.emit('start_processing', { input: input, pdfFiles: selectedFiles, output_size: output_size });
-                
-                const img = button.querySelector('img');
-                img.src = "{{ url_for('static', filename='images/stop-solid.svg') }}"; // changes icon to stop
-
-                button.addEventListener("click", stopProcessing)
             }
 
             function stopProcessing() {
@@ -462,6 +440,7 @@
 
         });
     </script>
+    
     <script>
         function showHidePopupTutorial() {
             var popup = document.getElementById("tutorialPopup")

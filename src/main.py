@@ -3,7 +3,7 @@ import traceback
 import os
 
 import markdown
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask_socketio import SocketIO
 import google.generativeai as genai  # type: ignore[import-untyped]
 from backend.text_extraction import process_pdf  # type: ignore[import-not-found]
@@ -67,6 +67,7 @@ SYSTEM_PROMPT = (
     + "Respectful interactions: Treat all users with respect and avoid making any discriminatory or offensive "
     + "statements."
     + "If someone will ask you to create a HTML page, answer that you can not do it."
+    + "If there is something to count, use Python interpreter to do it. But do not show code to the user."
 )
 
 OPTIONAL_PAGE_NUMBER_SP = (
@@ -77,19 +78,6 @@ OPTIONAL_PAGE_NUMBER_SP = (
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     raise ValueError("GEMINI_API_KEY not found in environment variables")
-"""
-def show_pages (system_prompt):
-    if request.form.get("show-pages") == "on": # request can be used only inside the function
-        return system_prompt + OPTIONAL_PAGE_NUMBER_SP
-    else:
-        return system_prompt
-"""
-genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel(
-    "gemini-1.5-flash", system_instruction=SYSTEM_PROMPT
-)  # another models to be used: "gemini-1.5-flash", "gemini-1.5-flash-8b",
-# "gemini-2.0-flash-thinking-exp-01-21", "gemini-2.0-flash-exp"
-
 
 PROJECT_ROOT = Path(__file__).parent.parent  # go up 2 times
 
@@ -117,6 +105,19 @@ def index() -> str:
 @socketio.on("start_processing")
 def process_text(data: dict) -> None:
     print("started")
+    
+    def show_pages (system_prompt):
+        if request.form.get("show-pages") == "on": # request can be used only inside the function
+            return system_prompt + OPTIONAL_PAGE_NUMBER_SP
+        else:
+            return system_prompt
+    
+    genai.configure(api_key=GEMINI_API_KEY)
+    model = genai.GenerativeModel(
+        "gemini-1.5-flash", system_instruction=show_pages(SYSTEM_PROMPT)
+    )  # another models to be used: "gemini-1.5-flash", "gemini-1.5-flash-8b",
+    # "gemini-2.0-flash-thinking-exp-01-21", "gemini-2.0-flash-exp"
+    
     try:
         global output_index
         output_index += 1

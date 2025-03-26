@@ -16,6 +16,233 @@
     
 </head>
 <body>
+    <div class="flex-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="{{ url_for('static', filename='images/logo.ico') }}" alt="logo">
+            </div>
+
+            <button  class="sidear-button-round" id="sidebar-icon" data-tooltip="Open Sidebar">
+                <img class="sidebar-icon" src="{{ url_for('static', filename='images/sidebar-show.svg') }}">
+            </button>
+
+            <div class="side-menu-buttons-container">
+
+                <img class="sidebar-arrow-down" src="{{ url_for('static', filename='images/caret-down-solid.svg') }}">
+
+                <button class="sidear-button-round" id="sliders-button" data-tooltip="Advanced Options">
+                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/sliders-solid.svg') }}">
+                </button>
+                
+                <button class="sidear-button-round" id="chat-button" data-tooltip="Prompt Enchanter">
+                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/rocketchat-brands-solid.svg') }}">
+                </button>
+
+                <button class="sidear-button-round" id="compare-button" data-tooltip="Compare Documents">
+                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/code-compare-solid.svg') }}">
+                </button>
+                <br>
+            </div>
+
+            <div class="sidebar-bottom-buttons">
+                <button class="sidear-button-round" id="info-button" data-tooltip="How to prompt?">
+                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/circle-question-regular.svg') }}">
+                </button>
+                <button type="button" class="sidear-button-round" id="clean-button" data-tooltip="Clear Output">
+                    <img class="icon" src="{{ url_for('static', filename='images/trash-can-solid.svg') }}">
+                </button>
+                <button class="sidear-button-round" id="settings-sidebar-button" data-tooltip="Settings">
+                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/gear-solid.svg') }}">
+                </button>
+            </div>
+            
+        </aside>
+        <div class="form-flex-container">
+            <div id="input-form">
+                <div class="inside-form-container">
+                    <!-- input section -->
+                    <div class="input-section" id="input-section">
+                        <div class="section-header-wrapper">
+                            <h3 class="side-tab-h3">Advanced Options</h3>
+                        </div>
+                        <div class="input-section-elements">
+                            <div class="option-section">
+
+                                <div class="segment-side-bar">
+                                    <div class="show-pages-checkbox-container glass-box">
+                                      <input type="checkbox" id="change_lebgth" name="show-pages">
+                                      <label for="show-pages">Change length of response</label>
+                                    </div>
+                                    <div class="show-pages-checkbox-container">
+                                        <label for="model-select" id="select-text">Options:</label>
+                                        <select id="words-sentence-select" name="model" class="show-pages-checkbox-containe glass-select">
+                                            <option value="very short">very short</option>
+                                            <option value="short">short</option>
+                                            <option value="medium" selected="selected">medium</option>
+                                            <option value="very long">very long</option>
+                                            <option value="long">long</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="segment-side-bar">
+                                    <div class="show-pages-checkbox-container glass-box">
+                                        <input type="checkbox" id="show-pages" name="show-pages">
+                                        <label for="show-pages">Show pages</label>
+                                    </div>
+                                </div>
+                                <div class="segment-side-bar">
+                                    <div class="show-pages-checkbox-container">
+                                        <label for="model-select">Choose model:</label>
+                                        <select id="model-select" name="model"  class="show-pages-checkbox-containe glass-select">
+                                            <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+                                            <option value="gemini-1.5-flash-8b">gemini-1.5-flash-8b</option>
+                                            <option value="gemini-2.0-flash-thinking-exp-01-21">gemini-2.0-flash-thinking-exp-01-21</option>
+                                           <option value="gemini-2.0-flash-exp">gemini-2.0-flash-exp</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="segment-side-bar">
+                                    <div class="show-pages-checkbox-container">
+                                        <label for="model-select">Choose temperature:</label>
+                                        <div class="slidecontainer">
+                                            <input type="range" min="0" max="1" step="0.05" value="0.8" class="slider" id="myRange">
+                                        </div>
+                                    </div>
+                                    <div class="show-pages-checkbox-container">
+                                        <label for="model-select">Value of temperature: <span id="demo"></span></label>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button class="open-button" onclick="openForm()">More info about temperature</button>
+                                    <div class="form-popup" id="tempInfo">
+                                        <form class="form-container">
+                                            <label>In AI models like LLMs, temperature controls the randomness
+                                                of the model's responses. A value close to 1 results in more varied and creative outputs,
+                                                while a lower value (closer to 0) makes responses more predictable and focused.</label>
+
+                                            <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
+                                        </form>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- output section -->
+                    <div class="output-section">
+                        <div id="output" class="markdown-body">
+                            <!-- output goes here -->
+                        </div>
+                        <div class="input-form-container">
+                            <div class="input-area-elements">
+                                <textarea id="input" name="input" placeholder="Type your query" required></textarea>
+                                <button id="action-button" class="button-round"> <!-- type="submit" class="button-round"> -->
+                                    <img class="icon" src="{{ url_for('static', filename='images/arrow-up-solid.svg') }}">
+                                </button>
+                                <button class="button-round" id="file-button" data-tooltip="Documents" type="button"> <!-- to avoid sending the form -->
+                                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/file-regular.svg') }}">
+                                </button>
+                            </div>
+                            
+                            <div class="bottom-panel" id="bottom-panel">
+                                <div class="bottom-panel-header">
+                                    <div class="bottom-panel-checkbox-buttons">
+                                        <button id="selectAllBtn" type="button" class="bottom-panel-button">Select All</button>
+                                        <button id="uncheckAllBtn" type="button" class="bottom-panel-button">Uncheck All</button>
+                                    </div>
+                                    <button id="hidePanel-button" class="sidear-button-round" type="button" data-tooltip="Or press Escape">
+                                        <img class="icon" src="{{ url_for('static', filename='images/circle-xmark-regular.svg') }}">
+                                    </button>
+                                </div>
+                                <div class="documents-list">
+                                    <div class="scrollable-list">
+                                        {% for pdf in pdf_files %}
+                                        <div class="file-item">
+                                            <input type="checkbox" class="file-checkbox" id="{{ pdf }}" name="selected_files" value="{{ pdf }}">
+                                            <label for="{{ pdf }}">{{ pdf[11:-4] }}</label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="list-of-choosen-files">
+                            <div id="selected-files"></div> <!-- selected files go here -->
+                        </div>
+                        <div id="tutorialPopup">
+                            <div class="header-tutorial-flex-contanier">
+                                <h3>LLM Prompting Tutorial</h3>
+                                <button id="hideTutorial-button" class="sidear-button-round" type="button" data-tooltip="Or press Escape">
+                                    <img class="icon" src="{{ url_for('static', filename='images/circle-xmark-regular.svg') }}">
+                                </button>
+                            </div>
+                            <div class="tutorial-text">
+                                <div class="tutorial-text-paragraph">
+                                    <h4>Understand the context</h4>
+                                    <p>Financial regulations for banks can be complex. Before writing your prompt, ensure you understand:</p>
+                                    <ol>
+                                        <li><strong>The document’s scope.</strong> What regulation or specific section are you targeting?</li>
+                                        <li><strong>Your objective.</strong> Are you looking for a summary, clarification of a term, compliance details, or an interpretation of a clause?</li>
+                                    </ol>
+                                    <em>Tip: Think of your prompt as a question to an expert who is familiar with banking regulations.</em>
+                                </div>
+
+                                <div class="tutorial-text-paragraph">
+                                    <h4>Be specific and targeted</h4>
+                                    <p>General queries might lead to vague or off-target responses. Instead, use specific language.</p>
+                                    <ol>
+                                        <li><strong>Identify the regulation.</strong> Instead of “Explain bank rules,” say “Explain the capital adequacy requirements in Recommendation X.”</li>
+                                        <li><strong>Mention sections or terms.</strong> For example, “What are the implications of the liquidity coverage ratio as described in Section 4.2 of the regulation?”</li>
+                                    </ol>
+                                    <em>Example: “Can you summarize the key requirements related to risk management in the KNF guidelines, focusing on the minimum liquidity coverage ratio?”</em>
+                                </div>    
+
+                                <div class="tutorial-text-paragraph">
+                                    <h4>Structure your prompt clearly</h4>
+                                    <p>A well-structured prompt can guide the model more effectively.</p>
+                                    <ol>
+                                        <li><strong>Bullet points or lists.</strong> When asking for multiple points or criteria, format your request in a list.</li>
+                                        <li><strong>Step-by-step requests.</strong> If the regulation is complex, ask for a breakdown of the topic into understandable steps or segments.</li>
+                                    </ol>
+                                    <em>Example: “Please outline: 1) The key risk factors outlined in the regulation. 2) The steps banks must take to mitigate these risks. 3) Any penalties for non-compliance.”</em>
+                                </div>
+
+                                <div class="tutorial-text-paragraph">
+                                    <h4>Use open-ended and specific questions</h4>
+                                    <p>Balance is key. Open-ended questions allow the model to provide comprehensive answers, while specificity keeps responses focused.</p>
+                                    <ol>
+                                        <li><strong>Open-ended.</strong> “What are the emerging trends in financial regulation for banks?”</li>
+                                        <li><strong>Specific.</strong> “What are the minimum capital requirements for banks under the Basel III framework?”</li>
+                                    </ol>
+                                </div>
+
+                                <div class="tutorial-text-paragraph">
+                                    <h4>Iterate and refine</h4>
+                                    <p>Your first prompt may not yield the perfect answer. Use the LLM’s feedback.</p>
+                                    <ol>
+                                        <li><strong>Clarify ambiguities.</strong> If the response is too broad, refine your query with additional context.</li>
+                                        <li><strong>Ask follow-up questions.</strong> Narrow down further details in subsequent prompts.</li>
+                                    </ol>
+                                    <em>Tip: If a prompt returns too much unrelated information, add a clarifying sentence such as “Focus solely on the implications for mid-sized banks.”</em>
+                                </div>
+
+                                <div class="tutorial-text-paragraph">
+                                    <h4>Incorporate industry jargon carefully</h4>
+                                    <p>While financial terminology is necessary, ensure you’re not overloading your prompt.</p>
+                                    <ol>
+                                        <li><strong>Balance technicality.</strong> Use standard terms, but if a term is very technical or obscure, briefly define it.</li>
+                                        <li><strong>Maintain readability.</strong> The prompt should be understandable for the LLM without ambiguity.</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const socket = io.connect('http://127.0.0.1:5000'); // DO ZMIANY
@@ -52,6 +279,48 @@
             document.getElementById("sidebar-icon").addEventListener("click", closeOpenSidebar);
             inputText.addEventListener('keydown', handleInputKeydown);
             clearBtn.addEventListener('click', clearOutput);
+            document.getElementById("info-button").addEventListener("click", showHidePopupTutorial);
+            document.getElementById("hideTutorial-button").addEventListener("click", closePopupTutorial);
+
+            var checkBox = document.getElementById("change_lebgth");
+            var select = document.getElementById("words-sentence-select");
+            var text = document.getElementById("select-text");
+
+            select.style.display = "none";
+            text.style.display = "none";
+
+            checkBox.addEventListener("change", function () {
+            select.style.display = checkBox.checked ? "block" : "none";
+            text.style.display = checkBox.checked ? "block" : "none";
+            });
+
+            var slider = document.getElementById("myRange");
+            var output = document.getElementById("demo");
+            output.innerHTML = slider.value;
+
+            slider.oninput = function() {
+            output.innerHTML = this.value;
+            }
+
+            function openForm() {
+                document.getElementById("tempInfo").style.display = "block";
+            }
+
+            function closeForm() {
+                document.getElementById("tempInfo").style.display = "none";
+            }
+
+            var openButton = document.querySelector(".open-button");
+            var closeButton = document.querySelector(".btn.cancel");
+            var tempInfo = document.getElementById("tempInfo");
+
+            openButton.addEventListener("click", function () {
+                tempInfo.style.display = "block";
+            });
+
+            closeButton.addEventListener("click", function () {
+                tempInfo.style.display = "none";
+            });
 
             document.querySelectorAll('.file-checkbox').forEach((checkbox) => { // eventlisteners for all file checkboxes
                 checkbox.addEventListener('change', updateSelectedFilesDisplay);
@@ -70,11 +339,18 @@
                     inputText.removeEventListener('keydown', handleInputKeydown);
 
                     let input = document.getElementById('input').value;
-                    let output_size = document.getElementById('output-size').value;
+                    //let output_size = document.getElementById('output-size').value;
                     let selectedFiles = [];
                     document.querySelectorAll('.file-checkbox:checked').forEach((checkbox) => {
                         selectedFiles.push(checkbox.value);
                     });
+
+
+
+                    let output_size = 1000;
+
+
+
                     socket.emit('start_processing', { input: input, pdfFiles: selectedFiles, output_size: output_size });
 
                     const img = button.querySelector('img');
@@ -91,7 +367,7 @@
                 inputText.removeEventListener('keydown', handleInputKeydown);
             
                 let input = document.getElementById('input').value;
-                let output_size = document.getElementById('output-size').value;
+                //let output_size = document.getElementById('output-size').value;
                 let selectedFiles = [];
                 document.querySelectorAll('.file-checkbox:checked').forEach((checkbox) => {
                     selectedFiles.push(checkbox.value);
@@ -186,117 +462,36 @@
 
         });
     </script>
-    <div class="flex-container">
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <img src="{{ url_for('static', filename='images/logo.ico') }}" alt="logo">
-            </div>
+    <script>
+        function showHidePopupTutorial() {
+            var popup = document.getElementById("tutorialPopup")
 
-            <button  class="sidear-button-round" id="sidebar-icon" data-tooltip="Open Sidebar">
-                <img class="sidebar-icon" src="{{ url_for('static', filename='images/sidebar-show.svg') }}">
-            </button>
+            if (popup.style.display === "none" || popup.style.display === "") {
+                popup.style.display = "flex";
 
-            <div class="side-menu-buttons-container">
+                setTimeout(() => {
+                    popup.style.opacity = "1";
+                }, 200); // for smooth transition
+            } else {
+                popup.style.opacity = "0";
 
-                <img class="sidebar-arrow-down" src="{{ url_for('static', filename='images/caret-down-solid.svg') }}">
+                setTimeout(() => {
+                    popup.style.display = "none";
+                }, 200); // hide after fade out
+            }
+        }
+        
+        function closePopupTutorial () {
+            var popup = document.getElementById("tutorialPopup")
 
-                <button class="sidear-button-round" id="sliders-button" data-tooltip="Advanced Options">
-                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/sliders-solid.svg') }}">
-                </button>
-                
-                <button class="sidear-button-round" id="chat-button" data-tooltip="Prompt Enchanter">
-                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/rocketchat-brands-solid.svg') }}">
-                </button>
+            if (popup.style.display === "flex") {
+                popup.style.display = "none";
 
-                <button class="sidear-button-round" id="compare-button" data-tooltip="Compare Documents">
-                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/code-compare-solid.svg') }}">
-                </button>
-                <br>
-            </div>
-
-            <div class="sidebar-bottom-buttons">
-                <button class="sidear-button-round" id="info-button" data-tooltip="How to prompt?">
-                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/circle-question-regular.svg') }}">
-                </button>
-                <button type="button" class="sidear-button-round" id="clean-button" data-tooltip="Clear Output">
-                    <img class="icon" src="{{ url_for('static', filename='images/trash-can-solid.svg') }}">
-                </button>
-                <button class="sidear-button-round" id="settings-sidebar-button" data-tooltip="Settings">
-                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/gear-solid.svg') }}">
-                </button>
-            </div>
-            
-        </aside>
-        <div class="form-flex-container">
-            <div id="input-form">
-                <div class="inside-form-container">
-                    <!-- input section -->
-                    <div class="input-section" id="input-section">
-                        <div class="section-header-wrapper">
-                            <h3 class="side-tab-h3">Advanced Options</h3>
-                        </div>
-                        <div class="input-section-elements">
-                            <div class="option-section">
-
-                                <div class="show-pages-checkbox-container">
-                                    <label for="output-size">Response size in words:  </label>
-                                    <input type="text" id="output-size" name="output_size" minlength="2" maxlength="5" size="2" value="100">
-                                </div>
-
-                                <div class="show-pages-checkbox-container">
-                                    <input type="checkbox" id="show-pages" name="show-pages">
-                                    <label for="show-pages">Show pages</label>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- output section -->
-                    <div class="output-section">
-                        <div id="output" class="markdown-body">
-                            <!-- output goes here -->
-                        </div>
-                        <div class="input-form-container">
-                            <div class="input-area-elements">
-                                <textarea id="input" name="input" placeholder="Type your query" required></textarea>
-                                <button id="action-button" class="button-round"> <!-- type="submit" class="button-round"> -->
-                                    <img class="icon" src="{{ url_for('static', filename='images/arrow-up-solid.svg') }}">
-                                </button>
-                                <button class="button-round" id="file-button" data-tooltip="Documents" type="button"> <!-- to avoid sending the form -->
-                                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/file-regular.svg') }}">
-                                </button>
-                            </div>
-                            
-                            <div class="bottom-panel" id="bottom-panel">
-                                <div class="bottom-panel-header">
-                                    <div class="bottom-panel-checkbox-buttons">
-                                        <button id="selectAllBtn" type="button" class="bottom-panel-button">Select All</button>
-                                        <button id="uncheckAllBtn" type="button" class="bottom-panel-button">Uncheck All</button>
-                                    </div>
-                                    <button id="hidePanel-button" class="sidear-button-round" type="button" data-tooltip="Or press Escape"> <!-- onclick="toggleBottomPanel()"> -->
-                                        <img class="icon" src="{{ url_for('static', filename='images/circle-xmark-regular.svg') }}">
-                                    </button>
-                                </div>
-                                <div class="documents-list">
-                                    <div class="scrollable-list">
-                                        {% for pdf in pdf_files %}
-                                        <div class="file-item">
-                                            <input type="checkbox" class="file-checkbox" id="{{ pdf }}" name="selected_files" value="{{ pdf }}">
-                                            <label for="{{ pdf }}">{{ pdf[11:-4] }}</label>
-                                        </div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="list-of-choosen-files">
-                            <div id="selected-files"></div> <!-- selected files go here -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                setTimeout(() => {
+                    popup.style.opacity = "0";
+                }, 200); // for smooth transition
+            }
+        }
+    </script>
 </body>
 </html>

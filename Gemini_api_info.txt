@@ -1,32 +1,3 @@
-            function handleInputKeydown(event) {
-                if (event.key === 'Enter' && !event.shiftKey) {
-                    event.preventDefault(); // prevent going to a new line
-                    const button = document.getElementById('action-button');
-                    button.removeEventListener("click", startProcessing)
-                    inputText.removeEventListener('keydown', handleInputKeydown);
-
-                    let input = document.getElementById('input').value;
-                    //let output_size = document.getElementById('output-size').value;
-                    let selectedFiles = [];
-                    document.querySelectorAll('.file-checkbox:checked').forEach((checkbox) => {
-                        selectedFiles.push(checkbox.value);
-                    });
-
-                    socket.emit('start_processing', { input: input, pdfFiles: selectedFiles, output_size: output_size });
-
-                    const img = button.querySelector('img');
-                    img.src = "{{ url_for('static', filename='images/stop-solid.svg') }}"; // changes icon to stop
-
-                    button.addEventListener("click", stopProcessing)
-                }
-            }
-
-
-
-
-
-
-
 TO IMPLEMENT:
 
 1) context cashing for uploaded files (if free) -> https://ai.google.dev/gemini-api/docs/caching?lang=python

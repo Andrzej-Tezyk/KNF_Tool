@@ -360,10 +360,15 @@
                 document.querySelectorAll('.file-checkbox:checked').forEach((checkbox) => {
                     selectedFiles.push(checkbox.value);
                 });
-                let show_pages_checkbox = document.getElementById('show-pages').value;
+                let show_pages_checkbox = document.getElementById('show-pages').checked;
                 let choosen_model = document.getElementById('model-select').value;
                 
-                socket.emit('start_processing', { input: input, pdfFiles: selectedFiles, output_size: output_size, show_pages_checkbox: show_pages_checkbox, choosen_model: choosen_model });
+                socket.emit('start_processing', { 
+                    input: input, 
+                    pdfFiles: selectedFiles, 
+                    output_size: output_size, 
+                    show_pages_checkbox: show_pages_checkbox, 
+                    choosen_model: choosen_model });
                 
                 const img = button.querySelector('img');
                 img.src = "{{ url_for('static', filename='images/stop-solid.svg') }}"; // changes icon to stop

@@ -121,6 +121,7 @@ def process_text(data: dict) -> None:
         selected_files = data.get("pdfFiles")
         output_size = data.get("output_size")
         show_pages_checkbox = data.get("show_pages_checkbox")
+        choosen_model = data.get("choosen_model")
         
         show_pages_checkbox = str(show_pages_checkbox)
         
@@ -144,6 +145,7 @@ def process_text(data: dict) -> None:
         print(f"selected files: {selected_files}")
         print(f"output size: {output_size}")
         print(show_pages_checkbox)
+        print(f"selected_model: {choosen_model}")
 
         pdf_dir = Path(SCRAPED_FILES_DIR)
 
@@ -154,8 +156,8 @@ def process_text(data: dict) -> None:
         
         genai.configure(api_key=GEMINI_API_KEY)
         model = genai.GenerativeModel(
-            "gemini-2.0-flash", system_instruction=show_pages(SYSTEM_PROMPT)
-        )  # another models to be used: "gemini-2.0-flash-thinking-exp-01-21", "gemini-2.0-flash"
+            choosen_model, system_instruction=show_pages(SYSTEM_PROMPT)
+        )  # another models to be used: "gemini-2.0-flash-thinking-exp-01-21" "gemini-2.0-flash"
         
         try:
             for index, pdf in enumerate(pdfs_to_scan):

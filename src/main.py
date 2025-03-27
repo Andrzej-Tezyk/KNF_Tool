@@ -72,7 +72,7 @@ SYSTEM_PROMPT = (
 
 OPTIONAL_PAGE_NUMBER_SP = (
     "State in brackets after each sentence or paragraph from which page in the text the information used to "
-    + "generate the answer came. Format: (page in the same language as rest of output: number or numbers)."
+    + "generate the answer came. Format: (word 'page' in the same language as rest of output: number or numbers)."
 )
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -107,17 +107,11 @@ def process_text(data: dict) -> None:
     print("started")
     
     def show_pages (system_prompt):
-        if request.form.get("show-pages") == "on": # request can be used only inside the function
+        if show_pages_checkbox == "on": # request can be used only inside the function
             return system_prompt + OPTIONAL_PAGE_NUMBER_SP
         else:
             return system_prompt
-    
-    genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel(
-        "gemini-1.5-flash", system_instruction=show_pages(SYSTEM_PROMPT)
-    )  # another models to be used: "gemini-1.5-flash", "gemini-1.5-flash-8b",
-    # "gemini-2.0-flash-thinking-exp-01-21", "gemini-2.0-flash-exp"
-    
+
     try:
         global output_index
         output_index += 1
@@ -126,6 +120,10 @@ def process_text(data: dict) -> None:
         prompt = data.get("input")
         selected_files = data.get("pdfFiles")
         output_size = data.get("output_size")
+        show_pages_checkbox = data.get("show_pages_checkbox")
+        
+        show_pages_checkbox = str(show_pages_checkbox)
+        
         if not prompt:
             print("no prompt provided")
             socketio.emit("error", {"message": "No input provided"})
@@ -140,15 +138,12 @@ def process_text(data: dict) -> None:
             socketio.emit("stream_stopped")
             return
 
-        if not output_size:
-            print("no chosen output size, set to 100")
-            output_size = 1000
-
-        output_size = int(output_size)
+        output_size = str(output_size)
 
         print(f"prompt: {prompt}")
         print(f"selected files: {selected_files}")
         print(f"output size: {output_size}")
+        print(show_pages_checkbox)
 
         pdf_dir = Path(SCRAPED_FILES_DIR)
 
@@ -156,7 +151,12 @@ def process_text(data: dict) -> None:
 
         for pdf in pdfs_to_scan:
             print(pdf)
-
+        
+        genai.configure(api_key=GEMINI_API_KEY)
+        model = genai.GenerativeModel(
+            "gemini-2.0-flash", system_instruction=show_pages(SYSTEM_PROMPT)
+        )  # another models to be used: "gemini-2.0-flash-thinking-exp-01-21", "gemini-2.0-flash"
+        
         try:
             for index, pdf in enumerate(pdfs_to_scan):
                 if not streaming:

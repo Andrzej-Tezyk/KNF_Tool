@@ -74,13 +74,13 @@
                                       <label for="show-pages">Change length of response</label>
                                     </div>
                                     <div class="show-pages-checkbox-container">
-                                        <label for="model-select" id="select-text">Options:</label>
+                                        <label for="words-sentence-select" id="select-text">Options:</label>
                                         <select id="words-sentence-select" name="model" class="show-pages-checkbox-containe glass-select">
                                             <option value="very short">very short</option>
                                             <option value="short">short</option>
                                             <option value="medium" selected="selected">medium</option>
-                                            <option value="very long">very long</option>
                                             <option value="long">long</option>
+                                            <option value="very long">very long</option>
                                         </select>
                                     </div>
                                 </div>
@@ -370,13 +370,14 @@
                 inputText.removeEventListener('keydown', startProcessingOnEnter);
             
                 let input = document.getElementById('input').value;
-                //let output_size = document.getElementById('output-size').value;
+                let output_size = document.getElementById('words-sentence-select').value;
                 let selectedFiles = [];
                 document.querySelectorAll('.file-checkbox:checked').forEach((checkbox) => {
                     selectedFiles.push(checkbox.value);
                 });
+                let show_pages_checkbox = document.getElementById('show-pages').value; 
                 
-                socket.emit('start_processing', { input: input, pdfFiles: selectedFiles, output_size: output_size });
+                socket.emit('start_processing', { input: input, pdfFiles: selectedFiles, output_size: output_size, show_pages_checkbox });
                 
                 const img = button.querySelector('img');
                 img.src = "{{ url_for('static', filename='images/stop-solid.svg') }}"; // changes icon to stop

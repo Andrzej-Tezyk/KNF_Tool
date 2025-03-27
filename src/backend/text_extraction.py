@@ -68,7 +68,7 @@ def process_pdf(prompt: str, pdf: Path, model: Any, output_size: int) -> Generat
         prompt: A string containing the user’s prompt for processing the document.
         pdf: A Path object representing the PDF file to be processed.
         model: A generative AI model used to process the document.
-        output_size: An integer defining the approximate word limit for the response.
+        output_size: A string defining the approximate word limit for the response.
 
     Returns:
         A dictionary containing:
@@ -87,19 +87,12 @@ def process_pdf(prompt: str, pdf: Path, model: Any, output_size: int) -> Generat
     else:
         try:
             print(f"Document: {pdf.stem} is beeing analyzed.")
-            # text = extract_text_from_pdf(pdf)
-            # if len(text) > 10:  # random small number
-            #    response = model.generate_content(
-            #        f"{prompt} (Please limit the response to approximately {output_size} words) {text}"
-            #    )  # , generation_config={"max_output_tokens": max_tokens}
-
-            # else:
             file_to_send = genai.upload_file(pdf)
             print(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
             response = model.generate_content(
                 [
                     prompt
-                    + f"(Please limit the response to approximately {output_size} words)",
+                    + f"(Please provide {output_size} size response)",
                     file_to_send,
                 ],
                 stream=True,

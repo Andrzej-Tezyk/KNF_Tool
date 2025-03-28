@@ -53,7 +53,7 @@ def extract_text_from_pdf(pdf_path: Path) -> str:
         return ""
 
 
-def process_pdf(prompt: str, pdf: Path, model: Any, output_size: int) -> Generator:
+def process_pdf(prompt: str, pdf: Path, model: Any, change_lebgth_checkbox: str, output_size: int) -> Generator:
     """Processes a single PDF document using the provided prompt and returns the result.
 
     This function uploads a PDF document, sends it to a model with the given prompt,
@@ -92,7 +92,7 @@ def process_pdf(prompt: str, pdf: Path, model: Any, output_size: int) -> Generat
             response = model.generate_content(
                 [
                     prompt
-                    + f"(Please provide {output_size} size response)",
+                    + f"(Please provide {output_size} size response)" if change_lebgth_checkbox == "True" else "",
                     file_to_send,
                 ],
                 stream=True,

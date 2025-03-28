@@ -107,9 +107,11 @@ def process_text(data: dict) -> None:
     print("started")
     
     def show_pages (system_prompt):
-        if show_pages_checkbox == "on": # request can be used only inside the function
+        if show_pages_checkbox == "True": # request can be used only inside the function
+            print(system_prompt + OPTIONAL_PAGE_NUMBER_SP)
             return system_prompt + OPTIONAL_PAGE_NUMBER_SP
         else:
+            print(system_prompt)
             return system_prompt
 
     try:
@@ -122,8 +124,10 @@ def process_text(data: dict) -> None:
         output_size = data.get("output_size")
         show_pages_checkbox = data.get("show_pages_checkbox")
         choosen_model = data.get("choosen_model")
+        change_lebgth_checkbox = data.get("change_length_checkbox")
         
         show_pages_checkbox = str(show_pages_checkbox)
+        change_lebgth_checkbox = str(change_lebgth_checkbox)
         
         if not prompt:
             print("no prompt provided")
@@ -145,6 +149,7 @@ def process_text(data: dict) -> None:
         print(f"selected files: {selected_files}")
         print(f"output size: {output_size}")
         print(show_pages_checkbox)
+        print(change_lebgth_checkbox)
         print(f"selected_model: {choosen_model}")
 
         pdf_dir = Path(SCRAPED_FILES_DIR)
@@ -158,6 +163,16 @@ def process_text(data: dict) -> None:
         model = genai.GenerativeModel(
             choosen_model, system_instruction=show_pages(SYSTEM_PROMPT)
         )  # another models to be used: "gemini-2.0-flash-thinking-exp-01-21" "gemini-2.0-flash"
+        
+        
+        
+        
+        # DO POPRAWY: kod wczytuje system prompt tylko kiedy Change output size is checked; nie dzialaja wymagania jak nalezy co do rozmiaru; shor, medium -> too ambigious, dac konkretne liczby
+        # bug: przy zmianie ustawien i zgenerowaniu nowej odpowiedzi: header pojawia sie tam gdzie nalezy, ale potem tworzony jest kolejny u gory strony,
+        # uncheck "Change length of the response" and checking "Show pages" makes the next output be produced with formatting issues
+        
+        
+        
         
         try:
             for index, pdf in enumerate(pdfs_to_scan):
@@ -177,7 +192,7 @@ def process_text(data: dict) -> None:
                 socketio.emit("new_container", {"html": container_html})
 
                 accumulated_text = ""
-                for result_chunk in process_pdf(prompt, pdf, model, output_size):
+                for result_chunk in process_pdf(prompt, pdf, model, change_lebgth_checkbox, output_size):
                     if not streaming:
                         break
                     if (
@@ -222,6 +237,14 @@ def handle_stop() -> None:
     global streaming
     streaming = False
     print("Processing Stopped by User")
+
+
+
+
+@app.route('/langchainChat')
+def langchain_chat():
+    return render_template("langchainChat.html")
+
 
 
 if __name__ == "__main__":

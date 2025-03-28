@@ -71,7 +71,7 @@
                                 <div class="segment-side-bar">
                                     <div class="show-pages-checkbox-container glass-box">
                                       <input type="checkbox" id="change_lebgth" name="show-pages">
-                                      <label for="show-pages">Change length of response</label>
+                                      <label for="show-pages">Change length of response</label> <!-- zgooglowac jak dziala for="" i co ma tam sie znalezc :) -->
                                     </div>
                                     <div class="show-pages-checkbox-container">
                                         <label for="words-sentence-select" id="select-text">Options:</label>
@@ -362,13 +362,15 @@
                 });
                 let show_pages_checkbox = document.getElementById('show-pages').checked;
                 let choosen_model = document.getElementById('model-select').value;
+                let change_length_checkbox = document.getElementById('change_lebgth').checked;
                 
                 socket.emit('start_processing', { 
                     input: input, 
                     pdfFiles: selectedFiles, 
                     output_size: output_size, 
                     show_pages_checkbox: show_pages_checkbox, 
-                    choosen_model: choosen_model });
+                    choosen_model: choosen_model,
+                    change_length_checkbox: change_length_checkbox });
                 
                 const img = button.querySelector('img');
                 img.src = "{{ url_for('static', filename='images/stop-solid.svg') }}"; // changes icon to stop

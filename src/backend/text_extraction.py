@@ -92,7 +92,7 @@ def process_pdf(prompt: str, pdf: Path, model: Any, change_lebgth_checkbox: str,
             response = model.generate_content(
                 [
                     prompt
-                    + f"(Please provide {output_size} size response)" if change_lebgth_checkbox == "True" else "",
+                    + f"(Please provide {output_size} size response)" if change_lebgth_checkbox == "True" else prompt,
                     file_to_send,
                 ],
                 stream=True,

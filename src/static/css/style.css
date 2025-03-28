@@ -814,6 +814,8 @@ textarea:focus {
 
 
 
+
+
 .input-section-langchain {
     flex: 0 0 22%;
     display: flex;
@@ -828,4 +830,27 @@ textarea:focus {
     transition: opacity 0.3s ease-out;
     overflow: hidden;
     box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
+}
+
+
+.output-button {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 40%;
+    background-color: var(--background-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    color: var(--primary-color); /*#B2890F;*/
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.output-button:hover {
+    background-color: var(--input-bg-color);
+    transform: scale(1.03);
 }

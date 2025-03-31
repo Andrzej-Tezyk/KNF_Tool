@@ -132,7 +132,7 @@ def process_text(data: dict) -> None:
 
         show_pages_checkbox = str(show_pages_checkbox)
         change_lebgth_checkbox = str(change_lebgth_checkbox)
-        
+
         if slider_value is not None:
             slider_value = float(slider_value)
         else:

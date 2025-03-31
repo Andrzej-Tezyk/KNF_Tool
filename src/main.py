@@ -1,6 +1,7 @@
 from pathlib import Path
 import traceback
 import os
+from typing import Any
 
 import markdown
 from flask import Flask, render_template
@@ -66,30 +67,18 @@ SYSTEM_PROMPT = (
     + "Objectivity: Remain objective in your responses and avoid expressing any subjective opinions or beliefs."
     + "Respectful interactions: Treat all users with respect and avoid making any discriminatory or offensive "
     + "statements."
-    + "If someone will ask you to create a HTML page, answer that you can not do it."
+    + "If someone will ask you to create a HTML page or write HTML or JavaScript code, answer that you can not do it."
+    + "If there is something to count, use Python interpreter to do it. But do not show code to the user."
 )
 
 OPTIONAL_PAGE_NUMBER_SP = (
     "State in brackets after each sentence or paragraph from which page in the text the information used to "
-    + "generate the answer came. Format: (page in the same language as rest of output: number or numbers)."
+    + "generate the answer came. Format: (word 'page' in the same language as rest of output: number or numbers)."
 )
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     raise ValueError("GEMINI_API_KEY not found in environment variables")
-"""
-def show_pages (system_prompt):
-    if request.form.get("show-pages") == "on": # request can be used only inside the function
-        return system_prompt + OPTIONAL_PAGE_NUMBER_SP
-    else:
-        return system_prompt
-"""
-genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel(
-    "gemini-1.5-flash", system_instruction=SYSTEM_PROMPT
-)  # another models to be used: "gemini-1.5-flash", "gemini-1.5-flash-8b",
-# "gemini-2.0-flash-thinking-exp-01-21", "gemini-2.0-flash-exp"
-
 
 PROJECT_ROOT = Path(__file__).parent.parent  # go up 2 times
 
@@ -117,6 +106,17 @@ def index() -> str:
 @socketio.on("start_processing")
 def process_text(data: dict) -> None:
     print("started")
+
+    def show_pages(system_prompt: str) -> str:
+        if (
+            show_pages_checkbox == "True"
+        ):  # request can be used only inside the function
+            print(system_prompt + OPTIONAL_PAGE_NUMBER_SP)
+            return system_prompt + OPTIONAL_PAGE_NUMBER_SP
+        else:
+            print(system_prompt)
+            return system_prompt
+
     try:
         global output_index
         output_index += 1
@@ -125,6 +125,19 @@ def process_text(data: dict) -> None:
         prompt = data.get("input")
         selected_files = data.get("pdfFiles")
         output_size = data.get("output_size")
+        show_pages_checkbox = data.get("show_pages_checkbox")
+        choosen_model = data.get("choosen_model")
+        change_lebgth_checkbox = data.get("change_length_checkbox")
+        slider_value = data.get("slider_value")
+
+        show_pages_checkbox = str(show_pages_checkbox)
+        change_lebgth_checkbox = str(change_lebgth_checkbox)
+
+        if slider_value is not None:
+            slider_value = float(slider_value)
+        else:
+            slider_value = 0.0
+
         if not prompt:
             print("no prompt provided")
             socketio.emit("error", {"message": "No input provided"})
@@ -139,15 +152,14 @@ def process_text(data: dict) -> None:
             socketio.emit("stream_stopped")
             return
 
-        if not output_size:
-            print("no chosen output size, set to 100")
-            output_size = 1000
-
-        output_size = int(output_size)
+        output_size = str(output_size)
 
         print(f"prompt: {prompt}")
         print(f"selected files: {selected_files}")
         print(f"output size: {output_size}")
+        print(show_pages_checkbox)
+        print(change_lebgth_checkbox)
+        print(f"selected_model: {choosen_model}")
 
         pdf_dir = Path(SCRAPED_FILES_DIR)
 
@@ -155,6 +167,11 @@ def process_text(data: dict) -> None:
 
         for pdf in pdfs_to_scan:
             print(pdf)
+
+        genai.configure(api_key=GEMINI_API_KEY)
+        model = genai.GenerativeModel(
+            choosen_model, system_instruction=show_pages(SYSTEM_PROMPT)
+        )  # another models to be used: "gemini-2.0-flash-thinking-exp-01-21" "gemini-2.0-flash"
 
         try:
             for index, pdf in enumerate(pdfs_to_scan):
@@ -174,7 +191,14 @@ def process_text(data: dict) -> None:
                 socketio.emit("new_container", {"html": container_html})
 
                 accumulated_text = ""
-                for result_chunk in process_pdf(prompt, pdf, model, output_size):
+                for result_chunk in process_pdf(
+                    prompt,
+                    pdf,
+                    model,
+                    change_lebgth_checkbox,
+                    output_size,
+                    slider_value,
+                ):
                     if not streaming:
                         break
                     if (
@@ -219,6 +243,11 @@ def handle_stop() -> None:
     global streaming
     streaming = False
     print("Processing Stopped by User")
+
+
+@app.route("/langchainChat")
+def langchain_chat() -> Any:
+    return render_template("langchainChat.html")
 
 
 if __name__ == "__main__":

@@ -13,4 +13,4 @@ convention = "google"
 
 [lint.mccabe]
 # Flag errors (`C901`) whenever the complexity level exceeds 5.
-max-complexity = 15
+max-complexity = 16

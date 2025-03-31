@@ -66,7 +66,7 @@ SYSTEM_PROMPT = (
     + "Objectivity: Remain objective in your responses and avoid expressing any subjective opinions or beliefs."
     + "Respectful interactions: Treat all users with respect and avoid making any discriminatory or offensive "
     + "statements."
-    + "If someone will ask you to create a HTML page, answer that you can not do it."
+    + "If someone will ask you to create a HTML page or write HTML or JavaScript code, answer that you can not do it."
     + "If there is something to count, use Python interpreter to do it. But do not show code to the user."
 )
 
@@ -125,9 +125,11 @@ def process_text(data: dict) -> None:
         show_pages_checkbox = data.get("show_pages_checkbox")
         choosen_model = data.get("choosen_model")
         change_lebgth_checkbox = data.get("change_length_checkbox")
+        slider_value = data.get("slider_value")
         
         show_pages_checkbox = str(show_pages_checkbox)
         change_lebgth_checkbox = str(change_lebgth_checkbox)
+        slider_value = float(slider_value)
         
         if not prompt:
             print("no prompt provided")
@@ -192,7 +194,7 @@ def process_text(data: dict) -> None:
                 socketio.emit("new_container", {"html": container_html})
 
                 accumulated_text = ""
-                for result_chunk in process_pdf(prompt, pdf, model, change_lebgth_checkbox, output_size):
+                for result_chunk in process_pdf(prompt, pdf, model, change_lebgth_checkbox, output_size, slider_value):
                     if not streaming:
                         break
                     if (

@@ -363,6 +363,7 @@
                 let show_pages_checkbox = document.getElementById('show-pages').checked;
                 let choosen_model = document.getElementById('model-select').value;
                 let change_length_checkbox = document.getElementById('change_lebgth').checked;
+                let slider_value = document.getElementById('myRange').value;
                 
                 socket.emit('start_processing', { 
                     input: input, 
@@ -370,7 +371,8 @@
                     output_size: output_size, 
                     show_pages_checkbox: show_pages_checkbox, 
                     choosen_model: choosen_model,
-                    change_length_checkbox: change_length_checkbox });
+                    change_length_checkbox: change_length_checkbox,
+                    slider_value: slider_value });
                 
                 const img = button.querySelector('img');
                 img.src = "{{ url_for('static', filename='images/stop-solid.svg') }}"; // changes icon to stop

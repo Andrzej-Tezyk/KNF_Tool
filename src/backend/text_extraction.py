@@ -53,7 +53,14 @@ def extract_text_from_pdf(pdf_path: Path) -> str:
         return ""
 
 
-def process_pdf(prompt: str, pdf: Path, model: Any, change_lebgth_checkbox: str, output_size: int, slider_value: int) -> Generator:
+def process_pdf(
+    prompt: str,
+    pdf: Path,
+    model: Any,
+    change_lebgth_checkbox: str,
+    output_size: int,
+    slider_value: float,
+) -> Generator:
     """Processes a single PDF document using the provided prompt and returns the result.
 
     This function uploads a PDF document, sends it to a model with the given prompt,
@@ -91,11 +98,15 @@ def process_pdf(prompt: str, pdf: Path, model: Any, change_lebgth_checkbox: str,
             print(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
             response = model.generate_content(
                 [
-                    prompt
-                    + f"(Please provide {output_size} size response)" if change_lebgth_checkbox == "True" else prompt,
+                    (
+                        prompt + f"(Please provide {output_size} size response)"
+                        if change_lebgth_checkbox == "True"
+                        else prompt
+                    ),
                     file_to_send,
                 ],
-                stream=True, generation_config = {"temperature":slider_value}
+                stream=True,
+                generation_config={"temperature": slider_value},
             )
             # split its text into smaller sub-chunks
             for response_chunk in response:

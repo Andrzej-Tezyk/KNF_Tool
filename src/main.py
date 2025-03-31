@@ -1,9 +1,10 @@
 from pathlib import Path
 import traceback
 import os
+from typing import Any
 
 import markdown
-from flask import Flask, render_template, request
+from flask import Flask, render_template
 from flask_socketio import SocketIO
 import google.generativeai as genai  # type: ignore[import-untyped]
 from backend.text_extraction import process_pdf  # type: ignore[import-not-found]
@@ -105,9 +106,11 @@ def index() -> str:
 @socketio.on("start_processing")
 def process_text(data: dict) -> None:
     print("started")
-    
-    def show_pages (system_prompt):
-        if show_pages_checkbox == "True": # request can be used only inside the function
+
+    def show_pages(system_prompt: str) -> str:
+        if (
+            show_pages_checkbox == "True"
+        ):  # request can be used only inside the function
             print(system_prompt + OPTIONAL_PAGE_NUMBER_SP)
             return system_prompt + OPTIONAL_PAGE_NUMBER_SP
         else:
@@ -126,11 +129,15 @@ def process_text(data: dict) -> None:
         choosen_model = data.get("choosen_model")
         change_lebgth_checkbox = data.get("change_length_checkbox")
         slider_value = data.get("slider_value")
-        
+
         show_pages_checkbox = str(show_pages_checkbox)
         change_lebgth_checkbox = str(change_lebgth_checkbox)
-        slider_value = float(slider_value)
         
+        if slider_value is not None:
+            slider_value = float(slider_value)
+        else:
+            slider_value = 0.0
+
         if not prompt:
             print("no prompt provided")
             socketio.emit("error", {"message": "No input provided"})
@@ -160,22 +167,12 @@ def process_text(data: dict) -> None:
 
         for pdf in pdfs_to_scan:
             print(pdf)
-        
+
         genai.configure(api_key=GEMINI_API_KEY)
         model = genai.GenerativeModel(
             choosen_model, system_instruction=show_pages(SYSTEM_PROMPT)
         )  # another models to be used: "gemini-2.0-flash-thinking-exp-01-21" "gemini-2.0-flash"
-        
-        
-        
-        
-        # DO POPRAWY: kod wczytuje system prompt tylko kiedy Change output size is checked; nie dzialaja wymagania jak nalezy co do rozmiaru; shor, medium -> too ambigious, dac konkretne liczby
-        # bug: przy zmianie ustawien i zgenerowaniu nowej odpowiedzi: header pojawia sie tam gdzie nalezy, ale potem tworzony jest kolejny u gory strony,
-        # uncheck "Change length of the response" and checking "Show pages" makes the next output be produced with formatting issues
-        
-        
-        
-        
+
         try:
             for index, pdf in enumerate(pdfs_to_scan):
                 if not streaming:
@@ -194,7 +191,14 @@ def process_text(data: dict) -> None:
                 socketio.emit("new_container", {"html": container_html})
 
                 accumulated_text = ""
-                for result_chunk in process_pdf(prompt, pdf, model, change_lebgth_checkbox, output_size, slider_value):
+                for result_chunk in process_pdf(
+                    prompt,
+                    pdf,
+                    model,
+                    change_lebgth_checkbox,
+                    output_size,
+                    slider_value,
+                ):
                     if not streaming:
                         break
                     if (
@@ -241,12 +245,9 @@ def handle_stop() -> None:
     print("Processing Stopped by User")
 
 
-
-
-@app.route('/langchainChat')
-def langchain_chat():
+@app.route("/langchainChat")
+def langchain_chat() -> Any:
     return render_template("langchainChat.html")
-
 
 
 if __name__ == "__main__":

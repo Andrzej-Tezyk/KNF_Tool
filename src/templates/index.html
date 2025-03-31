@@ -16,176 +16,6 @@
     
 </head>
 <body>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const socket = io.connect('http://127.0.0.1:5000'); // DO ZMIANY
-            const outputDiv = document.getElementById('output');
-            const processBtn = document.getElementById('action-button');
-            const toggleBottomPanelBtn = document.getElementById('toggleBottomPanelBtn');
-            const inputText = document.getElementById('input');
-            const clearBtn = document.getElementById('clean-button');
-            
-            socket.on('new_container', function(data) {
-                outputDiv.insertAdjacentHTML('beforeend', data.html);
-            });
-            
-            socket.on('update_content', function(data) {
-                const container = document.getElementById(data.container_id);
-                if (container) {
-                    container.innerHTML = data.html;
-                }
-            });
-
-            socket.on('stream_stopped', function(data) {
-                const button = document.getElementById('action-button');
-                const img = button.querySelector('img');
-                img.src = "{{ url_for('static', filename='images/arrow-up-solid.svg') }}";
-                button.addEventListener("click", startProcessing);
-                inputText.addEventListener('keydown', handleInputKeydown);
-            });
-
-            processBtn.addEventListener('click', startProcessing)
-            document.getElementById("file-button").addEventListener("click", toggleBottomPanel);
-            document.getElementById("hidePanel-button").addEventListener("click", toggleBottomPanel);
-            document.getElementById("selectAllBtn").addEventListener("click", selectAllFiles);
-            document.getElementById("uncheckAllBtn").addEventListener("click", uncheckAllFiles);
-            document.getElementById("sidebar-icon").addEventListener("click", closeOpenSidebar);
-            inputText.addEventListener('keydown', handleInputKeydown);
-            clearBtn.addEventListener('click', clearOutput);
-
-            document.querySelectorAll('.file-checkbox').forEach((checkbox) => { // eventlisteners for all file checkboxes
-                checkbox.addEventListener('change', updateSelectedFilesDisplay);
-            });
-
-            function clearOutput() {
-                stopProcessing()
-                outputDiv.innerHTML = ''; // clear previous output
-            }
-
-            function handleInputKeydown(event) {
-                if (event.key === 'Enter' && !event.shiftKey) {
-                    event.preventDefault(); // prevent going to a new line
-                    const button = document.getElementById('action-button');
-                    button.removeEventListener("click", startProcessing)
-                    inputText.removeEventListener('keydown', handleInputKeydown);
-
-                    let input = document.getElementById('input').value;
-                    let output_size = document.getElementById('output-size').value;
-                    let selectedFiles = [];
-                    document.querySelectorAll('.file-checkbox:checked').forEach((checkbox) => {
-                        selectedFiles.push(checkbox.value);
-                    });
-                    socket.emit('start_processing', { input: input, pdfFiles: selectedFiles, output_size: output_size });
-
-                    const img = button.querySelector('img');
-                    img.src = "{{ url_for('static', filename='images/stop-solid.svg') }}"; // changes icon to stop
-
-                    button.addEventListener("click", stopProcessing)
-                }
-            }
-            
-            function startProcessing() {
-                const button = document.getElementById('action-button');
-              
-                button.removeEventListener("click", startProcessing)
-                inputText.removeEventListener('keydown', handleInputKeydown);
-            
-                let input = document.getElementById('input').value;
-                let output_size = document.getElementById('output-size').value;
-                let selectedFiles = [];
-                document.querySelectorAll('.file-checkbox:checked').forEach((checkbox) => {
-                    selectedFiles.push(checkbox.value);
-                });
-                
-                socket.emit('start_processing', { input: input, pdfFiles: selectedFiles, output_size: output_size });
-                
-                const img = button.querySelector('img');
-                img.src = "{{ url_for('static', filename='images/stop-solid.svg') }}"; // changes icon to stop
-
-                button.addEventListener("click", stopProcessing)
-            }
-
-            function stopProcessing() {
-                const button = document.getElementById('action-button');
-                socket.emit('stop_processing');
-                button.removeEventListener("click", stopProcessing);
-            }
-
-            function toggleBottomPanel() {
-                const panel = document.getElementById("bottom-panel");
-                if (panel.style.bottom === "0px") {
-                    panel.style.bottom = "-100%";
-                } else {
-                    panel.style.bottom = "0px";
-                }
-            }
-
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    const panel = document.getElementById("bottom-panel");
-                    if (panel && panel.style.bottom === "0px") { // check if the panel is open
-                        toggleBottomPanel();
-                    }
-                }
-            });
-
-            function selectAllFiles() {
-                const checkboxes = document.querySelectorAll(".file-checkbox"); // select all checkboxes inside the scrollable list
-                checkboxes.forEach(checkbox => {
-                    checkbox.checked = true; // all checkboxes are checked
-                });
-                updateSelectedFilesDisplay(); // update choosen files
-            }
-
-            function uncheckAllFiles() {
-                const checkboxes = document.querySelectorAll(".file-checkbox"); // select all checkboxes inside the scrollable list
-                checkboxes.forEach(checkbox => {
-                    checkbox.checked = false; // all checkboxes are checked
-                });
-                updateSelectedFilesDisplay(); // update choosen files
-            }
-
-            function closeOpenSidebar() {
-            var inputSection = document.querySelector(".input-section");
-            var sideMenuButtons = document.querySelector(".side-menu-buttons-container");
-
-            if (inputSection.style.display === "none" || inputSection.style.display === "") {
-                inputSection.style.display = "flex";
-                sideMenuButtons.style.display = "flex";
-
-                setTimeout(() => {
-                    inputSection.style.opacity = "1";
-                    sideMenuButtons.style.opacity = "1";
-                }, 200); // for smooth transition
-            } else {
-                inputSection.style.opacity = "0";
-                sideMenuButtons.style.opacity = "0";
-
-                setTimeout(() => {
-                    inputSection.style.display = "none";
-                    sideMenuButtons.style.display = "none";
-                }, 200); // hide after fade out
-            }
-        }
-
-        function updateSelectedFilesDisplay() { // update checkboxes
-            const selectedFilesContainer = document.getElementById('selected-files');
-            if (selectedFilesContainer) {
-                let selectedFiles = [];
-                document.querySelectorAll('.file-checkbox:checked').forEach((checkbox) => {
-                    let fullName = checkbox.value; // shorten documents names
-                    let shortName = fullName;
-                    if (fullName.length > 15 && fullName.includes('_')) {
-                        shortName = fullName.slice(11, 25);
-                    }
-                    selectedFiles.push(shortName);
-                });
-                selectedFilesContainer.textContent = selectedFiles.join(', ');
-            }
-        }
-
-        });
-    </script>
     <div class="flex-container">
         <aside class="sidebar">
             <div class="sidebar-header">
@@ -238,14 +68,59 @@
                         <div class="input-section-elements">
                             <div class="option-section">
 
-                                <div class="show-pages-checkbox-container">
-                                    <label for="output-size">Response size in words:  </label>
-                                    <input type="text" id="output-size" name="output_size" minlength="2" maxlength="5" size="2" value="100">
+                                <div class="segment-side-bar">
+                                    <div class="show-pages-checkbox-container glass-box">
+                                      <input type="checkbox" id="change_lebgth" name="show-pages">
+                                      <label for="show-pages">Change length of response</label> <!-- zgooglowac jak dziala for="" i co ma tam sie znalezc :) -->
+                                    </div>
+                                    <div class="show-pages-checkbox-container">
+                                        <label for="words-sentence-select" id="select-text">Options:</label>
+                                        <select id="words-sentence-select" name="model" class="show-pages-checkbox-containe glass-select">
+                                            <option value="very short">very short</option>
+                                            <option value="short">short</option>
+                                            <option value="medium" selected="selected">medium</option>
+                                            <option value="long">long</option>
+                                            <option value="very long">very long</option>
+                                        </select>
+                                    </div>
                                 </div>
+                                <div class="segment-side-bar">
+                                    <div class="show-pages-checkbox-container glass-box">
+                                        <input type="checkbox" id="show-pages" name="show-pages">
+                                        <label for="show-pages">Show pages</label>
+                                    </div>
+                                </div>
+                                <div class="segment-side-bar">
+                                    <div class="show-pages-checkbox-container">
+                                        <label for="model-select">Choose model:</label>
+                                        <select id="model-select" name="model"  class="show-pages-checkbox-containe glass-select">
+                                            <option value="gemini-2.0-flash" selected="selected">gemini-2.0-flash</option>
+                                            <option value="gemini-2.0-flash-thinking-exp-01-21">gemini-2.0-flash-thinking-exp-01-21</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="segment-side-bar">
+                                    <div class="show-pages-checkbox-container">
+                                        <label for="model-select">Choose temperature:</label>
+                                        <div class="slidecontainer">
+                                            <input type="range" min="0" max="1" step="0.05" value="0.8" class="slider" id="myRange">
+                                        </div>
+                                    </div>
+                                    <div class="show-pages-checkbox-container">
+                                        <label for="model-select">Value of temperature: <span id="demo"></span></label>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button class="open-button" onclick="openForm()">More info about temperature</button>
+                                    <div class="form-popup" id="tempInfo">
+                                        <form class="form-container">
+                                            <label>In AI models like LLMs, temperature controls the randomness
+                                                of the model's responses. A value close to 1 results in more varied and creative outputs,
+                                                while a lower value (closer to 0) makes responses more predictable and focused.</label>
 
-                                <div class="show-pages-checkbox-container">
-                                    <input type="checkbox" id="show-pages" name="show-pages">
-                                    <label for="show-pages">Show pages</label>
+                                            <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
+                                        </form>
+                                    </div>
                                 </div>
 
                             </div>
@@ -260,10 +135,10 @@
                         <div class="input-form-container">
                             <div class="input-area-elements">
                                 <textarea id="input" name="input" placeholder="Type your query" required></textarea>
-                                <button id="action-button" class="button-round"> <!-- type="submit" class="button-round"> -->
+                                <button id="action-button" class="button-round"> 
                                     <img class="icon" src="{{ url_for('static', filename='images/arrow-up-solid.svg') }}">
                                 </button>
-                                <button class="button-round" id="file-button" data-tooltip="Documents" type="button"> <!-- to avoid sending the form -->
+                                <button class="button-round" id="file-button" data-tooltip="Documents" type="button"> 
                                     <img class="sidebar-icon" src="{{ url_for('static', filename='images/file-regular.svg') }}">
                                 </button>
                             </div>
@@ -274,7 +149,7 @@
                                         <button id="selectAllBtn" type="button" class="bottom-panel-button">Select All</button>
                                         <button id="uncheckAllBtn" type="button" class="bottom-panel-button">Uncheck All</button>
                                     </div>
-                                    <button id="hidePanel-button" class="sidear-button-round" type="button" data-tooltip="Or press Escape"> <!-- onclick="toggleBottomPanel()"> -->
+                                    <button id="hidePanel-button" class="sidear-button-round" type="button" data-tooltip="Or press Escape">
                                         <img class="icon" src="{{ url_for('static', filename='images/circle-xmark-regular.svg') }}">
                                     </button>
                                 </div>
@@ -293,10 +168,360 @@
                         <div class="list-of-choosen-files">
                             <div id="selected-files"></div> <!-- selected files go here -->
                         </div>
+                        <div id="tutorialPopup">
+                            <div class="header-tutorial-flex-contanier">
+                                <h3>LLM Prompting Tutorial</h3>
+                                <button id="hideTutorial-button" class="sidear-button-round" type="button" data-tooltip="Or press Escape">
+                                    <img class="icon" src="{{ url_for('static', filename='images/circle-xmark-regular.svg') }}">
+                                </button>
+                            </div>
+                            <div class="tutorial-text">
+                                <div class="tutorial-text-paragraph">
+                                    <h4>Understand the context</h4>
+                                    <p>Financial regulations for banks can be complex. Before writing your prompt, ensure you understand:</p>
+                                    <ol>
+                                        <li><strong>The document’s scope.</strong> What regulation or specific section are you targeting?</li>
+                                        <li><strong>Your objective.</strong> Are you looking for a summary, clarification of a term, compliance details, or an interpretation of a clause?</li>
+                                    </ol>
+                                    <em>Tip: Think of your prompt as a question to an expert who is familiar with banking regulations.</em>
+                                </div>
+
+                                <div class="tutorial-text-paragraph">
+                                    <h4>Be specific and targeted</h4>
+                                    <p>General queries might lead to vague or off-target responses. Instead, use specific language.</p>
+                                    <ol>
+                                        <li><strong>Identify the regulation.</strong> Instead of “Explain bank rules,” say “Explain the capital adequacy requirements in Recommendation X.”</li>
+                                        <li><strong>Mention sections or terms.</strong> For example, “What are the implications of the liquidity coverage ratio as described in Section 4.2 of the regulation?”</li>
+                                    </ol>
+                                    <em>Example: “Can you summarize the key requirements related to risk management in the KNF guidelines, focusing on the minimum liquidity coverage ratio?”</em>
+                                </div>    
+
+                                <div class="tutorial-text-paragraph">
+                                    <h4>Structure your prompt clearly</h4>
+                                    <p>A well-structured prompt can guide the model more effectively.</p>
+                                    <ol>
+                                        <li><strong>Bullet points or lists.</strong> When asking for multiple points or criteria, format your request in a list.</li>
+                                        <li><strong>Step-by-step requests.</strong> If the regulation is complex, ask for a breakdown of the topic into understandable steps or segments.</li>
+                                    </ol>
+                                    <em>Example: “Please outline: 1) The key risk factors outlined in the regulation. 2) The steps banks must take to mitigate these risks. 3) Any penalties for non-compliance.”</em>
+                                </div>
+
+                                <div class="tutorial-text-paragraph">
+                                    <h4>Use open-ended and specific questions</h4>
+                                    <p>Balance is key. Open-ended questions allow the model to provide comprehensive answers, while specificity keeps responses focused.</p>
+                                    <ol>
+                                        <li><strong>Open-ended.</strong> “What are the emerging trends in financial regulation for banks?”</li>
+                                        <li><strong>Specific.</strong> “What are the minimum capital requirements for banks under the Basel III framework?”</li>
+                                    </ol>
+                                </div>
+
+                                <div class="tutorial-text-paragraph">
+                                    <h4>Iterate and refine</h4>
+                                    <p>Your first prompt may not yield the perfect answer. Use the LLM’s feedback.</p>
+                                    <ol>
+                                        <li><strong>Clarify ambiguities.</strong> If the response is too broad, refine your query with additional context.</li>
+                                        <li><strong>Ask follow-up questions.</strong> Narrow down further details in subsequent prompts.</li>
+                                    </ol>
+                                    <em>Tip: If a prompt returns too much unrelated information, add a clarifying sentence such as “Focus solely on the implications for mid-sized banks.”</em>
+                                </div>
+
+                                <div class="tutorial-text-paragraph">
+                                    <h4>Incorporate industry jargon carefully</h4>
+                                    <p>While financial terminology is necessary, ensure you’re not overloading your prompt.</p>
+                                    <ol>
+                                        <li><strong>Balance technicality.</strong> Use standard terms, but if a term is very technical or obscure, briefly define it.</li>
+                                        <li><strong>Maintain readability.</strong> The prompt should be understandable for the LLM without ambiguity.</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // variables, listeners
+            const socket = io.connect('http://127.0.0.1:5000'); // DO ZMIANY
+            const outputDiv = document.getElementById('output');
+            const toggleBottomPanelBtn = document.getElementById('toggleBottomPanelBtn');
+            const inputText = document.getElementById('input');
+            const clearBtn = document.getElementById('clean-button');
+            const button = document.getElementById('action-button');
+            const img = button.querySelector('img');
+            
+            button.addEventListener('click', startProcessingOnButton);
+            inputText.addEventListener('keydown', startProcessingOnEnter);
+            clearBtn.addEventListener('click', clearOutput);
+
+            document.getElementById("file-button").addEventListener("click", toggleBottomPanel);
+            document.getElementById("hidePanel-button").addEventListener("click", toggleBottomPanel);
+            document.getElementById("selectAllBtn").addEventListener("click", selectAllFiles);
+            document.getElementById("uncheckAllBtn").addEventListener("click", uncheckAllFiles);
+            document.getElementById("sidebar-icon").addEventListener("click", closeOpenSidebar);
+            document.getElementById("info-button").addEventListener("click", showHidePopupTutorial);
+            document.getElementById("hideTutorial-button").addEventListener("click", closePopupTutorial);
+
+
+
+            // socket events
+            socket.on('new_container', function(data) {
+                outputDiv.insertAdjacentHTML('beforeend', data.html);
+            });
+            
+            socket.on('update_content', function(data) {
+                const container = document.getElementById(data.container_id);
+                if (container) {
+                    container.innerHTML = data.html;
+                }
+            });
+
+            socket.on('stream_stopped', function(data) {
+                img.src = "{{ url_for('static', filename='images/arrow-up-solid.svg') }}";
+                button.addEventListener("click", startProcessingOnButton);
+                inputText.addEventListener('keydown', startProcessingOnEnter);
+            });
+
+
+
+            // advanced options elements
+            var checkBox = document.getElementById("change_lebgth");
+            var select = document.getElementById("words-sentence-select");
+            var text = document.getElementById("select-text");
+
+            select.style.display = "none";
+            text.style.display = "none";
+
+            checkBox.addEventListener("change", function () {
+            select.style.display = checkBox.checked ? "block" : "none";
+            text.style.display = checkBox.checked ? "block" : "none";
+            });
+
+            var slider = document.getElementById("myRange");
+            var output = document.getElementById("demo");
+            output.innerHTML = slider.value;
+
+            slider.oninput = function() {
+            output.innerHTML = this.value;
+            }
+
+            function openForm() {
+                document.getElementById("tempInfo").style.display = "block";
+            }
+
+            function closeForm() {
+                document.getElementById("tempInfo").style.display = "none";
+            }
+
+            var openButton = document.querySelector(".open-button");
+            var closeButton = document.querySelector(".btn.cancel");
+            var tempInfo = document.getElementById("tempInfo");
+
+            openButton.addEventListener("click", function () {
+                tempInfo.style.display = "block";
+            });
+
+            closeButton.addEventListener("click", function () {
+                tempInfo.style.display = "none";
+            });
+
+
+
+            // clear button
+            function clearOutput() {
+                stopProcessing()
+                outputDiv.innerHTML = ''; // clear previous output
+            }
+
+
+
+            // start processing: 1) on key; 2) ob button
+            // remove arrow-up -> add stop button + functionality
+            function startProcessingOnEnter() {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault(); // prevent going to a new line
+                
+                    startProcessingOnButton();
+                }       
+            }
+
+            function startProcessingOnButton() {
+                const button = document.getElementById('action-button');
+              
+                button.removeEventListener("click", startProcessingOnButton)
+                inputText.removeEventListener('keydown', startProcessingOnEnter);
+            
+                let input = document.getElementById('input').value;
+                let output_size = document.getElementById('words-sentence-select').value;
+                let selectedFiles = [];
+                document.querySelectorAll('.file-checkbox:checked').forEach((checkbox) => {
+                    selectedFiles.push(checkbox.value);
+                });
+                let show_pages_checkbox = document.getElementById('show-pages').checked;
+                let choosen_model = document.getElementById('model-select').value;
+                let change_length_checkbox = document.getElementById('change_lebgth').checked;
+                let slider_value = document.getElementById('myRange').value;
+                
+                socket.emit('start_processing', { 
+                    input: input, 
+                    pdfFiles: selectedFiles, 
+                    output_size: output_size, 
+                    show_pages_checkbox: show_pages_checkbox, 
+                    choosen_model: choosen_model,
+                    change_length_checkbox: change_length_checkbox,
+                    slider_value: slider_value });
+                
+                const img = button.querySelector('img');
+                img.src = "{{ url_for('static', filename='images/stop-solid.svg') }}"; // changes icon to stop
+
+                button.addEventListener("click", stopProcessing)      
+            }
+
+            function stopProcessing() {
+                const button = document.getElementById('action-button');
+                socket.emit('stop_processing');
+                button.removeEventListener("click", stopProcessing);
+            }
+
+
+
+            // show/hide panel with document checkboxes
+            function toggleBottomPanel() {
+                const panel = document.getElementById("bottom-panel");
+                if (panel.style.bottom === "0px") {
+                    panel.style.bottom = "-100%";
+                } else {
+                    panel.style.bottom = "0px";
+                }
+            }
+
+            // close bottom tab on Esc
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    const panel = document.getElementById("bottom-panel");
+                    if (panel && panel.style.bottom === "0px") { // check if the panel is open
+                        toggleBottomPanel();
+                    }
+                }
+            });
+
+            // buttons on bottom panel
+            function selectAllFiles() {
+                const checkboxes = document.querySelectorAll(".file-checkbox"); // select all checkboxes inside the scrollable list
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = true; // all checkboxes are checked
+                });
+                updateSelectedFilesDisplay(); // update choosen files
+            }
+
+            function uncheckAllFiles() {
+                const checkboxes = document.querySelectorAll(".file-checkbox"); // select all checkboxes inside the scrollable list
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = false; // all checkboxes are checked
+                });
+                updateSelectedFilesDisplay(); // update choosen files
+            }
+
+
+
+            // show sidebar + additional buttons
+            function closeOpenSidebar() {
+            var inputSection = document.querySelector(".input-section");
+            var sideMenuButtons = document.querySelector(".side-menu-buttons-container");
+
+            if (inputSection.style.display === "none" || inputSection.style.display === "") {
+                inputSection.style.display = "flex";
+                sideMenuButtons.style.display = "flex";
+
+                setTimeout(() => {
+                    inputSection.style.opacity = "1";
+                    sideMenuButtons.style.opacity = "1";
+                }, 200); // for smooth transition
+            } else {
+                inputSection.style.opacity = "0";
+                sideMenuButtons.style.opacity = "0";
+
+                setTimeout(() => {
+                    inputSection.style.display = "none";
+                    sideMenuButtons.style.display = "none";
+                }, 200); // hide after fade out
+            }
+        }
+
+
+
+        // document checkboxes listener
+        document.querySelectorAll('.file-checkbox').forEach((checkbox) => { // eventlisteners for all file checkboxes
+            checkbox.addEventListener('change', updateSelectedFilesDisplay);
+        });        
+
+
+
+        // show shorten filenames under input textfield
+        function updateSelectedFilesDisplay() {
+            const selectedFilesContainer = document.getElementById('selected-files');
+
+            if (selectedFilesContainer) {
+                let selectedFiles = [];
+
+                document.querySelectorAll('.file-checkbox:checked').forEach((checkbox) => {
+                    let fullName = checkbox.value;
+                    let shortName = fullName.length > 15 && fullName.includes('_') 
+                                    ? fullName.slice(11, 25) 
+                                    : fullName;
+                    selectedFiles.push(shortName);
+                });
+
+                if (selectedFiles.length > 0) {
+                    selectedFilesContainer.textContent = selectedFiles.join(', ');
+                    selectedFilesContainer.style.color = ''; // reset to default text color
+                } else {
+                    selectedFilesContainer.textContent = "No file selected";
+                    selectedFilesContainer.style.color = 'red'; // show red warning text
+                }
+            }
+        }
+
+        // call once to initialize state correctly
+        updateSelectedFilesDisplay();
+
+        });
+    </script>
+    
+    <script>
+        // tutorial shown on "?" button click
+        function showHidePopupTutorial() {
+            var popup = document.getElementById("tutorialPopup")
+
+            if (popup.style.display === "none" || popup.style.display === "") {
+                popup.style.display = "flex";
+
+                setTimeout(() => {
+                    popup.style.opacity = "1";
+                }, 200); // for smooth transition
+            } else {
+                popup.style.opacity = "0";
+
+                setTimeout(() => {
+                    popup.style.display = "none";
+                }, 200); // hide after fade out
+            }
+        }
+        
+        function closePopupTutorial () {
+            var popup = document.getElementById("tutorialPopup")
+
+            if (popup.style.display === "flex") {
+                popup.style.display = "none";
+
+                setTimeout(() => {
+                    popup.style.opacity = "0";
+                }, 200); // for smooth transition
+            }
+        }
+    </script>
 </body>
 </html>

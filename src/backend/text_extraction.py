@@ -53,7 +53,14 @@ def extract_text_from_pdf(pdf_path: Path) -> str:
         return ""
 
 
-def process_pdf(prompt: str, pdf: Path, model: Any, output_size: int) -> Generator:
+def process_pdf(
+    prompt: str,
+    pdf: Path,
+    model: Any,
+    change_lebgth_checkbox: str,
+    output_size: int,
+    slider_value: float,
+) -> Generator:
     """Processes a single PDF document using the provided prompt and returns the result.
 
     This function uploads a PDF document, sends it to a model with the given prompt,
@@ -68,7 +75,7 @@ def process_pdf(prompt: str, pdf: Path, model: Any, output_size: int) -> Generat
         prompt: A string containing the user’s prompt for processing the document.
         pdf: A Path object representing the PDF file to be processed.
         model: A generative AI model used to process the document.
-        output_size: An integer defining the approximate word limit for the response.
+        output_size: A string defining the approximate word limit for the response.
 
     Returns:
         A dictionary containing:
@@ -87,46 +94,29 @@ def process_pdf(prompt: str, pdf: Path, model: Any, output_size: int) -> Generat
     else:
         try:
             print(f"Document: {pdf.stem} is beeing analyzed.")
-            # text = extract_text_from_pdf(pdf)
-            # if len(text) > 10:  # random small number
-            #    response = model.generate_content(
-            #        f"{prompt} (Please limit the response to approximately {output_size} words) {text}"
-            #    )  # , generation_config={"max_output_tokens": max_tokens}
-
-            # else:
             file_to_send = genai.upload_file(pdf)
             print(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
             response = model.generate_content(
                 [
-                    prompt
-                    + f"(Please limit the response to approximately {output_size} words)",
+                    (
+                        prompt + f"(Please provide {output_size} size response)"
+                        if change_lebgth_checkbox == "True"
+                        else prompt
+                    ),
                     file_to_send,
                 ],
                 stream=True,
+                generation_config={"temperature": slider_value},
             )
-            for response_chunk in response:
-                # replace -> sometimes double space between words occure; most likely reason: pdf formating
-                response_chunk_text = response_chunk.text.replace("  ", " ")
-                yield {"pdf_name": pdf.stem, "content": response_chunk_text}
-            print(f"Response for: {pdf.stem} was saved!\n")
-            time.sleep(1)  # to lower number api requests to model per sec
-
-        except Exception as e:
-            print(f"There is a problem with {pdf.stem}. \n Error message: {e}\n")
-            traceback.print_exc()
-            yield {"error": f"An error occurred while processing {pdf.stem}: {str(e)}"}
-
-
-""" problem with markdown formatting when using this approach
             # split its text into smaller sub-chunks
             for response_chunk in response:
                 # clean up the chunk text (removes extra spaces)
                 chunk_text = response_chunk.text.replace("  ", " ")
-                words = chunk_text.split()
+                words = chunk_text.split(" ")
                 sub_chunk = ""
                 for word in words:
                     sub_chunk = sub_chunk + " " + word if sub_chunk else word
-                    if len(sub_chunk.split()) >= 3: # size of subchunk here
+                    if len(sub_chunk.split()) >= 3:  # size of subchunk here
                         yield {"pdf_name": pdf.stem, "content": sub_chunk + " "}
                         sub_chunk = ""
                         time.sleep(0.2)
@@ -136,4 +126,7 @@ def process_pdf(prompt: str, pdf: Path, model: Any, output_size: int) -> Generat
                     time.sleep(0.1)
             print(f"Response for: {pdf.stem} was saved!\n")
             time.sleep(1)  # lower API request rate per sec
-"""
+        except Exception as e:
+            print(f"There is a problem with {pdf.stem}. \n Error message: {e}\n")
+            traceback.print_exc()
+            yield {"error": f"An error occurred while processing {pdf.stem}: {str(e)}"}

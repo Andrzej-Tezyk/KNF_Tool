@@ -257,13 +257,6 @@
             inputText.addEventListener('keydown', startProcessingOnEnter);
             clearBtn.addEventListener('click', clearOutput);
 
-            document.getElementById("file-button").addEventListener("click", toggleBottomPanel);
-            document.getElementById("hidePanel-button").addEventListener("click", toggleBottomPanel);
-            document.getElementById("selectAllBtn").addEventListener("click", selectAllFiles);
-            document.getElementById("uncheckAllBtn").addEventListener("click", uncheckAllFiles);
-            document.getElementById("sidebar-icon").addEventListener("click", closeOpenSidebar);
-            document.getElementById("info-button").addEventListener("click", showHidePopupTutorial);
-            document.getElementById("hideTutorial-button").addEventListener("click", closePopupTutorial);
 
 
 
@@ -284,50 +277,6 @@
                 button.addEventListener("click", startProcessingOnButton);
                 inputText.addEventListener('keydown', startProcessingOnEnter);
             });
-
-
-
-            // advanced options elements
-            var checkBox = document.getElementById("change_lebgth");
-            var select = document.getElementById("words-sentence-select");
-            var text = document.getElementById("select-text");
-
-            select.style.display = "none";
-            text.style.display = "none";
-
-            checkBox.addEventListener("change", function () {
-            select.style.display = checkBox.checked ? "block" : "none";
-            text.style.display = checkBox.checked ? "block" : "none";
-            });
-
-            var slider = document.getElementById("myRange");
-            var output = document.getElementById("demo");
-            output.innerHTML = slider.value;
-
-            slider.oninput = function() {
-            output.innerHTML = this.value;
-            }
-
-            function openForm() {
-                document.getElementById("tempInfo").style.display = "block";
-            }
-
-            function closeForm() {
-                document.getElementById("tempInfo").style.display = "none";
-            }
-
-            var openButton = document.querySelector(".open-button");
-            var closeButton = document.querySelector(".btn.cancel");
-            var tempInfo = document.getElementById("tempInfo");
-
-            openButton.addEventListener("click", function () {
-                tempInfo.style.display = "block";
-            });
-
-            closeButton.addEventListener("click", function () {
-                tempInfo.style.display = "none";
-            });
-
 
 
             // clear button
@@ -386,142 +335,11 @@
                 button.removeEventListener("click", stopProcessing);
             }
 
-
-
-            // show/hide panel with document checkboxes
-            function toggleBottomPanel() {
-                const panel = document.getElementById("bottom-panel");
-                if (panel.style.bottom === "0px") {
-                    panel.style.bottom = "-100%";
-                } else {
-                    panel.style.bottom = "0px";
-                }
-            }
-
-            // close bottom tab on Esc
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    const panel = document.getElementById("bottom-panel");
-                    if (panel && panel.style.bottom === "0px") { // check if the panel is open
-                        toggleBottomPanel();
-                    }
-                }
-            });
-
-            // buttons on bottom panel
-            function selectAllFiles() {
-                const checkboxes = document.querySelectorAll(".file-checkbox"); // select all checkboxes inside the scrollable list
-                checkboxes.forEach(checkbox => {
-                    checkbox.checked = true; // all checkboxes are checked
-                });
-                updateSelectedFilesDisplay(); // update choosen files
-            }
-
-            function uncheckAllFiles() {
-                const checkboxes = document.querySelectorAll(".file-checkbox"); // select all checkboxes inside the scrollable list
-                checkboxes.forEach(checkbox => {
-                    checkbox.checked = false; // all checkboxes are checked
-                });
-                updateSelectedFilesDisplay(); // update choosen files
-            }
-
-
-
-            // show sidebar + additional buttons
-            function closeOpenSidebar() {
-            var inputSection = document.querySelector(".input-section");
-            var sideMenuButtons = document.querySelector(".side-menu-buttons-container");
-
-            if (inputSection.style.display === "none" || inputSection.style.display === "") {
-                inputSection.style.display = "flex";
-                sideMenuButtons.style.display = "flex";
-
-                setTimeout(() => {
-                    inputSection.style.opacity = "1";
-                    sideMenuButtons.style.opacity = "1";
-                }, 200); // for smooth transition
-            } else {
-                inputSection.style.opacity = "0";
-                sideMenuButtons.style.opacity = "0";
-
-                setTimeout(() => {
-                    inputSection.style.display = "none";
-                    sideMenuButtons.style.display = "none";
-                }, 200); // hide after fade out
-            }
-        }
-
-
-
-        // document checkboxes listener
-        document.querySelectorAll('.file-checkbox').forEach((checkbox) => { // eventlisteners for all file checkboxes
-            checkbox.addEventListener('change', updateSelectedFilesDisplay);
-        });        
-
-
-
-        // show shorten filenames under input textfield
-        function updateSelectedFilesDisplay() {
-            const selectedFilesContainer = document.getElementById('selected-files');
-
-            if (selectedFilesContainer) {
-                let selectedFiles = [];
-
-                document.querySelectorAll('.file-checkbox:checked').forEach((checkbox) => {
-                    let fullName = checkbox.value;
-                    let shortName = fullName.length > 15 && fullName.includes('_') 
-                                    ? fullName.slice(11, 25) 
-                                    : fullName;
-                    selectedFiles.push(shortName);
-                });
-
-                if (selectedFiles.length > 0) {
-                    selectedFilesContainer.textContent = selectedFiles.join(', ');
-                    selectedFilesContainer.style.color = ''; // reset to default text color
-                } else {
-                    selectedFilesContainer.textContent = "No file selected";
-                    selectedFilesContainer.style.color = 'red'; // show red warning text
-                }
-            }
-        }
-
-        // call once to initialize state correctly
-        updateSelectedFilesDisplay();
-
         });
     </script>
-    
-    <script>
-        // tutorial shown on "?" button click
-        function showHidePopupTutorial() {
-            var popup = document.getElementById("tutorialPopup")
-
-            if (popup.style.display === "none" || popup.style.display === "") {
-                popup.style.display = "flex";
-
-                setTimeout(() => {
-                    popup.style.opacity = "1";
-                }, 200); // for smooth transition
-            } else {
-                popup.style.opacity = "0";
-
-                setTimeout(() => {
-                    popup.style.display = "none";
-                }, 200); // hide after fade out
-            }
-        }
-        
-        function closePopupTutorial () {
-            var popup = document.getElementById("tutorialPopup")
-
-            if (popup.style.display === "flex") {
-                popup.style.display = "none";
-
-                setTimeout(() => {
-                    popup.style.opacity = "0";
-                }, 200); // for smooth transition
-            }
-        }
-    </script>
+    <script src="{{ url_for('static', filename='advancedOptions.js') }}"></script>
+    <script src="{{ url_for('static', filename='bottomPanel.js') }}"></script>
+    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+    <script src="{{ url_for('static', filename='popupTutorial.js') }}"></script>
 </body>
 </html>

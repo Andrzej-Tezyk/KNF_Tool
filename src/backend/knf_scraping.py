@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 
 def windows_safe_filename(filename: str) -> str:
     """Removes invalid characters from the file name.
-    
+
     This function removes any invalid character in Windows file name from the filename.
     It also replaces end of line characters "\n" with spaces " ".
     Returns the new file name.
@@ -18,24 +18,26 @@ def windows_safe_filename(filename: str) -> str:
     Examples:
         >>> windows_safe_filename('invalid:filename?.txt')
         'invalidfilename.txt'
-    
+
     Args:
         filename: A string containing the file name.
-    
+
     Returns:
         A string containing file name cleansed from any invalid characters.
-    
+
     Raises:
         None
     """
     filename = filename.replace("\n", " ")
-    filename = re.sub(r'[<>:"/\\|?*]', "", filename)            # <>:"/\|?* are invalid characters in Windows file names
+    filename = re.sub(
+        r'[<>:"/\\|?*]', "", filename
+    )  # <>:"/\|?* are invalid characters in Windows file names
     return filename
 
 
 def scrape_knf(num_retries: int, user_agent_list: list) -> None:
     """Scrapes pdf files from KNF url.
-    
+
     This function scrapes pdf files from a KNF url.
     For a certain number of tries it masks under an agent from given agent list
     and downloads the file into a directory. If an error occurs during scraping,
@@ -44,20 +46,20 @@ def scrape_knf(num_retries: int, user_agent_list: list) -> None:
     Examples:
         >>> scrape_knf(10, ["Mozilla/5.0", "Mozilla/4.0"])
         None
-    
+
     Args:
         num_retries: An int describing number of retries the program will
         attempt of scraping a file.
         user_agent_list: A list of strings with user agents for masking.
-    
+
     Returns:
         None
-    
+
     Raises:
         Exception: If an error occurs during processing, it is logged and returned
         in the response dictionary.
     """
-    
+
     scraped_files_dir = Path("scraped_files")
 
     knf_base_url = "https://www.knf.gov.pl"

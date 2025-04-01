@@ -53,14 +53,7 @@ def extract_text_from_pdf(pdf_path: Path) -> str:
         return ""
 
 
-def process_pdf(
-    prompt: str,
-    pdf: Path,
-    model: Any,
-    change_lebgth_checkbox: str,
-    output_size: int,
-    slider_value: float,
-) -> Generator:
+def process_pdf(prompt: str, pdf: Path, model: Any, output_size: int) -> Generator:
     """Processes a single PDF document using the provided prompt and returns the result.
 
     This function uploads a PDF document, sends it to a model with the given prompt,
@@ -75,7 +68,7 @@ def process_pdf(
         prompt: A string containing the user’s prompt for processing the document.
         pdf: A Path object representing the PDF file to be processed.
         model: A generative AI model used to process the document.
-        output_size: A string defining the approximate word limit for the response.
+        output_size: An integer defining the approximate word limit for the response.
 
     Returns:
         A dictionary containing:
@@ -94,19 +87,22 @@ def process_pdf(
     else:
         try:
             print(f"Document: {pdf.stem} is beeing analyzed.")
+            # text = extract_text_from_pdf(pdf)
+            # if len(text) > 10:  # random small number
+            #    response = model.generate_content(
+            #        f"{prompt} (Please limit the response to approximately {output_size} words) {text}"
+            #    )  # , generation_config={"max_output_tokens": max_tokens}
+
+            # else:
             file_to_send = genai.upload_file(pdf)
             print(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
             response = model.generate_content(
                 [
-                    (
-                        prompt + f"(Please provide {output_size} size response)"
-                        if change_lebgth_checkbox == "True"
-                        else prompt
-                    ),
+                    prompt
+                    + f"(Please limit the response to approximately {output_size} words)",
                     file_to_send,
                 ],
                 stream=True,
-                generation_config={"temperature": slider_value},
             )
             # split its text into smaller sub-chunks
             for response_chunk in response:

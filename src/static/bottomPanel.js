@@ -1,3 +1,5 @@
+const toggleBottomPanelBtn = document.getElementById('toggleBottomPanelBtn');
+
 document.getElementById("file-button").addEventListener("click", toggleBottomPanel);
 document.getElementById("hidePanel-button").addEventListener("click", toggleBottomPanel);
 document.getElementById("selectAllBtn").addEventListener("click", selectAllFiles);

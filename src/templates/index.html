@@ -240,103 +240,13 @@
             </div>
         </div>
     </div>
-
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-
-            // variables, listeners
-            const socket = io.connect('http://127.0.0.1:5000'); // DO ZMIANY
-            const outputDiv = document.getElementById('output');
-            const toggleBottomPanelBtn = document.getElementById('toggleBottomPanelBtn');
-            const inputText = document.getElementById('input');
-            const clearBtn = document.getElementById('clean-button');
-            const button = document.getElementById('action-button');
-            const img = button.querySelector('img');
-            
-            button.addEventListener('click', startProcessingOnButton);
-            inputText.addEventListener('keydown', startProcessingOnEnter);
-            clearBtn.addEventListener('click', clearOutput);
-
-
-
-
-            // socket events
-            socket.on('new_container', function(data) {
-                outputDiv.insertAdjacentHTML('beforeend', data.html);
-            });
-            
-            socket.on('update_content', function(data) {
-                const container = document.getElementById(data.container_id);
-                if (container) {
-                    container.innerHTML = data.html;
-                }
-            });
-
-            socket.on('stream_stopped', function(data) {
-                img.src = "{{ url_for('static', filename='images/arrow-up-solid.svg') }}";
-                button.addEventListener("click", startProcessingOnButton);
-                inputText.addEventListener('keydown', startProcessingOnEnter);
-            });
-
-
-            // clear button
-            function clearOutput() {
-                stopProcessing()
-                outputDiv.innerHTML = ''; // clear previous output
-            }
-
-
-
-            // start processing: 1) on key; 2) ob button
-            // remove arrow-up -> add stop button + functionality
-            function startProcessingOnEnter() {
-                if (event.key === 'Enter' && !event.shiftKey) {
-                    event.preventDefault(); // prevent going to a new line
-                
-                    startProcessingOnButton();
-                }       
-            }
-
-            function startProcessingOnButton() {
-                const button = document.getElementById('action-button');
-              
-                button.removeEventListener("click", startProcessingOnButton)
-                inputText.removeEventListener('keydown', startProcessingOnEnter);
-            
-                let input = document.getElementById('input').value;
-                let output_size = document.getElementById('words-sentence-select').value;
-                let selectedFiles = [];
-                document.querySelectorAll('.file-checkbox:checked').forEach((checkbox) => {
-                    selectedFiles.push(checkbox.value);
-                });
-                let show_pages_checkbox = document.getElementById('show-pages').checked;
-                let choosen_model = document.getElementById('model-select').value;
-                let change_length_checkbox = document.getElementById('change_lebgth').checked;
-                let slider_value = document.getElementById('myRange').value;
-                
-                socket.emit('start_processing', { 
-                    input: input, 
-                    pdfFiles: selectedFiles, 
-                    output_size: output_size, 
-                    show_pages_checkbox: show_pages_checkbox, 
-                    choosen_model: choosen_model,
-                    change_length_checkbox: change_length_checkbox,
-                    slider_value: slider_value });
-                
-                const img = button.querySelector('img');
-                img.src = "{{ url_for('static', filename='images/stop-solid.svg') }}"; // changes icon to stop
-
-                button.addEventListener("click", stopProcessing)      
-            }
-
-            function stopProcessing() {
-                const button = document.getElementById('action-button');
-                socket.emit('stop_processing');
-                button.removeEventListener("click", stopProcessing);
-            }
-
-        });
+        var stopIconUrl = "{{ url_for('static', filename='images/stop-solid.svg') }}";
+        var arrowUpIconUrl = "{{ url_for('static', filename='images/arrow-up-solid.svg') }}";
     </script>
+    <script src="{{ url_for('static', filename='socket.js') }}"></script>
+    <script src="{{ url_for('static', filename='stopProcessing.js') }}"></script> 
+    <script src="{{ url_for('static', filename='clearOutput.js') }}"></script>
     <script src="{{ url_for('static', filename='advancedOptions.js') }}"></script>
     <script src="{{ url_for('static', filename='bottomPanel.js') }}"></script>
     <script src="{{ url_for('static', filename='sidebar.js') }}"></script>

@@ -7,8 +7,9 @@ import markdown
 from flask import Flask, render_template
 from flask_socketio import SocketIO
 import google.generativeai as genai  # type: ignore[import-untyped]
-from src.backend.process_query import process_pdf  # type: ignore[import-not-found]
+from backend.process_query import process_pdf  # type: ignore[import-not-found]
 from backend.knf_scraping import scrape_knf  # type: ignore[import-not-found]
+from backend.show_pages import show_pages  # type: ignore[import-not-found]
 
 # directory with pdf files
 SCRAPED_FILES_DIR = "scraped_files"
@@ -71,15 +72,14 @@ SYSTEM_PROMPT = (
     + "If there is something to count, use Python interpreter to do it. But do not show code to the user."
 )
 
-OPTIONAL_PAGE_NUMBER_SP = (
-    "State in brackets after each sentence or paragraph from which page in the text the information used to "
-    + "generate the answer came. Format: (word 'page' in the same language as rest of output: number or numbers)."
-)
+
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     raise ValueError("GEMINI_API_KEY not found in environment variables")
 
+
+# scrape if no documents on the server
 PROJECT_ROOT = Path(__file__).parent.parent  # go up 2 times
 
 scraped_dir = PROJECT_ROOT / "scraped_files"
@@ -106,16 +106,6 @@ def index() -> str:
 @socketio.on("start_processing")
 def process_text(data: dict) -> None:
     print("started")
-
-    def show_pages(system_prompt: str) -> str:
-        if (
-            show_pages_checkbox == "True"
-        ):  # request can be used only inside the function
-            print(system_prompt + OPTIONAL_PAGE_NUMBER_SP)
-            return system_prompt + OPTIONAL_PAGE_NUMBER_SP
-        else:
-            print(system_prompt)
-            return system_prompt
 
     try:
         global output_index
@@ -170,7 +160,7 @@ def process_text(data: dict) -> None:
 
         genai.configure(api_key=GEMINI_API_KEY)
         model = genai.GenerativeModel(
-            choosen_model, system_instruction=show_pages(SYSTEM_PROMPT)
+            choosen_model, system_instruction=show_pages(SYSTEM_PROMPT, show_pages_checkbox)
         )  # another models to be used: "gemini-2.0-flash-thinking-exp-01-21" "gemini-2.0-flash"
 
         try:

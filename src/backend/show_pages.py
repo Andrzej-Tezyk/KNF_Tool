@@ -3,10 +3,9 @@ OPTIONAL_PAGE_NUMBER_SP = (
     + "generate the answer came. Format: (word 'page' in the same language as rest of output: number or numbers)."
 )
 
+
 def show_pages(system_prompt: str, show_pages_checkbox: bool) -> str:
-    if (
-        show_pages_checkbox == "True"
-    ):  # request can be used only inside the function
+    if show_pages_checkbox == "True":  # request can be used only inside the function
         print(system_prompt + OPTIONAL_PAGE_NUMBER_SP)
         return system_prompt + OPTIONAL_PAGE_NUMBER_SP
     else:

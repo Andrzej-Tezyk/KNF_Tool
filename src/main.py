@@ -73,7 +73,6 @@ SYSTEM_PROMPT = (
 )
 
 
-
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     raise ValueError("GEMINI_API_KEY not found in environment variables")
@@ -147,8 +146,8 @@ def process_text(data: dict) -> None:
         print(f"prompt: {prompt}")
         print(f"selected files: {selected_files}")
         print(f"output size: {output_size}")
-        print(f'Show pages: {show_pages_checkbox}')
-        print(f'Change output size: {change_lebgth_checkbox}')
+        print(f"Show pages: {show_pages_checkbox}")
+        print(f"Change output size: {change_lebgth_checkbox}")
         print(f"selected_model: {choosen_model}")
 
         pdf_dir = Path(SCRAPED_FILES_DIR)
@@ -160,7 +159,8 @@ def process_text(data: dict) -> None:
 
         genai.configure(api_key=GEMINI_API_KEY)
         model = genai.GenerativeModel(
-            choosen_model, system_instruction=show_pages(SYSTEM_PROMPT, show_pages_checkbox)
+            choosen_model,
+            system_instruction=show_pages(SYSTEM_PROMPT, show_pages_checkbox),
         )  # another models to be used: "gemini-2.0-flash-thinking-exp-01-21" "gemini-2.0-flash"
 
         try:

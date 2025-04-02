@@ -147,8 +147,8 @@ def process_text(data: dict) -> None:
         print(f"prompt: {prompt}")
         print(f"selected files: {selected_files}")
         print(f"output size: {output_size}")
-        print(show_pages_checkbox)
-        print(change_lebgth_checkbox)
+        print(f'Show pages: {show_pages_checkbox}')
+        print(f'Change output size: {change_lebgth_checkbox}')
         print(f"selected_model: {choosen_model}")
 
         pdf_dir = Path(SCRAPED_FILES_DIR)

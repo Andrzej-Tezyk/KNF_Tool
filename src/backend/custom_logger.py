@@ -1,4 +1,6 @@
 import logging
+from typing import Any
+
 
 class CustomFormatter(logging.Formatter):
 
@@ -8,17 +10,19 @@ class CustomFormatter(logging.Formatter):
     bold_red = "\x1b[31;1m"
     reset = "\x1b[0m"
     # use "s" at the end to align headers
-    format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
+    format_string = (
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
+    )
 
     FORMATS = {
-        logging.DEBUG: grey + format + reset,
-        logging.INFO: grey + format + reset,
-        logging.WARNING: yellow + format + reset,
-        logging.ERROR: red + format + reset,
-        logging.CRITICAL: bold_red + format + reset
+        logging.DEBUG: grey + format_string + reset,
+        logging.INFO: grey + format_string + reset,
+        logging.WARNING: yellow + format_string + reset,
+        logging.ERROR: red + format_string + reset,
+        logging.CRITICAL: bold_red + format_string + reset,
     }
 
-    def format(self, record):
+    def format(self, record: Any) -> Any:
         log_fmt = self.FORMATS.get(record.levelno)
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)

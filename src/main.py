@@ -12,7 +12,7 @@ import google.generativeai as genai  # type: ignore[import-untyped]
 from backend.process_query import process_pdf  # type: ignore[import-not-found]
 from backend.knf_scraping import scrape_knf  # type: ignore[import-not-found]
 from backend.show_pages import show_pages  # type: ignore[import-not-found]
-from backend.custom_logger import CustomFormatter
+from backend.custom_logger import CustomFormatter  # type: ignore[import-not-found]
 
 
 with open("config/config.json") as file:
@@ -97,7 +97,7 @@ def process_text(data: dict) -> None:
         output_index += 1
         global streaming
         streaming = True
-        
+
         # get data
         prompt = data.get("input")
         selected_files = data.get("pdfFiles")
@@ -139,7 +139,6 @@ def process_text(data: dict) -> None:
         log.debug(f"Change output size: {change_lebgth_checkbox}")
         log.debug(f"selected_model: {choosen_model}")
 
-
         # files
         pdf_dir = Path(SCRAPED_FILES_DIR)
 
@@ -148,14 +147,12 @@ def process_text(data: dict) -> None:
         for pdf in pdfs_to_scan:
             log.info(pdf)
 
-
         # model instance inside the function to allow multiple models
         genai.configure(api_key=GEMINI_API_KEY)
         model = genai.GenerativeModel(
             choosen_model,
             system_instruction=show_pages(SYSTEM_PROMPT, show_pages_checkbox),
         )  # another models to be used: "gemini-2.0-flash-thinking-exp-01-21" "gemini-2.0-flash"
-
 
         try:
             for index, pdf in enumerate(pdfs_to_scan):

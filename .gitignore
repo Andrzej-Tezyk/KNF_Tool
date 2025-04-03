@@ -5,4 +5,6 @@
 /src/backend/__pycache__
 ms_colours.txt
 /.vscode
-.gitignor
+**/__pycache__
+.mypy_cache
+.ruff_cache

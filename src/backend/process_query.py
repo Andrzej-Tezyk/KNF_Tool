@@ -3,9 +3,13 @@ import traceback
 from pathlib import Path
 from typing import Any
 from collections.abc import Generator
+import logging
 
 import google.generativeai as genai  # type: ignore[import-untyped]
 from dotenv import load_dotenv
+
+
+log = logging.getLogger("__name__")
 
 
 load_dotenv()
@@ -51,9 +55,9 @@ def process_pdf(
 
     else:
         try:
-            print(f"Document: {pdf.stem} is beeing analyzed.")
+            log.info(f"Document: {pdf.stem} is beeing analyzed.")
             file_to_send = genai.upload_file(pdf)
-            print(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
+            log.debug(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
             response = model.generate_content(
                 [
                     (
@@ -82,9 +86,9 @@ def process_pdf(
                 if sub_chunk:
                     yield {"pdf_name": pdf.stem, "content": sub_chunk + " "}
                     time.sleep(0.1)
-            print(f"Response for: {pdf.stem} was saved!\n")
+            log.debug(f"Response for: {pdf.stem} was saved!\n")
             time.sleep(1)  # lower API request rate per sec
         except Exception as e:
-            print(f"There is a problem with {pdf.stem}. \n Error message: {e}\n")
+            log.error(f"There is a problem with {pdf.stem}. \n Error message: {e}\n")
             traceback.print_exc()
             yield {"error": f"An error occurred while processing {pdf.stem}: {str(e)}"}

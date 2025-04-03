@@ -6,3 +6,5 @@
 ms_colours.txt
 /.vscode
 **/__pycache__
+.mypy_cache
+.ruff_cache

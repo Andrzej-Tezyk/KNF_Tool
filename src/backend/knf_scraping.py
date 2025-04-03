@@ -3,9 +3,13 @@ import random
 import traceback
 from pathlib import Path
 import re
+import logging
 
 import requests
 from bs4 import BeautifulSoup
+
+
+log = logging.getLogger("__name__")
 
 
 def windows_safe_filename(filename: str) -> str:
@@ -82,7 +86,7 @@ def scrape_knf(num_retries: int, user_agent_list: list) -> None:
             if response.status_code in [200, 404]:
                 break  # escape loop if response was successful
         except requests.exceptions.ConnectionError:
-            print("Connection failed, retrying...")
+            log.error("Connection failed, retrying...")
 
     if response and response.status_code == 200:
         soup = BeautifulSoup(response.content, "html.parser")
@@ -103,7 +107,7 @@ def scrape_knf(num_retries: int, user_agent_list: list) -> None:
                     else:
                         pdf_titles_links[title] = href
             except Exception as e:
-                print(f"Problem with link for {link} \n Error messange: {e}\n")
+                log.error(f"Problem with link for {link} \n Error messange: {e}\n")
 
         for title, url in pdf_titles_links.items():
             if len(title) > 1:  # temporary: scraping needs deeper rework;
@@ -116,12 +120,9 @@ def scrape_knf(num_retries: int, user_agent_list: list) -> None:
                     )
                     with open(pdf_path, "wb") as f:
                         f.write(pdf_response.content)
-                        print(f"Downloaded: {pdf_path}")
+                        log.debug(f"Downloaded: {pdf_path}")
                 except Exception as e:
-                    print(f"PDF not downloaded: {url} \n Error messange: {e}\n")
+                    log.error(f"PDF not downloaded: {url} \n Error messange: {e}\n")
                     traceback.print_exc()
     else:
-        print("Failed to retrieve the main page content after retries.")
-
-
-# scrape_knf()
+        log.error("Failed to retrieve the main page content after retries.")

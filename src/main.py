@@ -3,6 +3,7 @@ import traceback
 import os
 from typing import Any
 import json
+import logging
 
 import markdown
 from flask import Flask, render_template
@@ -11,10 +12,20 @@ import google.generativeai as genai  # type: ignore[import-untyped]
 from backend.process_query import process_pdf  # type: ignore[import-not-found]
 from backend.knf_scraping import scrape_knf  # type: ignore[import-not-found]
 from backend.show_pages import show_pages  # type: ignore[import-not-found]
+from backend.custom_logger import CustomFormatter  # type: ignore[import-not-found]
 
 
 with open("config/config.json") as file:
     config = json.load(file)
+
+
+log = logging.getLogger("__name__")
+log.setLevel(logging.DEBUG)
+# create console handler with a higher log level
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+ch.setFormatter(CustomFormatter())
+log.addHandler(ch)
 
 
 # directory with pdf files
@@ -61,6 +72,7 @@ if not scraped_dir.exists():
     scrape_knf(NUM_RETRIES, USER_AGENT_LIST)
 
 
+# flask
 app = Flask(__name__, template_folder="templates", static_folder="static")
 socketio = SocketIO(app, cors_allowed_origins="*")
 
@@ -70,7 +82,7 @@ output_index: int = -1
 
 @app.route("/")
 def index() -> str:
-    print("start")
+    log.info("App is up")
     pdf_dir = Path(SCRAPED_FILES_DIR)
     pdf_files = [pdf.name for pdf in pdf_dir.glob("*.pdf")] if pdf_dir.exists() else []
     return render_template("index.html", pdf_files=pdf_files)
@@ -78,13 +90,15 @@ def index() -> str:
 
 @socketio.on("start_processing")
 def process_text(data: dict) -> None:
-    print("started")
+    log.info("Started input processing")
 
     try:
         global output_index
         output_index += 1
         global streaming
         streaming = True
+
+        # get data
         prompt = data.get("input")
         selected_files = data.get("pdfFiles")
         output_size = data.get("output_size")
@@ -102,14 +116,14 @@ def process_text(data: dict) -> None:
             slider_value = 0.0
 
         if not prompt:
-            print("no prompt provided")
+            log.error("No prompt provided")
             socketio.emit("error", {"message": "No input provided"})
             streaming = False
             socketio.emit("stream_stopped")
             return
 
         if not selected_files or selected_files == []:
-            print("no selected files")
+            log.error("no selected files")
             socketio.emit("error", {"message": "No files selected"})
             streaming = False
             socketio.emit("stream_stopped")
@@ -117,20 +131,23 @@ def process_text(data: dict) -> None:
 
         output_size = str(output_size)
 
-        print(f"prompt: {prompt}")
-        print(f"selected files: {selected_files}")
-        print(f"output size: {output_size}")
-        print(f"Show pages: {show_pages_checkbox}")
-        print(f"Change output size: {change_lebgth_checkbox}")
-        print(f"selected_model: {choosen_model}")
+        # debug logs for each document
+        log.debug(f"prompt: {prompt}")
+        log.debug(f"selected files: {selected_files}")
+        log.debug(f"output size: {output_size}")
+        log.debug(f"Show pages: {show_pages_checkbox}")
+        log.debug(f"Change output size: {change_lebgth_checkbox}")
+        log.debug(f"selected_model: {choosen_model}")
 
+        # files
         pdf_dir = Path(SCRAPED_FILES_DIR)
 
         pdfs_to_scan = [pdf_dir / file_name for file_name in selected_files]
 
         for pdf in pdfs_to_scan:
-            print(pdf)
+            log.info(pdf)
 
+        # model instance inside the function to allow multiple models
         genai.configure(api_key=GEMINI_API_KEY)
         model = genai.GenerativeModel(
             choosen_model,
@@ -151,7 +168,7 @@ def process_text(data: dict) -> None:
                     output_index=output_index,
                 )
 
-                print(f"new container for: {pdf_name_to_show}")
+                log.info(f"New container created for: {pdf_name_to_show}")
                 socketio.emit("new_container", {"html": container_html})
 
                 accumulated_text = ""
@@ -171,7 +188,7 @@ def process_text(data: dict) -> None:
                         socketio.emit("error", {"message": "error in chunk response"})
                         return
                     elif "content" in result_chunk:
-                        print(f'recived chunk: {result_chunk["content"]}')
+                        log.debug(f'Recived response chunk: {result_chunk["content"]}')
                         accumulated_text += result_chunk["content"]
                         markdown_content = markdown.markdown(accumulated_text)
                         socketio.emit(
@@ -187,7 +204,7 @@ def process_text(data: dict) -> None:
             if not streaming:
                 socketio.emit("stream_stopped")
         except Exception as e:
-            print(f"An error occurred in the generate function: {e}")
+            log.error(f"An error occurred in the generate function: {e}")
             traceback.print_exc()
             socketio.emit(
                 "error", {"message": f"An unexpected error occurred: {str(e)}"}
@@ -197,7 +214,7 @@ def process_text(data: dict) -> None:
         socketio.emit("stream_stopped")
 
     except Exception as e:
-        print(f"An error occurred in the generate function: {e}")
+        log.error(f"An error occurred in the generate function: {e}")
         traceback.print_exc()
         socketio.emit("error", {"message": f"An unexpected error occurred: {str(e)}"})
 
@@ -206,7 +223,7 @@ def process_text(data: dict) -> None:
 def handle_stop() -> None:
     global streaming
     streaming = False
-    print("Processing Stopped by User")
+    log.info("Processing Stopped by User")
 
 
 @app.route("/langchainChat")

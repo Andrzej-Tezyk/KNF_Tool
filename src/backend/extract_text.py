@@ -1,7 +1,11 @@
 import traceback
 from pathlib import Path
+import logging
 
 from PyPDF2 import PdfReader
+
+
+log = logging.getLogger("__name__")
 
 
 def extract_text_from_pdf(pdf_path: Path) -> str:
@@ -30,17 +34,17 @@ def extract_text_from_pdf(pdf_path: Path) -> str:
     try:
         with open(pdf_path, "rb") as file:
             pdf = PdfReader(file)
-            print(f"Number of pages: {len(pdf.pages)}")
+            log.debug(f"Number of pages: {len(pdf.pages)}")
 
             text = ""
             try:
                 for page in pdf.pages:  # loop through all pages
                     text += page.extract_text()
             except Exception as e:
-                print(f"Something went wrong with {pdf_path}. Error messange: {e}")
+                log.error(f"Something went wrong with {pdf_path}. Error messange: {e}")
                 traceback.print_exc()
         return text
     except Exception as e:
-        print(f"Error processing {pdf_path}: {str(e)}")
+        log.error(f"Error processing {pdf_path}: {str(e)}")
         traceback.print_exc()
         return ""

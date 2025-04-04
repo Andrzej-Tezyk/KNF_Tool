@@ -71,10 +71,8 @@ if not GEMINI_API_KEY:
 
 
 # scrape if no documents on the server
-PROJECT_ROOT = Path(__file__).parent  # go up 1 time to the root directory
-
+PROJECT_ROOT = Path(__file__).parent.parent  # go up 2 time to the root directory
 scraped_dir = PROJECT_ROOT / "scraped_files"
-
 if not scraped_dir.exists():
     scrape_knf(scraped_dir, NUM_RETRIES, USER_AGENT_LIST)
 

@@ -15,7 +15,13 @@ from backend.show_pages import show_pages  # type: ignore[import-not-found]
 from backend.custom_logger import CustomFormatter  # type: ignore[import-not-found]
 
 
-with open("config/config.json") as file:
+# Get the directory where main.py is located
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Construct the path to config.json
+config_path = os.path.join(script_dir, "..", "config", "config.json")
+
+with open(config_path) as file:
     config = json.load(file)
 
 

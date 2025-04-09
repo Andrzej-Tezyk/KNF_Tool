@@ -72,7 +72,21 @@ def process_pdf(
             )
             # split its text into smaller sub-chunks
             for response_chunk in response:
-                # clean up the chunk text (removes extra spaces)
+                # replace -> sometimes double space between words occure; most likely reason: pdf formating
+                response_chunk_text = response_chunk.text.replace("  ", " ")
+                yield {"pdf_name": pdf.stem, "content": response_chunk_text}
+                time.sleep(0.1)
+            log.debug(f"Response for: {pdf.stem} was saved!\n")
+            time.sleep(1)  # lower API request rate per sec
+        except Exception as e:
+            log.error(f"There is a problem with {pdf.stem}. \n Error message: {e}\n")
+            traceback.print_exc()
+            yield {"error": f"An error occurred while processing {pdf.stem}: {str(e)}"}
+
+'''
+
+
+         # clean up the chunk text (removes extra spaces)
                 chunk_text = response_chunk.text.replace("  ", " ")
                 words = chunk_text.split(" ")
                 sub_chunk = ""
@@ -84,11 +98,5 @@ def process_pdf(
                         time.sleep(0.2)
                 # yield remaining words
                 if sub_chunk:
-                    yield {"pdf_name": pdf.stem, "content": sub_chunk + " "}
-                    time.sleep(0.1)
-            log.debug(f"Response for: {pdf.stem} was saved!\n")
-            time.sleep(1)  # lower API request rate per sec
-        except Exception as e:
-            log.error(f"There is a problem with {pdf.stem}. \n Error message: {e}\n")
-            traceback.print_exc()
-            yield {"error": f"An error occurred while processing {pdf.stem}: {str(e)}"}
+                    yield {"pdf_name": pdf.stem, "content": sub_chunk + " "}   
+'''

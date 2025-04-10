@@ -1,6 +1,7 @@
 import traceback
-from pathlib import Path
+import re
 import logging
+from pathlib import Path
 
 from PyPDF2 import PdfReader
 
@@ -8,7 +9,24 @@ from PyPDF2 import PdfReader
 log = logging.getLogger("__name__")
 
 
-def extract_text_from_pdf(pdf_path: Path) -> str:
+POLISH_CHARS = "ąćęłńóśźżĄĆĘŁŃÓŚŹŻ"
+
+
+def clean_polish_spacing(text: str) -> str:
+    """
+    A problem with extracting text from .pdf in polish language was found. 
+    When polish alphabet letter is within a word a " " is created before it.
+    Like: "słówko" -> "s ł ó wko"
+
+    Args:
+        text: Text extracted from pdf document.
+
+    Returns:
+        A string containing cleaned text.
+    """
+    return re.sub(rf"\s([{POLISH_CHARS}])", r"\1", text)
+
+def extract_text_from_pdf(pdf_path: Path, language: str) -> str:
     """Extracts text from a PDF file.
 
     This function reads a PDF file, extracts text from each page, and concatenates
@@ -43,7 +61,14 @@ def extract_text_from_pdf(pdf_path: Path) -> str:
             except Exception as e:
                 log.error(f"Something went wrong with {pdf_path}. Error messange: {e}")
                 traceback.print_exc()
+
+        if language == "polish":
+            text = clean_polish_spacing(text)
+
+        text = text.replace("  ", " ")
+
         return text
+    
     except Exception as e:
         log.error(f"Error processing {pdf_path}: {str(e)}")
         traceback.print_exc()

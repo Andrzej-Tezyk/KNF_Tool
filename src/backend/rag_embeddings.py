@@ -4,6 +4,7 @@ import os
 
 import google.generativeai as genai
 from chromadb import Documents, EmbeddingFunction, Embeddings
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from extract_text import extract_text_from_pdf
 
 log = logging.getLogger("__name__")
@@ -12,6 +13,19 @@ log = logging.getLogger("__name__")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     raise ValueError("GEMINI_API_KEY not found in environment variables")
+
+
+def clean_extracted_text (text: str):
+    cleaned_text = ""
+
+    for i, line in enumerate(text.split('\n')):
+        if len(line) > 10 and i > 70:
+            cleaned_text += line + '\n'
+
+    for char in ['~', '©', '_']:
+        cleaned_text = cleaned_text.replace(char, '')
+
+    return cleaned_text
 
 
 def split_text(text: str):
@@ -25,8 +39,13 @@ def split_text(text: str):
     Returns:
         List[str]: A list containing non-empty substrings obtained by splitting the input text.
     """
-    split_text = re.split('\n \n', text)
-    return [i for i in split_text if i != ""]
+    split_text = RecursiveCharacterTextSplitter(
+                    chunk_size=1000,
+                    chunk_overlap=100,
+                    length_function=len,
+                    add_start_index=True,
+                )
+    return split_text
 
 
 class GeminiEmbeddingFunction(EmbeddingFunction):
@@ -52,3 +71,22 @@ class GeminiEmbeddingFunction(EmbeddingFunction):
                                     task_type="retrieval_document",
                                     title=title)["embedding"]
     
+
+pdf_path = "scraped_files/2025-01-17_Rekomendacja A - dotycząca zarządzania przez banki ryzykiem związanym z działalnością na instrumentach pochodnych.pdf"
+
+pdf_text = extract_text_from_pdf(pdf_path=pdf_path, language="polish")
+
+cleanded_text  = clean_extracted_text(pdf_text)
+
+print(cleanded_text)
+
+text_splitter = RecursiveCharacterTextSplitter(
+                    chunk_size=1000,
+                    chunk_overlap=100,
+                    length_function=len,
+                    add_start_index=True,
+                )
+
+splited_text = text_splitter.create_documents([cleanded_text])
+
+#print(splited_text[0].page_content)

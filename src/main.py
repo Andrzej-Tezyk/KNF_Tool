@@ -7,7 +7,7 @@ import logging
 from dotenv import load_dotenv
 
 import markdown
-from flask import Flask, render_template
+from flask import Flask, render_template, request 
 from flask_socketio import SocketIO
 import google.generativeai as genai
 from backend.process_query import process_query_with_rag  # type: ignore[import-not-found]
@@ -119,6 +119,10 @@ log.info("Vector DB initialized")
 streaming: bool = False
 output_index: int = -1
 
+# --- Add a simple cache ---
+# WARNING: This global dict is not thread-safe and will be lost on server restart.
+# Use Flask-Caching or Redis for a more robust solution in production.
+generated_content_cache: dict[str, dict[str, str]] = {}
 
 @app.route("/")
 def index() -> str:
@@ -202,12 +206,12 @@ def process_text(data: dict) -> None:
                 if not streaming:
                     break
                 pdf_name_to_show = str(pdf.stem.split('_', 1)[1])
+                container_id = f"content-pdf{index}_{output_index}" # Use current index
 
                 container_html = render_template(
                     "output.html",
                     container_title=pdf_name_to_show,
-                    index=index,
-                    output_index=output_index,
+                    container_id=container_id,
                 )
 
                 log.info(f"New container created for: {pdf_name_to_show}")
@@ -237,25 +241,36 @@ def process_text(data: dict) -> None:
                         break
                     if (
                         "error" in result_chunk
-                    ):  # TODO czy tu chodzi o slowo error w odpowiedzi? jezeli tak to do sprawdzenia
+                    ):  # czy tu chodzi o slowo error w odpowiedzi? jezeli tak to do sprawdzenia
+                        log.error(f"Error received in chunk")       
                         socketio.emit("error", {"message": "error in chunk response"})
                         return
                     elif "content" in result_chunk:
                         log.debug(f'Recived response chunk: {result_chunk["content"]}')
                         accumulated_text += result_chunk["content"]
                         markdown_content = markdown.markdown(accumulated_text)
+                        final_markdown_content = markdown_content # Keep track of the latest full content
                         socketio.emit(
                             "update_content",
                             {
-                                "container_id": f"content-pdf{index}_{output_index}",
+                                "container_id": container_id,
                                 "html": markdown_content,
                             },
                         )
                     else:
                         socketio.emit("error", {"message": "unexpected error"})
                         return
+                if streaming:
+                    generated_content_cache[container_id] = {
+                        "title": pdf_name_to_show,
+                        "content": final_markdown_content # Store the final accumulated HTML
+                    }
+                    print("CACHE", generated_content_cache)
+                    log.info(f"Stored content for {container_id} in cache.")             
+            
             if not streaming:
                 socketio.emit("stream_stopped")
+                log.info("Stream stopped during file processing.")
         except Exception as e:
             log.error(f"An error occurred in the generate function: {e}")
             traceback.print_exc()
@@ -270,6 +285,7 @@ def process_text(data: dict) -> None:
         log.error(f"An error occurred in the generate function: {e}")
         traceback.print_exc()
         socketio.emit("error", {"message": f"An unexpected error occurred: {str(e)}"})
+        streaming = False
 
 
 @socketio.on("stop_processing")
@@ -281,7 +297,28 @@ def handle_stop() -> None:
 
 @app.route("/langchainChat")
 def langchain_chat() -> Any:
-    return render_template("langchainChat.html")
+    content_id = request.args.get('contentId') # Get ID from URL query ?contentId=...
+    print("CACHE ITEM", generated_content_cache[content_id])
+    log.info(f"Langchain chat request for contentId: {content_id}")
+
+    # Retrieve data from cache
+    cached_data = generated_content_cache.get(content_id) if content_id else None
+
+    if cached_data:
+        container_title_langchain = cached_data.get("title", "Unknown Title")
+        content_langchain = cached_data.get("content", "<p>Content not found.</p>")
+        log.info(f"Found content for {content_id} in cache.")
+    else:
+        container_title_langchain = "Error"
+        content_langchain = f"<p>Could not find content for ID: {content_id}. Cache might be empty or ID is invalid.</p>"
+        log.warning(f"Content for {content_id} not found in cache.")
+
+    return render_template(
+        "langchainChat.html",
+        container_title_langchain=container_title_langchain,
+        content_langchain=content_langchain
+        )
+
 
 
 if __name__ == "__main__":

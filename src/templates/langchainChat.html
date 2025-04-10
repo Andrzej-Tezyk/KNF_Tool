@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document Name</title>
+    <title>{{ container_title_langchain }}</title>
     <script 
         src="https://unpkg.com/htmx.org@2.0.3" 
         integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq" 
@@ -33,7 +33,17 @@
                     <!-- output section -->
                     <div class="output-section">
                         <div id="output" class="markdown-body">
-                            <!-- output goes here -->
+                        <!-- output retrieved from cache -->
+                            
+                            <div class="output-content" id="retrieved-content-section">
+                                <div class="output-header">
+                                    {{ container_title_langchain }}
+                                </div>
+                                <div class="markdown-body">
+                                    {{ content_langchain | safe }}
+                                </div>
+                            </div>
+                        <!-- output goes here -->
                         </div>
                         <div class="input-form-container">
                             <div class="input-area-elements">

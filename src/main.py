@@ -201,12 +201,11 @@ def process_text(data: dict) -> None:
             for index, pdf in enumerate(pdfs_to_scan):
                 if not streaming:
                     break
-                pdf_name_to_show = str(pdf)
-                container_title = pdf_name_to_show[25:-4]
+                pdf_name_to_show = str(pdf.stem.split('_', 1)[1])
 
                 container_html = render_template(
                     "output.html",
-                    container_title=container_title,
+                    container_title=pdf_name_to_show,
                     index=index,
                     output_index=output_index,
                 )

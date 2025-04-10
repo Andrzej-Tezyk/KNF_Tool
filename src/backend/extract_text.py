@@ -3,7 +3,7 @@ import re
 import logging
 from pathlib import Path
 
-from PyPDF2 import PdfReader
+import pdfplumber
 
 
 log = logging.getLogger("__name__")
@@ -16,6 +16,10 @@ def clean_polish_spacing(text: str) -> str:
     """
     A problem with extracting text from .pdf in polish language was found. 
     When polish alphabet letter is within a word a " " is created before it.
+    Random unnecessary spaces are created as a result of how pypdf2 works.
+    PyPDF2 reconstruct text based on proximity, which isn't always accurate.
+    Polish characters (or any accented glyphs) might be slightly offset in the font, 
+    causing spacing algorithms to think they’re a new "word" and insert a space.
     Like: "słówko" -> "s ł ó wko"
 
     Args:
@@ -24,9 +28,19 @@ def clean_polish_spacing(text: str) -> str:
     Returns:
         A string containing cleaned text.
     """
-    return re.sub(rf"\s([{POLISH_CHARS}])", r"\1", text)
 
-def extract_text_from_pdf(pdf_path: Path, language: str) -> str:
+    # remove line breakes that are not paragraph breakes
+    text = text.replace('\r\n', '\n').replace('\r', '\n')
+
+    # remove spaces before Polish chars
+    text = re.sub(rf"\s([{POLISH_CHARS}])", r"\1", text)
+
+    # fix hypernated line breakes
+    text = re.sub(r"-\s*\n\s*", "", text)
+
+    return text.strip()
+
+def extract_text_from_pdf(pdf_path: Path) -> str:
     """Extracts text from a PDF file.
 
     This function reads a PDF file, extracts text from each page, and concatenates
@@ -51,25 +65,29 @@ def extract_text_from_pdf(pdf_path: Path, language: str) -> str:
 
     try:
         with open(pdf_path, "rb") as file:
-            pdf = PdfReader(file)
-            log.debug(f"Number of pages: {len(pdf.pages)}")
-
-            text = ""
-            try:
-                for page in pdf.pages:  # loop through all pages
-                    text += page.extract_text()
-            except Exception as e:
-                log.error(f"Something went wrong with {pdf_path}. Error messange: {e}")
-                traceback.print_exc()
-
-        if language == "polish":
-            text = clean_polish_spacing(text)
-
-        text = text.replace("  ", " ")
-
-        return text
+            full_text = ""
+            with pdfplumber.open(pdf_path) as pdf:
+                for page in pdf.pages:
+                    page_text = page.extract_text()
+                    if page_text:  # some pages may return None
+                        full_text += page_text + "\n\n"  # paragraph separator
+            return full_text.strip()
     
     except Exception as e:
         log.error(f"Error processing {pdf_path}: {str(e)}")
         traceback.print_exc()
         return ""
+
+
+
+'''
+def extract_text_from_pdf(file_path: str) -> str:
+    full_text = ""
+    with pdfplumber.open(file_path) as pdf:
+        for page in pdf.pages:
+            page_text = page.extract_text()
+            if page_text:  # Some pages may return None
+                cleaned = clean_pdf_text(page_text)
+                full_text += cleaned + "\n\n"  # Paragraph separator
+    return full_text.strip()
+'''

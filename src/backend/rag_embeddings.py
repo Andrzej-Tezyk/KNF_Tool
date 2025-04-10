@@ -74,7 +74,7 @@ class GeminiEmbeddingFunction(EmbeddingFunction):
 
 pdf_path = "scraped_files/2025-01-17_Rekomendacja A - dotycząca zarządzania przez banki ryzykiem związanym z działalnością na instrumentach pochodnych.pdf"
 
-pdf_text = extract_text_from_pdf(pdf_path=pdf_path, language="polish")
+pdf_text = extract_text_from_pdf(pdf_path)
 
 cleanded_text  = clean_extracted_text(pdf_text)
 

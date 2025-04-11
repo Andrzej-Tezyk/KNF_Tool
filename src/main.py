@@ -17,14 +17,16 @@ from backend.chroma_instance import get_chroma_client  # type: ignore[import-not
 
 
 # Get the directory where main.py is located
-script_dir = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 # Construct the path to config.json
-config_path = os.path.join(script_dir, "..", "config", "config.json")
+CONFIG_PATH = PROJECT_ROOT / "config" / "config.json"
 
-with open(config_path) as file:
+# directory with pdf files
+SCRAPED_FILES_DIR = PROJECT_ROOT / "scraped_files"
+
+with open(CONFIG_PATH) as file:
     config = json.load(file)
-
 
 log = logging.getLogger("__name__")
 log.setLevel(logging.DEBUG)
@@ -33,14 +35,6 @@ ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
 ch.setFormatter(CustomFormatter())
 log.addHandler(ch)
-
-
-# project root directory
-PROJECT_ROOT = Path(__file__).parent.parent  # go up 2 time to the root directory
-
-# directory with pdf files
-SCRAPED_FILES_DIR = PROJECT_ROOT / "scraped_files"
-
 
 NUM_RETRIES = 5
 
@@ -263,7 +257,6 @@ def process_text(data: dict) -> None:
                         "title": pdf_name_to_show,
                         "content": final_markdown_content # Store the final accumulated HTML
                     }
-                    print("CACHE", generated_content_cache)
                     log.info(f"Stored content for {container_id} in cache.")             
             
             if not streaming:
@@ -296,7 +289,6 @@ def handle_stop() -> None:
 @app.route("/langchainChat")
 def langchain_chat() -> Any:
     content_id = request.args.get('contentId') # Get ID from URL query ?contentId=...
-    print("CACHE ITEM", generated_content_cache[content_id])
     log.info(f"Langchain chat request for contentId: {content_id}")
 
     # Retrieve data from cache

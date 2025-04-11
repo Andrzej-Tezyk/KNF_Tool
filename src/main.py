@@ -7,6 +7,7 @@ import logging
 
 import markdown
 from flask import Flask, render_template, request 
+import chromadb
 from flask_socketio import SocketIO
 from flask_caching import Cache
 import google.generativeai as genai  # type: ignore[import-untyped]
@@ -17,14 +18,27 @@ from backend.custom_logger import CustomFormatter  # type: ignore[import-not-fou
 from backend.chroma_instance import get_chroma_client  # type: ignore[import-not-found]
 
 
-# Get the directory where main.py is located
+# Get the project root directory
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 # Construct the path to config.json
 CONFIG_PATH = PROJECT_ROOT / "config" / "config.json"
 
-# directory with pdf files
+# Directory with pdf files
 SCRAPED_FILES_DIR = PROJECT_ROOT / "scraped_files"
+
+# Cache directory
+CACHE_DIR = PROJECT_ROOT / ".cache"
+
+# Configure Flask-Caching
+# Use FileSystemCache to persist across reloads during development
+# Use SimpleCache for basic in-memory (similar to dict, won't survive reloads)
+# For production, consider RedisCache or MemcachedCache if available
+CACHE_CONFIG = {
+    "CACHE_TYPE": "FileSystemCache",
+    "CACHE_DIR": CACHE_DIR,  # Store cache files in project root/.cache
+    "CACHE_THRESHOLD": 500  # Max number of items in cache
+}
 
 with open(CONFIG_PATH) as file:
     config = json.load(file)
@@ -74,32 +88,20 @@ if not SCRAPED_FILES_DIR.exists() or next(SCRAPED_FILES_DIR.iterdir(), None) is 
     scrape_knf(SCRAPED_FILES_DIR, NUM_RETRIES, USER_AGENT_LIST)
 
 
+
 def replace_polish_chars(text: str) -> str:
     """
     For documents names only.
     """
     polish_to_ascii = {
-        "ą": "a",
-        "ć": "c",
-        "ę": "e",
-        "ł": "l",
-        "ń": "n",
-        "ó": "o",
-        "ś": "s",
-        "ż": "z",
-        "ź": "z",
-        "Ą": "A",
-        "Ć": "C",
-        "Ę": "E",
-        "Ł": "L",
-        "Ń": "N",
-        "Ó": "O",
-        "Ś": "S",
-        "Ż": "Z",
-        "Ź": "Z",
+        "ą": "a", "ć": "c", "ę": "e", "ł": "l", "ń": "n",
+        "ó": "o", "ś": "s", "ż": "z", "ź": "z",
+        "Ą": "A", "Ć": "C", "Ę": "E", "Ł": "L", "Ń": "N",
+        "Ó": "O", "Ś": "S", "Ż": "Z", "Ź": "Z",
     }
 
-    return "".join(polish_to_ascii.get(c, c) for c in text)
+    return ''.join(polish_to_ascii.get(c, c) for c in text)
+
 
 
 # flask
@@ -109,27 +111,13 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 chroma_client = get_chroma_client("exp_vector_db")
 log.info("Vector DB initialized")
 
-# Configure Flask-Caching
-# Use FileSystemCache to persist across reloads during development
-# Use SimpleCache for basic in-memory (similar to dict, won't survive reloads)
-# For production, consider RedisCache or MemcachedCache if available
-CACHE_CONFIG = {
-    "CACHE_TYPE": "FileSystemCache",
-    "CACHE_DIR": Path(PROJECT_ROOT) / ".cache",  # Store cache files in project root/.cache
-    "CACHE_THRESHOLD": 500  # Max number of items in cache
-}
-app.config.from_mapping(CACHE_CONFIG)
-
 # Initialize cache
+app.config.from_mapping(CACHE_CONFIG)
 cache = Cache(app)
+
 
 streaming: bool = False
 output_index: int = -1
-
-# --- Add a simple cache ---
-# WARNING: This global dict is not thread-safe and will be lost on server restart.
-# Use Flask-Caching or Redis for a more robust solution in production.
-generated_content_cache: dict[str, dict[str, str]] = {}
 
 @app.route("/")
 def index() -> str:
@@ -227,9 +215,7 @@ def process_text(data: dict) -> None:
                 socketio.emit("new_container", {"html": container_html})
 
                 collection_name = pdf_name_to_show.replace(" ", "").lower()
-                collection_name = replace_polish_chars(
-                    collection_name
-                )  # TODO: better solution for database naming
+                collection_name = replace_polish_chars(collection_name) # TODO: better solution for database naming
                 collection_name = collection_name[25:60]
 
                 accumulated_text = ""
@@ -330,4 +316,7 @@ def langchain_chat() -> Any:
 
 
 if __name__ == "__main__":
+    cache_dir = app.config.get("CACHE_DIR")
+    if cache_dir:
+        Path(cache_dir).mkdir(parents=True, exist_ok=True)
     socketio.run(app, debug=True, allow_unsafe_werkzeug=True)

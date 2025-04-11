@@ -9,7 +9,8 @@ from dotenv import load_dotenv
 import markdown
 from flask import Flask, render_template, request 
 from flask_socketio import SocketIO
-import google.generativeai as genai
+from flask_caching import Cache
+import google.generativeai as genai  # type: ignore[import-untyped]
 from backend.process_query import process_query_with_rag  # type: ignore[import-not-found]
 from backend.knf_scraping import scrape_knf  # type: ignore[import-not-found]
 from backend.show_pages import show_pages  # type: ignore[import-not-found]
@@ -109,6 +110,20 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 chroma_client = get_chroma_client("exp_vector_db")
 log.info("Vector DB initialized")
+
+# Configure Flask-Caching
+# Use FileSystemCache to persist across reloads during development
+# Use SimpleCache for basic in-memory (similar to dict, won't survive reloads)
+# For production, consider RedisCache or MemcachedCache if available
+CACHE_CONFIG = {
+    "CACHE_TYPE": "FileSystemCache",
+    "CACHE_DIR": Path(PROJECT_ROOT) / ".cache",  # Store cache files in project root/.cache
+    "CACHE_THRESHOLD": 500  # Max number of items in cache
+}
+app.config.from_mapping(CACHE_CONFIG)
+
+# Initialize cache
+cache = Cache(app)
 
 streaming: bool = False
 output_index: int = -1
@@ -255,11 +270,13 @@ def process_text(data: dict) -> None:
                         socketio.emit("error", {"message": "unexpected error"})
                         return
                 if streaming:
-                    generated_content_cache[container_id] = {
+                    data_to_cache = {
                         "title": pdf_name_to_show,
-                        "content": final_markdown_content # Store the final accumulated HTML
+                        "content": final_markdown_content # Store final content (could be error msg)
                     }
-                    log.info(f"Stored content for {container_id} in cache.")             
+                    # Set a timeout (e.g., 1 hour = 3600 seconds)
+                    cache.set(container_id, data_to_cache, timeout=600)
+                    log.info(f"Stored content for {container_id} in cache.")     
             
             if not streaming:
                 socketio.emit("stream_stopped")
@@ -294,7 +311,8 @@ def langchain_chat() -> Any:
     log.info(f"Langchain chat request for contentId: {content_id}")
 
     # Retrieve data from cache
-    cached_data = generated_content_cache.get(content_id) if content_id else None
+    cached_data = cache.get(content_id)
+    log.debug(f"Cache lookup for {content_id} returned: {type(cached_data)}")
 
     if cached_data:
         container_title_langchain = cached_data.get("title", "Unknown Title")

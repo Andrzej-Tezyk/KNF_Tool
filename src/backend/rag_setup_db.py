@@ -2,6 +2,7 @@ import logging
 import traceback
 from pathlib import Path
 
+from chromadb import PersistentClient
 from rag_embeddings import clean_extracted_text
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from rag_chromadb import create_chroma_db, load_chroma_collection, get_relevant_passage
@@ -23,6 +24,9 @@ text_splitter = RecursiveCharacterTextSplitter(
                     add_start_index=True,
                 )
 
+client = PersistentClient(path="vector_db")
+
+'''
 pdf_path = "scraped_files/2025-01-17_Rekomendacja C - dotycząca zarządzania ryzykiem koncentracji.pdf"
 
 pdf_text = extract_text_from_pdf(pdf_path)
@@ -45,9 +49,9 @@ chroma_db, name = create_chroma_db(documents=documents,
 db=load_chroma_collection(path="rag", name="exp1-rekomendacja-C")
 relevant_text = get_relevant_passage(query="ryzyko inwestycyjne",db=db,n_results=3)
 print(relevant_text)
-
-
 '''
+
+
 def replace_polish_chars(text: str) -> str:
     polish_to_ascii = {
         "ą": "a", "ć": "c", "ę": "e", "ł": "l", "ń": "n",
@@ -60,6 +64,16 @@ def replace_polish_chars(text: str) -> str:
 
 def setup_chroma_db (doc_path: Path) -> None:
     try:
+        name = str(doc_path).replace(" ", "").lower()
+        name = replace_polish_chars(name)
+        name = name[25:60]
+
+        existing_collections = client.list_collections()
+
+        if any(collection.name == name for collection in existing_collections):
+            log.info(f"Collection {name} already exists. Skipping it's processing of {doc_path}.")
+            return
+
         text = extract_text_from_pdf(doc_path)
         cleanded_text  = clean_extracted_text(text)
         splited_text = text_splitter.create_documents([cleanded_text])
@@ -67,10 +81,6 @@ def setup_chroma_db (doc_path: Path) -> None:
         documents = []
         for chunk in splited_text:
             documents.append(chunk.page_content)
-
-        name = str(doc_path).replace(" ", "").lower()
-        name = replace_polish_chars(name)
-        name = name[25:60]
 
         create_chroma_db(documents=documents, 
                                 path="vector_db",
@@ -87,5 +97,3 @@ if PDF_FILES.is_dir():
         log.debug(f"{pdf_file} was embedded into chromadb.")
 else:
     log.error(f"The path {PDF_FILES} is not a directory.")
-
-    '''

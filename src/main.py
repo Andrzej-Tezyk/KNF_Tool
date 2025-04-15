@@ -15,7 +15,7 @@ from backend.show_pages import show_pages  # type: ignore[import-not-found]
 from backend.custom_logger import CustomFormatter  # type: ignore[import-not-found]
 
 
-with open("config/config.json") as file:
+with open("C:/Users/User/PycharmProjects/KNF_Tool/config/config.json") as file:
     config = json.load(file)
 
 

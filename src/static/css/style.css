@@ -127,6 +127,7 @@ body {
 
 .input-section-elements {
     padding: 0.5rem;
+    overflow: auto;
 }
 
 .section-header-wrapper {
@@ -155,6 +156,7 @@ body {
     gap: 1rem;
     margin-top: 10px;
     padding: 0.5rem;
+    overflow: auto;
 }
 
 .output-section {

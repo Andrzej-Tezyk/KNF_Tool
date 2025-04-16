@@ -27,14 +27,13 @@ function closeForm() {
     document.getElementById("tempInfo").style.display = "none";
 }
 
-var openButton = document.querySelector(".open-button");
-var closeButton = document.querySelector(".btn.cancel");
-var tempInfo = document.getElementById("tempInfo");
+function toggleTempInfo() {
+  const element = document.getElementById("tempInfo");
+  if (element.style.display === "none" || element.style.display === "") {
+    element.style.display = "block";
+  } else {
+    element.style.display = "none";
+  }
+}
 
-openButton.addEventListener("click", function () {
-    tempInfo.style.display = "block";
-});
-
-closeButton.addEventListener("click", function () {
-    tempInfo.style.display = "none";
-});
+var tempButton = document.querySelector(".btn.cancel");

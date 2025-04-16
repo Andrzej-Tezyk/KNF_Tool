@@ -1,6 +1,7 @@
 .venv
 /scraped_files
 .env
+.idea
 /output
 /src/backend/__pycache__
 ms_colours.txt

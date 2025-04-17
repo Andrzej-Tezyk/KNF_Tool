@@ -6,6 +6,7 @@ import json
 import logging
 
 import markdown
+import chromadb
 from flask import Flask, render_template
 from flask_socketio import SocketIO
 import google.generativeai as genai  # type: ignore[import-untyped]
@@ -75,6 +76,10 @@ if not scraped_dir.exists():
 # flask
 app = Flask(__name__, template_folder="templates", static_folder="static")
 socketio = SocketIO(app, cors_allowed_origins="*")
+
+# vector database
+chroma_client = chromadb
+log.info("Vector database is up.")
 
 streaming: bool = False
 output_index: int = -1

@@ -11,6 +11,9 @@ OPTIONAL_PAGE_NUMBER_SP = (
 
 
 def show_pages(system_prompt: str, show_pages_checkbox: bool) -> str:
+    """
+    Add an additional string to the system prompt to instruct model to include page name in outputs.
+    """
     if show_pages_checkbox == "True":  # request can be used only inside the function
         log.debug(system_prompt + OPTIONAL_PAGE_NUMBER_SP)
         return system_prompt + OPTIONAL_PAGE_NUMBER_SP

@@ -6,6 +6,7 @@ from collections.abc import Generator
 import logging
 
 import google.generativeai as genai  # type: ignore[import-untyped]
+import chromadb
 from dotenv import load_dotenv
 
 
@@ -109,6 +110,8 @@ def process_query_with_rag(
     change_lebgth_checkbox: str,
     output_size: int,
     slider_value: float,
+    collection_name: str,
+    db_path: str = "exp_vector_db"
 ) -> Generator:
     if not prompt:
         yield {"error": "No prompt provided"}
@@ -116,6 +119,8 @@ def process_query_with_rag(
     else:
         try:
             log.info(f"Document: {pdf.stem} is beeing analyzed.")
+
+            
 
             rag_context = 
 

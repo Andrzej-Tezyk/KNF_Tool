@@ -100,3 +100,46 @@ def process_pdf(
                 if sub_chunk:
                     yield {"pdf_name": pdf.stem, "content": sub_chunk + " "}   
 '''
+
+
+def process_query_with_rag(
+    prompt: str,
+    pdf: Path,
+    model: Any,
+    change_lebgth_checkbox: str,
+    output_size: int,
+    slider_value: float,
+) -> Generator:
+    if not prompt:
+        yield {"error": "No prompt provided"}
+
+    else:
+        try:
+            log.info(f"Document: {pdf.stem} is beeing analyzed.")
+
+            rag_context = 
+
+            log.debug(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
+            response = model.generate_content(
+                [
+                    (
+                        prompt + f"(Please provide {output_size} size response)" + rag_context
+                        if change_lebgth_checkbox == "True"
+                        else prompt + rag_context
+                    ),
+                ],
+                stream=True,
+                generation_config={"temperature": slider_value},
+            )
+            # split its text into smaller sub-chunks
+            for response_chunk in response:
+                # replace -> sometimes double space between words occure; most likely reason: pdf formating
+                response_chunk_text = response_chunk.text.replace("  ", " ")
+                yield {"pdf_name": pdf.stem, "content": response_chunk_text}
+                time.sleep(0.1)
+            log.debug(f"Response for: {pdf.stem} was saved!\n")
+            time.sleep(1)  # lower API request rate per sec
+        except Exception as e:
+            log.error(f"There is a problem with {pdf.stem}. \n Error message: {e}\n")
+            traceback.print_exc()
+            yield {"error": f"An error occurred while processing {pdf.stem}: {str(e)}"}

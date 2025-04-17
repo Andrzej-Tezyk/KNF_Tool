@@ -1,10 +1,9 @@
-import re
 import logging
 import os
 
 import google.generativeai as genai
 from chromadb import Documents, EmbeddingFunction, Embeddings
-from extract_text import extract_text_from_pdf
+
 
 log = logging.getLogger("__name__")
 
@@ -15,21 +14,16 @@ if not GEMINI_API_KEY:
 
 
 def clean_extracted_text (text: str):
-    cleaned_text = ""
 
-    for i, line in enumerate(text.split('\n')):
-        if len(line) > 10 and i > 70:
-            cleaned_text += line + '\n'
+    for char in ['~', '©', '_', '\n']:
+        text = text.replace(char, '')
 
-    for char in ['~', '©', '_']:
-        cleaned_text = cleaned_text.replace(char, '')
-
-    return cleaned_text
+    return text
 
 
 class GeminiEmbeddingFunction(EmbeddingFunction):
     """
-    Custom embedding funtion with gemini developer API for document retrieval.
+    Custom embedding funtion (to use other model than 001) with gemini developer API for document retrieval. NOT IN USE
 
     Class is based on the EmbeddingFunction of chromadb. Implements the __call__ method to generate embeddings.
     

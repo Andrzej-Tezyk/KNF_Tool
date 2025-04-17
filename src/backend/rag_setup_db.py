@@ -17,6 +17,7 @@ log = logging.getLogger("__name__")
 POLISH_CHARS = "ąćęłńóśźżĄĆĘŁŃÓŚŹŻ"
 
 
+
 text_splitter = RecursiveCharacterTextSplitter(
                     chunk_size=1000,
                     chunk_overlap=100,
@@ -24,9 +25,9 @@ text_splitter = RecursiveCharacterTextSplitter(
                     add_start_index=True,
                 )
 
-client = PersistentClient(path="vector_db")
+client = PersistentClient(path="exp_vector_db")
 
-'''
+"""
 pdf_path = "scraped_files/2025-01-17_Rekomendacja C - dotycząca zarządzania ryzykiem koncentracji.pdf"
 
 pdf_text = extract_text_from_pdf(pdf_path)
@@ -43,16 +44,20 @@ for chunk in splited_text:
     documents.append(chunk.page_content)
 
 chroma_db, name = create_chroma_db(documents=documents, 
-                                   path="rag",
+                                   path="experiment_db",
                                    name="exp1-rekomendacja-C")
 
-db=load_chroma_collection(path="rag", name="exp1-rekomendacja-C")
+db=load_chroma_collection(path="experiment_db", name="exp1-rekomendacja-C")
 relevant_text = get_relevant_passage(query="ryzyko inwestycyjne",db=db,n_results=3)
 print(relevant_text)
-'''
+"""
+
 
 
 def replace_polish_chars(text: str) -> str:
+    """
+    For documents names only.
+    """
     polish_to_ascii = {
         "ą": "a", "ć": "c", "ę": "e", "ł": "l", "ń": "n",
         "ó": "o", "ś": "s", "ż": "z", "ź": "z",
@@ -66,28 +71,31 @@ def setup_chroma_db (doc_path: Path) -> None:
     try:
         name = str(doc_path).replace(" ", "").lower()
         name = replace_polish_chars(name)
-        name = name[25:60]
+        name = name[25:40]
 
         existing_collections = client.list_collections()
 
         if any(collection.name == name for collection in existing_collections):
             log.info(f"Collection {name} already exists. Skipping it's processing of {doc_path}.")
-            return
+            name += "2" # some recomendations have the same letter; TO DO: find better solution
 
-        text = extract_text_from_pdf(doc_path)
-        cleanded_text  = clean_extracted_text(text)
-        splited_text = text_splitter.create_documents([cleanded_text])
+        text_list = extract_text_from_pdf(doc_path)
+        cleanded_text_list  = [clean_extracted_text(text) for text in text_list]
 
-        documents = []
-        for chunk in splited_text:
-            documents.append(chunk.page_content)
+        #splited_text = text_splitter.create_documents([cleanded_text])
 
-        create_chroma_db(documents=documents, 
-                                path="vector_db",
+        #documents = []
+        #for chunk in splited_text:
+            #documents.append(chunk.page_content)
+
+        create_chroma_db(documents=text_list, 
+                                path="exp_vector_db",
                                 name=name)
-    
+
+        log.info(f"{doc_path} was embedded.")
+
     except Exception as e:
-        log.error(f"Error processing {doc_path}: {str(e)}")
+        log.error(f"Error processing {doc_path}") #: {str(e)}
         traceback.print_exc()
 
 

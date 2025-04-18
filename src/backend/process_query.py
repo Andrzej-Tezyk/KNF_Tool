@@ -84,25 +84,6 @@ def process_pdf(
             yield {"error": f"An error occurred while processing {pdf.stem}: {str(e)}"}
 
 
-"""
-
-
-         # clean up the chunk text (removes extra spaces)
-                chunk_text = response_chunk.text.replace("  ", " ")
-                words = chunk_text.split(" ")
-                sub_chunk = ""
-                for word in words:
-                    sub_chunk = sub_chunk + " " + word if sub_chunk else word
-                    if len(sub_chunk.split()) >= 3:  # size of subchunk here
-                        yield {"pdf_name": pdf.stem, "content": sub_chunk + " "}
-                        sub_chunk = ""
-                        time.sleep(0.2)
-                # yield remaining words
-                if sub_chunk:
-                    yield {"pdf_name": pdf.stem, "content": sub_chunk + " "}   
-"""
-
-
 def process_query_with_rag(
     prompt: str,
     pdf: Path,

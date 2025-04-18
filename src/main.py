@@ -6,7 +6,6 @@ import json
 import logging
 
 import markdown
-import chromadb
 from flask import Flask, render_template
 from flask_socketio import SocketIO
 import google.generativeai as genai  # type: ignore[import-untyped]

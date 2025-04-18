@@ -2,11 +2,10 @@ import asyncio
 import logging
 import traceback
 from pathlib import Path
-from typing import List, Optional
 from concurrent.futures import ThreadPoolExecutor
 
 from chromadb import PersistentClient
-from rag_chromadb import create_chroma_db, load_chroma_collection, get_relevant_passage
+from rag_chromadb import create_chroma_db
 from extract_text import extract_text_from_pdf
 
 
@@ -73,7 +72,7 @@ async def process_pdf(doc_path: Path) -> None:
         log.info(f"{doc_path} was embedded.")
 
     except Exception as e:
-        log.error(f"Error processing {doc_path}")
+        log.error(f"Error processing {doc_path}. Error message: {e}")
         traceback.print_exc()
 
 
@@ -86,9 +85,7 @@ async def run_in_executor(func, *args, **kwargs):
         return await loop.run_in_executor(executor, lambda: func(*args, **kwargs))
 
 
-async def setup_chroma_db_async(
-    doc_paths: List[Path], max_concurrency: int = 4
-) -> None:
+async def setup_chroma_db_async(doc_paths: list, max_concurrency: int = 4) -> None:
     """
     Process multiple PDF files concurrently with limited concurrency
     """

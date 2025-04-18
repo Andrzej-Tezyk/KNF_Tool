@@ -34,10 +34,10 @@ class GeminiEmbeddingFunction(EmbeddingFunction):
         Embeddings.
     """
 
-    def __call__(self, input: Documents) -> Embeddings:
+    def __call__(self, input_docs: Documents) -> Embeddings:
         genai.configure(api_key=GEMINI_API_KEY)
         model = "models/text-embedding-004"
         title = "custom query"
         return genai.embed_content(
-            model=model, content=input, task_type="retrieval_document", title=title
+            model=model, content=input_docs, task_type="retrieval_document", title=title
         )["embedding"]

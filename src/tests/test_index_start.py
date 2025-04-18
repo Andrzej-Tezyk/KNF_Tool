@@ -1,4 +1,4 @@
-from main import index, app
+from main import app
 
 
 def test_index_start() -> None:

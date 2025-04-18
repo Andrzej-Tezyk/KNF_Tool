@@ -1,7 +1,6 @@
 import chromadb
 import time
 import logging
-from typing import List
 import os
 
 import chromadb.utils.embedding_functions as embedding_functions
@@ -31,9 +30,7 @@ def get_gemini_ef():
     )
 
 
-def create_chroma_db(
-    documents: List, path: str, name: str, page_numbers: List[int] = None
-):
+def create_chroma_db(documents: list, path: str, name: str, page_numbers: list = None):
     """
     Creates a chroma database.
 

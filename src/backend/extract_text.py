@@ -32,14 +32,13 @@ def extract_text_from_pdf(pdf_path: Path) -> str:
     """
 
     try:
-        with open(pdf_path, "rb") as file:
-            pages_list = []
-            with pdfplumber.open(pdf_path) as pdf:
-                for page in pdf.pages:
-                    page_text = page.extract_text()
-                    if page_text:  # some pages may return None
-                        pages_list.append(page_text)
-            return pages_list
+        pages_list = []
+        with pdfplumber.open(pdf_path) as pdf:
+            for page in pdf.pages:
+                page_text = page.extract_text()
+                if page_text:  # some pages may return None
+                    pages_list.append(page_text)
+        return pages_list
 
     except Exception as e:
         log.error(f"Error processing {pdf_path}: {str(e)}")

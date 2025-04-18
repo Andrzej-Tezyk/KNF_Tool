@@ -1,14 +1,14 @@
 import traceback
-from pathlib import Path
 import logging
+from pathlib import Path
 
-from PyPDF2 import PdfReader
+import pdfplumber
 
 
 log = logging.getLogger("__name__")
 
 
-def extract_text_from_pdf(pdf_path: Path) -> str:
+def extract_text_from_pdf(pdf_path: Path):  # type: ignore
     """Extracts text from a PDF file.
 
     This function reads a PDF file, extracts text from each page, and concatenates
@@ -32,18 +32,14 @@ def extract_text_from_pdf(pdf_path: Path) -> str:
     """
 
     try:
-        with open(pdf_path, "rb") as file:
-            pdf = PdfReader(file)
-            log.debug(f"Number of pages: {len(pdf.pages)}")
+        pages_list = []
+        with pdfplumber.open(pdf_path) as pdf:
+            for page in pdf.pages:
+                page_text = page.extract_text()
+                if page_text:  # some pages may return None
+                    pages_list.append(page_text)
+        return pages_list
 
-            text = ""
-            try:
-                for page in pdf.pages:  # loop through all pages
-                    text += page.extract_text()
-            except Exception as e:
-                log.error(f"Something went wrong with {pdf_path}. Error messange: {e}")
-                traceback.print_exc()
-        return text
     except Exception as e:
         log.error(f"Error processing {pdf_path}: {str(e)}")
         traceback.print_exc()

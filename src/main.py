@@ -9,10 +9,11 @@ import markdown
 from flask import Flask, render_template
 from flask_socketio import SocketIO
 import google.generativeai as genai  # type: ignore[import-untyped]
-from backend.process_query import process_pdf  # type: ignore[import-not-found]
+from backend.process_query import process_query_with_rag  # type: ignore[import-not-found]
 from backend.knf_scraping import scrape_knf  # type: ignore[import-not-found]
 from backend.show_pages import show_pages  # type: ignore[import-not-found]
 from backend.custom_logger import CustomFormatter  # type: ignore[import-not-found]
+from backend.chroma_instance import get_chroma_client  # type: ignore[import-not-found]
 
 
 with open("C:/Users/User/PycharmProjects/KNF_Tool/config/config.json") as file:
@@ -72,9 +73,40 @@ if not scraped_dir.exists():
     scrape_knf(NUM_RETRIES, USER_AGENT_LIST)
 
 
+def replace_polish_chars(text: str) -> str:
+    """
+    For documents names only.
+    """
+    polish_to_ascii = {
+        "ą": "a",
+        "ć": "c",
+        "ę": "e",
+        "ł": "l",
+        "ń": "n",
+        "ó": "o",
+        "ś": "s",
+        "ż": "z",
+        "ź": "z",
+        "Ą": "A",
+        "Ć": "C",
+        "Ę": "E",
+        "Ł": "L",
+        "Ń": "N",
+        "Ó": "O",
+        "Ś": "S",
+        "Ż": "Z",
+        "Ź": "Z",
+    }
+
+    return "".join(polish_to_ascii.get(c, c) for c in text)
+
+
 # flask
 app = Flask(__name__, template_folder="templates", static_folder="static")
 socketio = SocketIO(app, cors_allowed_origins="*")
+
+chroma_client = get_chroma_client("exp_vector_db")
+log.info("Vector DB initialized")
 
 streaming: bool = False
 output_index: int = -1
@@ -171,14 +203,22 @@ def process_text(data: dict) -> None:
                 log.info(f"New container created for: {pdf_name_to_show}")
                 socketio.emit("new_container", {"html": container_html})
 
+                collection_name = pdf_name_to_show.replace(" ", "").lower()
+                collection_name = replace_polish_chars(
+                    collection_name
+                )  # TODO: better solution for database naming
+                collection_name = collection_name[25:60]
+
                 accumulated_text = ""
-                for result_chunk in process_pdf(
+                for result_chunk in process_query_with_rag(
                     prompt,
                     pdf,
                     model,
                     change_lebgth_checkbox,
                     output_size,
                     slider_value,
+                    chroma_client,
+                    collection_name,
                 ):
                     if not streaming:
                         break

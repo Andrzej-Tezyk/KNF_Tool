@@ -1,5 +1,4 @@
 requests==2.32.3
-PyPDF2==3.0.1
 beautifulsoup4==4.12.3
 python-dotenv==1.0.1
 google-generativeai==0.8.3
@@ -12,3 +11,6 @@ mkdocs==1.6.1
 mkdocstrings-python==1.16.8
 mkdocs-material==9.6.10
 Flask-SocketIO==5.5.1
+chromadb==1.0.0
+langchain==0.3.23
+pdfplumber==0.11.6

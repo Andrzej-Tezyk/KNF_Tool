@@ -127,6 +127,7 @@ body {
 
 .input-section-elements {
     padding: 0.5rem;
+    overflow: auto;
 }
 
 .section-header-wrapper {
@@ -155,6 +156,9 @@ body {
     gap: 1rem;
     margin-top: 10px;
     padding: 0.5rem;
+    overflow: auto;
+    font-size: 100%;
+    font-family: Calibri;
 }
 
 .output-section {
@@ -328,6 +332,23 @@ textarea:focus {
     
 }
 
+.top-sidear-button-round{
+    width: 38px;
+    height: 38px;
+    border-radius: 40%;
+    background-color: var(--input-bg-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    color: white;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    z-index: 2;
+}
+
 .sidear-button-round{
     width: 38px;
     height: 38px;
@@ -339,7 +360,7 @@ textarea:focus {
     border: none;
     cursor: pointer;
     font-size: 20px;
-    color: white; /*#B2890F;*/
+    color: white;
     font-weight: bold;
     transition: background-color 0.3s ease, transform 0.2s ease;
 }
@@ -367,64 +388,68 @@ textarea:focus {
     flex-direction: column;
     gap: 1.4rem;
     margin-top: 10px;
-    padding: 0.5rem;
+    padding: 0.4rem;
 }
 
-.show-pages-checkbox-container {
+.option-object {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 4px;
     flex-direction: row;
-    font-family: Calibri;
-    font-size: 22px;
 }
 
-.glass-box input[type="checkbox"] {
+.option-object-model {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+}
+
+.checkbox-option-bar input[type="checkbox"] {
     appearance: none;
     width: 20px;
     height: 20px;
     background: rgba(255, 255, 255, 0.9);
-    /*backdrop-filter: blur(10px);*/
     border: 2px solid rgba(0, 0, 0, 0.2);
     cursor: pointer;
     border-radius: 4px;
-    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    aspect-ratio: 1 / 1;
 }
 
-.glass-box input[type="checkbox"]:checked::after {
+.checkbox-option-bar input[type="checkbox"]:checked::after {
     content: '\2713';
     font-size: 16px;
     color: black;
     position: absolute;
     font-weight: bold;
+    z-index: 1;
 }
 
-.glass-select {
+.select-option {
     appearance: none;
     padding: 12px;
     border: none;
-    border-radius: 12px;
+    border-radius: 20px;
     background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(12px);
     font-size: 16px;
     cursor: pointer;
     transition: 0.3s;
     outline: none;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 7px rgba(0, 0, 0, 0.15);
     color: #333;
-    width: 270px;
+    width: 100%;
+    haight: 80%;
+    margin-left: 10px;
     text-align: center;
+    box-sizing: border-box;
+    z-index: 1;
 }
 
-.slidecontainer {
-  width: 100%;
-}
-
-.slider {
+.temperature-slider {
   -webkit-appearance: none;
   width: 100%;
   height: 10px;
@@ -437,11 +462,11 @@ textarea:focus {
   box-shadow: 0 0 5px rgba(0,0,0,0.4);
 }
 
-.slider:hover {
+.temperature-slider:hover {
   opacity: 1;
 }
 
-.slider::-webkit-slider-thumb {
+.temperature-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 25px;
@@ -451,7 +476,7 @@ textarea:focus {
   cursor: pointer;
 }
 
-.slider::-moz-range-thumb {
+.temperature-slider::-moz-range-thumb {
   width: 23px;
   height: 24px;
   border: 0;
@@ -461,16 +486,15 @@ textarea:focus {
 .open-button {
     padding: 12px;
     border: none;
-    border-radius: 12px;
+    border-radius: 20px;
     background: #303368;
     backdrop-filter: blur(12px);
-    font-size: 16px;
     cursor: pointer;
     transition: 0.3s;
     outline: none;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     color: #ffffff;
-    width: 270px;
+    width: 210px;
     text-align: center;
     font-weight: bold;
 }
@@ -478,7 +502,9 @@ textarea:focus {
 .form-popup {
   display: none;
   right: 15px;
-  border: 3px solid #d8d8d8;
+  border: 2px solid #d8d8d8;
+  border-radius: 25px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 .form-container {
@@ -487,6 +513,7 @@ textarea:focus {
   gap: 20px;
   padding: 10px;
   background-color: white;
+  border-radius: 25px;
 }
 
 .form-container .cancel {

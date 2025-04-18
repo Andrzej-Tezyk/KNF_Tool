@@ -16,7 +16,7 @@ from backend.custom_logger import CustomFormatter  # type: ignore[import-not-fou
 from backend.chroma_instance import get_chroma_client  # type: ignore[import-not-found]
 
 
-with open("config/config.json") as file:
+with open("C:/Users/User/PycharmProjects/KNF_Tool/config/config.json") as file:
     config = json.load(file)
 
 

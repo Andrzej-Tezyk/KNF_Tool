@@ -4,6 +4,7 @@ import chromadb
 
 log = logging.getLogger("__name__")
 
+
 def get_chroma_client(path: str) -> chromadb.PersistentClient:
     """Returns a ChromaDB client instance.
 
@@ -14,4 +15,3 @@ def get_chroma_client(path: str) -> chromadb.PersistentClient:
         chromadb.PersistentClient: An instance of the ChromaDB client.
     """
     return chromadb.PersistentClient(path=path)
-

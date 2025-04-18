@@ -40,7 +40,7 @@ def extract_text_from_pdf(pdf_path: Path) -> str:
                     if page_text:  # some pages may return None
                         pages_list.append(page_text)
             return pages_list
-    
+
     except Exception as e:
         log.error(f"Error processing {pdf_path}: {str(e)}")
         traceback.print_exc()

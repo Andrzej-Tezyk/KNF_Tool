@@ -13,10 +13,10 @@ if not GEMINI_API_KEY:
     raise ValueError("GEMINI_API_KEY not found in environment variables")
 
 
-def clean_extracted_text (text: str):
+def clean_extracted_text(text: str):
 
-    for char in ['~', '©', '_', '\n']:
-        text = text.replace(char, '')
+    for char in ["~", "©", "_", "\n"]:
+        text = text.replace(char, "")
 
     return text
 
@@ -26,7 +26,7 @@ class GeminiEmbeddingFunction(EmbeddingFunction):
     Custom embedding funtion (to use other model than 001) with gemini developer API for document retrieval. NOT IN USE
 
     Class is based on the EmbeddingFunction of chromadb. Implements the __call__ method to generate embeddings.
-    
+
     Args:
         input (Documents): A collection of documents embedded.
 
@@ -39,8 +39,5 @@ class GeminiEmbeddingFunction(EmbeddingFunction):
         model = "models/text-embedding-004"
         title = "custom query"
         return genai.embed_content(
-                                    model=model,
-                                    content=input,
-                                    task_type="retrieval_document",
-                                    title=title)["embedding"]
-    
+            model=model, content=input, task_type="retrieval_document", title=title
+        )["embedding"]

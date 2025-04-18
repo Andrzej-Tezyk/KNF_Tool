@@ -15,6 +15,7 @@ if not GEMINI_API_KEY:
 
 log = logging.getLogger("__name__")
 
+
 def get_gemini_ef():
     """
     Returns a Google Gemini embedding function instance.
@@ -25,10 +26,14 @@ def get_gemini_ef():
     Returns:
         embedding_functions.GoogleGenerativeAiEmbeddingFunction: An instance of the Google Gemini embedding function.
     """
-    return embedding_functions.GoogleGenerativeAiEmbeddingFunction(api_key=GEMINI_API_KEY)
+    return embedding_functions.GoogleGenerativeAiEmbeddingFunction(
+        api_key=GEMINI_API_KEY
+    )
 
 
-def create_chroma_db(documents:List, path:str, name:str, page_numbers: List[int] = None):
+def create_chroma_db(
+    documents: List, path: str, name: str, page_numbers: List[int] = None
+):
     """
     Creates a chroma database.
 
@@ -47,14 +52,12 @@ def create_chroma_db(documents:List, path:str, name:str, page_numbers: List[int]
 
         page_num = page_numbers[index] if page_numbers else index + 1
 
-        db.add(
-            documents=document, 
-            ids=str(index),
-            metadatas={"page_number": page_num})
+        db.add(documents=document, ids=str(index), metadatas={"page_number": page_num})
         time.sleep(5)
         log.debug(f"Chunk {index} of {document} from page {page_num} was vectorized.")
 
     return db, name
+
 
 def load_chroma_collection(path, name):
     """
@@ -68,10 +71,13 @@ def load_chroma_collection(path, name):
         chromadb.Collection: The loaded Chroma Collection.
     """
     chroma_client = chromadb.PersistentClient(path=path)
-    db = chroma_client.get_collection(name=name, embedding_function=GeminiEmbeddingFunction())
+    db = chroma_client.get_collection(
+        name=name, embedding_function=GeminiEmbeddingFunction()
+    )
     log.debug("Collection loaded.")
 
     return db
+
 
 def get_relevant_passage(query, db, n_results=1):
     """
@@ -80,20 +86,20 @@ def get_relevant_passage(query, db, n_results=1):
     Args:
         query: Text to search.
         db: Database to query.
-        n_results: 
-    
+        n_results:
+
     Returns:
         A list of tuples containing (passage_text, page_number).
     """
     results = db.query(query_texts=[query], n_results=n_results)
-    
-    passages = results['documents'][0]
-    metadatas = results['metadatas'][0]
-    
+
+    passages = results["documents"][0]
+    metadatas = results["metadatas"][0]
+
     passages_with_pages = []
     for i, passage in enumerate(passages):
-        page_number = metadatas[i].get('page_number', 'unknown')
+        page_number = metadatas[i].get("page_number", "unknown")
         passages_with_pages.append((passage, page_number))
-    
+
     log.debug("Passages with page numbers sent.")
     return passages_with_pages

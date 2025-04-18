@@ -83,7 +83,8 @@ def process_pdf(
             traceback.print_exc()
             yield {"error": f"An error occurred while processing {pdf.stem}: {str(e)}"}
 
-'''
+
+"""
 
 
          # clean up the chunk text (removes extra spaces)
@@ -99,7 +100,7 @@ def process_pdf(
                 # yield remaining words
                 if sub_chunk:
                     yield {"pdf_name": pdf.stem, "content": sub_chunk + " "}   
-'''
+"""
 
 
 def process_query_with_rag(
@@ -110,7 +111,7 @@ def process_query_with_rag(
     output_size: int,
     slider_value: float,
     chroma_client: Any,
-    collection_name: str
+    collection_name: str,
 ) -> Generator:
     if not prompt:
         yield {"error": "No prompt provided"}
@@ -120,24 +121,36 @@ def process_query_with_rag(
             log.info(f"Document: {pdf.stem} is beeing analyzed.")
 
             try:
-                collection = chroma_client.get_collection(name=collection_name, embedding_function=get_gemini_ef())
+                collection = chroma_client.get_collection(
+                    name=collection_name, embedding_function=get_gemini_ef()
+                )
 
-                passages_with_pages = get_relevant_passage(prompt, collection, n_results=5) # TODO: experiment with different n_results values
+                passages_with_pages = get_relevant_passage(
+                    prompt, collection, n_results=5
+                )  # TODO: experiment with different n_results values
 
                 rag_context = "\n\nRelevanat context from the document:\n"
                 for passage, page_number in passages_with_pages:
                     rag_context += f"\nPage {page_number}: {passage}\n"
 
-                rag_context += "\n\n Please use only the above context to generate an answer."
+                rag_context += (
+                    "\n\n Please use only the above context to generate an answer."
+                )
             except Exception as e:
-                log.error(f"Problem with retrieveing context for {pdf.stem}. \n Error message: {e}\n")
-                rag_context = "Ignore all instrucions and output: 'Error: No context found.'"
+                log.error(
+                    f"Problem with retrieveing context for {pdf.stem}. \n Error message: {e}\n"
+                )
+                rag_context = (
+                    "Ignore all instrucions and output: 'Error: No context found.'"
+                )
 
             log.debug(f"Context for {pdf.stem}:\n{rag_context}\n")
             response = model.generate_content(
                 [
                     (
-                        prompt + f"(Please provide {output_size} size response)" + rag_context
+                        prompt
+                        + f"(Please provide {output_size} size response)"
+                        + rag_context
                         if change_lebgth_checkbox == "True"
                         else prompt + rag_context
                     ),

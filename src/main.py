@@ -74,20 +74,32 @@ if not scraped_dir.exists():
     scrape_knf(NUM_RETRIES, USER_AGENT_LIST)
 
 
-
 def replace_polish_chars(text: str) -> str:
     """
     For documents names only.
     """
     polish_to_ascii = {
-        "ą": "a", "ć": "c", "ę": "e", "ł": "l", "ń": "n",
-        "ó": "o", "ś": "s", "ż": "z", "ź": "z",
-        "Ą": "A", "Ć": "C", "Ę": "E", "Ł": "L", "Ń": "N",
-        "Ó": "O", "Ś": "S", "Ż": "Z", "Ź": "Z",
+        "ą": "a",
+        "ć": "c",
+        "ę": "e",
+        "ł": "l",
+        "ń": "n",
+        "ó": "o",
+        "ś": "s",
+        "ż": "z",
+        "ź": "z",
+        "Ą": "A",
+        "Ć": "C",
+        "Ę": "E",
+        "Ł": "L",
+        "Ń": "N",
+        "Ó": "O",
+        "Ś": "S",
+        "Ż": "Z",
+        "Ź": "Z",
     }
 
-    return ''.join(polish_to_ascii.get(c, c) for c in text)
-
+    return "".join(polish_to_ascii.get(c, c) for c in text)
 
 
 # flask
@@ -193,7 +205,9 @@ def process_text(data: dict) -> None:
                 socketio.emit("new_container", {"html": container_html})
 
                 collection_name = pdf_name_to_show.replace(" ", "").lower()
-                collection_name = replace_polish_chars(collection_name) # TODO: better solution for database naming
+                collection_name = replace_polish_chars(
+                    collection_name
+                )  # TODO: better solution for database naming
                 collection_name = collection_name[25:60]
 
                 accumulated_text = ""

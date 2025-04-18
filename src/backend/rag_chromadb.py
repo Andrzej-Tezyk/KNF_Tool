@@ -2,9 +2,10 @@ import chromadb
 import time
 import logging
 import os
+from typing import Any
 
 import chromadb.utils.embedding_functions as embedding_functions
-from backend.rag_embeddings import GeminiEmbeddingFunction
+from backend.rag_embeddings import GeminiEmbeddingFunction  # type: ignore[import-not-found]
 
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -15,7 +16,7 @@ if not GEMINI_API_KEY:
 log = logging.getLogger("__name__")
 
 
-def get_gemini_ef():
+def get_gemini_ef() -> Any:
     """
     Returns a Google Gemini embedding function instance.
 
@@ -30,7 +31,7 @@ def get_gemini_ef():
     )
 
 
-def create_chroma_db(documents: list, path: str, name: str, page_numbers: list = None):
+def create_chroma_db(documents: list, path: str, name: str, page_numbers: list = None):  # type: ignore
     """
     Creates a chroma database.
 
@@ -56,8 +57,10 @@ def create_chroma_db(documents: list, path: str, name: str, page_numbers: list =
     return db, name
 
 
-def load_chroma_collection(path, name):
+def load_chroma_collection(path: str, name: str) -> chromadb.Collection:
     """
+    DO NOT USE IT FOR NOW.
+
     Loads an existing Chroma collection from the specified path with the given name.
 
     Args:
@@ -76,7 +79,7 @@ def load_chroma_collection(path, name):
     return db
 
 
-def get_relevant_passage(query, db, n_results=1):
+def get_relevant_passage(query: str, db: Any, n_results: int = 1) -> list:
     """
     Get data from vector database.
 

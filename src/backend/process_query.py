@@ -7,7 +7,7 @@ import logging
 
 import google.generativeai as genai  # type: ignore[import-untyped]
 from dotenv import load_dotenv
-from backend.rag_chromadb import get_relevant_passage, get_gemini_ef
+from backend.rag_chromadb import get_relevant_passage, get_gemini_ef  # type: ignore[import-not-found]
 
 log = logging.getLogger("__name__")
 

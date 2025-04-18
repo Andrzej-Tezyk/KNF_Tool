@@ -1,8 +1,9 @@
 import logging
 import os
+from typing import Any
 
-import google.generativeai as genai
-from chromadb import Documents, EmbeddingFunction, Embeddings
+import google.generativeai as genai  # type: ignore[import-untyped]
+from chromadb import Documents, EmbeddingFunction
 
 
 log = logging.getLogger("__name__")
@@ -13,7 +14,7 @@ if not GEMINI_API_KEY:
     raise ValueError("GEMINI_API_KEY not found in environment variables")
 
 
-def clean_extracted_text(text: str):
+def clean_extracted_text(text: str) -> str:
 
     for char in ["~", "©", "_", "\n"]:
         text = text.replace(char, "")
@@ -34,7 +35,7 @@ class GeminiEmbeddingFunction(EmbeddingFunction):
         Embeddings.
     """
 
-    def __call__(self, input_docs: Documents) -> Embeddings:
+    def __call__(self, input_docs: Documents) -> Any:
         genai.configure(api_key=GEMINI_API_KEY)
         model = "models/text-embedding-004"
         title = "custom query"

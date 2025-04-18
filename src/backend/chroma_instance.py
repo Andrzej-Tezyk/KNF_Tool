@@ -1,11 +1,12 @@
 import logging
+from typing import Any
 
 import chromadb
 
 log = logging.getLogger("__name__")
 
 
-def get_chroma_client(path: str) -> chromadb.PersistentClient:
+def get_chroma_client(path: str) -> Any:
     """Returns a ChromaDB client instance.
 
     This function initializes and returns a ChromaDB client instance.

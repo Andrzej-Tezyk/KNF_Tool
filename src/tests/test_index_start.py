@@ -1,4 +1,4 @@
-from main import app
+from main import app  # type: ignore[import-not-found]
 
 
 def test_index_start() -> None:

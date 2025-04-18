@@ -8,7 +8,7 @@ import pdfplumber
 log = logging.getLogger("__name__")
 
 
-def extract_text_from_pdf(pdf_path: Path) -> str:
+def extract_text_from_pdf(pdf_path: Path):  # type: ignore
     """Extracts text from a PDF file.
 
     This function reads a PDF file, extracts text from each page, and concatenates

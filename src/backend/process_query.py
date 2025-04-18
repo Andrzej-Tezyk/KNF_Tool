@@ -6,9 +6,8 @@ from collections.abc import Generator
 import logging
 
 import google.generativeai as genai  # type: ignore[import-untyped]
-import chromadb
 from dotenv import load_dotenv
-
+from backend.rag_chromadb import get_relevant_passage, get_gemini_ef
 
 log = logging.getLogger("__name__")
 
@@ -110,8 +109,8 @@ def process_query_with_rag(
     change_lebgth_checkbox: str,
     output_size: int,
     slider_value: float,
-    collection_name: str,
-    db_path: str = "exp_vector_db"
+    chroma_client: Any,
+    collection_name: str
 ) -> Generator:
     if not prompt:
         yield {"error": "No prompt provided"}
@@ -120,11 +119,21 @@ def process_query_with_rag(
         try:
             log.info(f"Document: {pdf.stem} is beeing analyzed.")
 
-            
+            try:
+                collection = chroma_client.get_collection(name=collection_name, embedding_function=get_gemini_ef())
 
-            rag_context = 
+                passages_with_pages = get_relevant_passage(prompt, collection, n_results=5) # TODO: experiment with different n_results values
 
-            log.debug(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
+                rag_context = "\n\nRelevanat context from the document:\n"
+                for passage, page_number in passages_with_pages:
+                    rag_context += f"\nPage {page_number}: {passage}\n"
+
+                rag_context += "\n\n Please use only the above context to generate an answer."
+            except Exception as e:
+                log.error(f"Problem with retrieveing context for {pdf.stem}. \n Error message: {e}\n")
+                rag_context = "Ignore all instrucions and output: 'Error: No context found.'"
+
+            log.debug(f"Context for {pdf.stem}:\n{rag_context}\n")
             response = model.generate_content(
                 [
                     (

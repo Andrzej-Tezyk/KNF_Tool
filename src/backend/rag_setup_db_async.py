@@ -33,7 +33,9 @@ async def replace_polish_chars(text: str) -> str:
     return ''.join(polish_to_ascii.get(c, c) for c in text)
 
 async def process_pdf(doc_path: Path) -> None:
-    """Process a single PDF file asynchronously"""
+    """
+    Process a single PDF file asynchronously
+    """
     try:
         name = str(doc_path).replace(" ", "").lower()
         name = await replace_polish_chars(name)
@@ -64,7 +66,9 @@ async def process_pdf(doc_path: Path) -> None:
         traceback.print_exc()
 
 async def run_in_executor(func, *args, **kwargs):
-    """Run a blocking function in a thread pool executor"""
+    """
+    Run a blocking function in a thread pool executor
+    """
     loop = asyncio.get_event_loop()
     with ThreadPoolExecutor() as executor:
         return await loop.run_in_executor(
@@ -73,7 +77,9 @@ async def run_in_executor(func, *args, **kwargs):
         )
 
 async def setup_chroma_db_async(doc_paths: List[Path], max_concurrency: int = 4) -> None:
-    """Process multiple PDF files concurrently with limited concurrency"""
+    """
+    Process multiple PDF files concurrently with limited concurrency
+    """
     semaphore = asyncio.Semaphore(max_concurrency)
     
     async def process_with_semaphore(doc_path: Path) -> None:
@@ -91,6 +97,5 @@ async def main() -> None:
     else:
         log.error(f"The path {PDF_FILES} is not a directory.")
 
-# Run the async main function
 if __name__ == "__main__":
     asyncio.run(main())

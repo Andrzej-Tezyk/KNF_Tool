@@ -5,7 +5,7 @@ from typing import List
 import os
 
 import chromadb.utils.embedding_functions as embedding_functions
-from rag_embeddings import GeminiEmbeddingFunction
+from backend.rag_embeddings import GeminiEmbeddingFunction
 
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -15,8 +15,17 @@ if not GEMINI_API_KEY:
 
 log = logging.getLogger("__name__")
 
+def get_gemini_ef():
+    """
+    Returns a Google Gemini embedding function instance.
 
-google_ef  = embedding_functions.GoogleGenerativeAiEmbeddingFunction(api_key=GEMINI_API_KEY)
+    This function initializes and returns an instance of the Google Gemini
+    embedding function, which is used for generating embeddings for text data.
+
+    Returns:
+        embedding_functions.GoogleGenerativeAiEmbeddingFunction: An instance of the Google Gemini embedding function.
+    """
+    return embedding_functions.GoogleGenerativeAiEmbeddingFunction(api_key=GEMINI_API_KEY)
 
 
 def create_chroma_db(documents:List, path:str, name:str, page_numbers: List[int] = None):
@@ -32,7 +41,7 @@ def create_chroma_db(documents:List, path:str, name:str, page_numbers: List[int]
         Tuple: A tuple containing created chroma collection and its name.
     """
     chroma_client = chromadb.PersistentClient(path=path)
-    db = chroma_client.create_collection(name=name, embedding_function=google_ef)
+    db = chroma_client.create_collection(name=name, embedding_function=get_gemini_ef())
 
     for index, document in enumerate(documents):
 

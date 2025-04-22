@@ -2,7 +2,7 @@ import logging
 import os
 from typing import Any
 
-import google.generativeai as genai  # type: ignore[import-untyped]
+import google.generativeai as genai
 from chromadb import Documents, EmbeddingFunction
 
 

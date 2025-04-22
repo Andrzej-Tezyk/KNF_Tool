@@ -5,7 +5,7 @@ from typing import Any
 from collections.abc import Generator
 import logging
 
-import google.generativeai as genai  # type: ignore[import-untyped]
+import google.generativeai as genai
 from dotenv import load_dotenv
 from backend.rag_chromadb import get_relevant_passage, get_gemini_ef  # type: ignore[import-not-found]
 

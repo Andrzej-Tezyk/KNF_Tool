@@ -8,7 +8,7 @@ import logging
 import markdown
 from flask import Flask, render_template
 from flask_socketio import SocketIO
-import google.generativeai as genai  # type: ignore[import-untyped]
+import google.generativeai as genai
 from backend.process_query import process_query_with_rag  # type: ignore[import-not-found]
 from backend.knf_scraping import scrape_knf  # type: ignore[import-not-found]
 from backend.show_pages import show_pages  # type: ignore[import-not-found]
@@ -61,7 +61,7 @@ SYSTEM_PROMPT = config["system_prompt"]
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
-    raise ValueError("GEMINI_API_KEY not found in environment variables")
+    raise ValueError("GEMINI_API_KEY not found in environment variables.")
 
 
 # scrape if no documents on the server
@@ -135,7 +135,9 @@ def process_text(data: dict) -> None:
         selected_files = data.get("pdfFiles")
         output_size = data.get("output_size")
         show_pages_checkbox = data.get("show_pages_checkbox")
-        choosen_model = data.get("choosen_model")
+        choosen_model = str(
+            data.get("choosen_model", "gemini-2.0-flash")
+        )  # second arg = default model
         change_lebgth_checkbox = data.get("change_length_checkbox")
         slider_value = data.get("slider_value")
 

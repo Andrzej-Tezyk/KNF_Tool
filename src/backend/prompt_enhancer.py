@@ -2,8 +2,6 @@ import json
 import logging
 from typing import Any
 
-import google.generativeai as genai
-
 
 log = logging.getLogger("__name__")
 
@@ -12,7 +10,7 @@ with open("config/config.json") as file:
     config = json.load(file)
 
 
-def enhance_prompt(prompt: str, model: Any) -> str:
+def enhance_prompt(prompt: str, model: Any) -> Any:
     """Enhances the given prompt by adding context and instructions.
 
     This function takes a user-provided prompt and enhances it by adding context

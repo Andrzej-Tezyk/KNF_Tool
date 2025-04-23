@@ -25,7 +25,6 @@ def enhance_prompt(prompt: str, model: Any) -> str:
         str: The enhanced prompt with additional context and instructions.
     """
 
-
     instructions = config["prompt_enhancer"]
 
     instructions_and_prompt = f"{instructions}\n\nUser Prompt: {prompt}"

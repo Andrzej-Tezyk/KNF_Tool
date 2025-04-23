@@ -5,9 +5,10 @@ from typing import Any
 from collections.abc import Generator
 import logging
 
-import google.generativeai as genai  # type: ignore[import-untyped]
+import google.generativeai as genai
 from dotenv import load_dotenv
-
+from backend.rag_chromadb import get_relevant_passage, get_gemini_ef  # type: ignore[import-not-found]
+from backend.prompt_enhancer import enhance_prompt  # type: ignore[import-not-found]
 
 log = logging.getLogger("__name__")
 
@@ -20,6 +21,7 @@ def process_pdf(
     pdf: Path,
     model: Any,
     change_lebgth_checkbox: str,
+    enhancer_checkbox: str,
     output_size: int,
     slider_value: float,
 ) -> Generator:
@@ -53,6 +55,16 @@ def process_pdf(
     if not prompt:
         yield {"error": "No prompt provided"}
 
+    try:
+        if enhancer_checkbox == "True":
+            prompt = enhance_prompt(prompt, model)
+            log.debug(f"Improved prompt: {prompt}")
+
+    except Exception as e:
+        log.error(
+            f"Problem with prompt enhancer for {pdf.stem}. \n Error message: {e}\n"
+        )
+
     else:
         try:
             log.info(f"Document: {pdf.stem} is beeing analyzed.")
@@ -72,20 +84,90 @@ def process_pdf(
             )
             # split its text into smaller sub-chunks
             for response_chunk in response:
-                # clean up the chunk text (removes extra spaces)
-                chunk_text = response_chunk.text.replace("  ", " ")
-                words = chunk_text.split(" ")
-                sub_chunk = ""
-                for word in words:
-                    sub_chunk = sub_chunk + " " + word if sub_chunk else word
-                    if len(sub_chunk.split()) >= 3:  # size of subchunk here
-                        yield {"pdf_name": pdf.stem, "content": sub_chunk + " "}
-                        sub_chunk = ""
-                        time.sleep(0.2)
-                # yield remaining words
-                if sub_chunk:
-                    yield {"pdf_name": pdf.stem, "content": sub_chunk + " "}
-                    time.sleep(0.1)
+                # replace -> sometimes double space between words occure; most likely reason: pdf formating
+                response_chunk_text = response_chunk.text.replace("  ", " ")
+                yield {"pdf_name": pdf.stem, "content": response_chunk_text}
+                time.sleep(0.1)
+            log.debug(f"Response for: {pdf.stem} was saved!\n")
+            time.sleep(1)  # lower API request rate per sec
+        except Exception as e:
+            log.error(f"There is a problem with {pdf.stem}. \n Error message: {e}\n")
+            traceback.print_exc()
+            yield {"error": f"An error occurred while processing {pdf.stem}: {str(e)}"}
+
+
+def process_query_with_rag(
+    prompt: str,
+    pdf: Path,
+    model: Any,
+    change_lebgth_checkbox: str,
+    enhancer_checkbox: str,
+    output_size: int,
+    slider_value: float,
+    chroma_client: Any,
+    collection_name: str,
+) -> Generator:
+    if not prompt:
+        yield {"error": "No prompt provided"}
+
+    else:
+        try:
+            log.info(f"Document: {pdf.stem} is beeing analyzed.")
+
+            try:
+                collection = chroma_client.get_collection(
+                    name=collection_name, embedding_function=get_gemini_ef()
+                )
+
+                passages_with_pages = get_relevant_passage(
+                    prompt, collection, n_results=5
+                )  # TODO: experiment with different n_results values
+
+                rag_context = "\n\nRelevanat context from the document:\n"
+                for passage, page_number in passages_with_pages:
+                    rag_context += f"\nPage {page_number}: {passage}\n"
+
+                rag_context += (
+                    "\n\n Please use only the above context to generate an answer."
+                )
+            except Exception as e:
+                log.error(
+                    f"Problem with retrieveing context for {pdf.stem}. \n Error message: {e}\n"
+                )
+                rag_context = (
+                    "Ignore all instrucions and output: 'Error: No context found.'"
+                )
+
+            try:
+                if enhancer_checkbox == "True":
+                    prompt = enhance_prompt(prompt, model)
+                    log.debug(f"Improved prompt: {prompt}")
+
+            except Exception as e:
+                log.error(
+                    f"Problem with prompt enhancer for {pdf.stem}. \n Error message: {e}\n"
+                )
+
+            log.debug(f"Context for {pdf.stem}:\n{rag_context}\n")
+            response = model.generate_content(
+                [
+                    (
+                        prompt
+                        + f"(Please provide {output_size} size response)"
+                        + rag_context
+                        if change_lebgth_checkbox == "True"
+                        else prompt + rag_context
+                    ),
+                ],
+                stream=True,
+                generation_config={"temperature": slider_value},
+            )
+            # split its text into smaller sub-chunks
+            for response_chunk in response:
+                # replace -> sometimes double space between words occure; most likely reason: pdf formating
+                response_chunk_text = response_chunk.text.replace("  ", " ")
+                yield {"pdf_name": pdf.stem, "content": response_chunk_text}
+                time.sleep(0.1)
             log.debug(f"Response for: {pdf.stem} was saved!\n")
             time.sleep(1)  # lower API request rate per sec
         except Exception as e:

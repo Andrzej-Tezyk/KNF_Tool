@@ -8,6 +8,7 @@ import logging
 import google.generativeai as genai
 from dotenv import load_dotenv
 from backend.rag_chromadb import get_relevant_passage, get_gemini_ef  # type: ignore[import-not-found]
+from backend.prompt_enhancer import enhance_prompt  # type: ignore[import-not-found]
 
 log = logging.getLogger("__name__")
 
@@ -20,6 +21,7 @@ def process_pdf(
     pdf: Path,
     model: Any,
     change_lebgth_checkbox: str,
+    enhancer_checkbox: str,
     output_size: int,
     slider_value: float,
 ) -> Generator:
@@ -52,6 +54,16 @@ def process_pdf(
 
     if not prompt:
         yield {"error": "No prompt provided"}
+
+    try:
+        if enhancer_checkbox == "True":
+            prompt = enhance_prompt(prompt, model)
+            log.debug(f"Improved prompt: {prompt}")
+
+    except Exception as e:
+        log.error(
+            f"Problem with prompt enhancer for {pdf.stem}. \n Error message: {e}\n"
+        )
 
     else:
         try:
@@ -89,6 +101,7 @@ def process_query_with_rag(
     pdf: Path,
     model: Any,
     change_lebgth_checkbox: str,
+    enhancer_checkbox: str,
     output_size: int,
     slider_value: float,
     chroma_client: Any,
@@ -123,6 +136,16 @@ def process_query_with_rag(
                 )
                 rag_context = (
                     "Ignore all instrucions and output: 'Error: No context found.'"
+                )
+
+            try:
+                if enhancer_checkbox == "True":
+                    prompt = enhance_prompt(prompt, model)
+                    log.debug(f"Improved prompt: {prompt}")
+
+            except Exception as e:
+                log.error(
+                    f"Problem with prompt enhancer for {pdf.stem}. \n Error message: {e}\n"
                 )
 
             log.debug(f"Context for {pdf.stem}:\n{rag_context}\n")

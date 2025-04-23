@@ -16,7 +16,7 @@ from backend.custom_logger import CustomFormatter  # type: ignore[import-not-fou
 from backend.chroma_instance import get_chroma_client  # type: ignore[import-not-found]
 
 
-with open("C:/Users/User/PycharmProjects/KNF_Tool/config/config.json") as file:
+with open("config/config.json") as file:
     config = json.load(file)
 
 
@@ -139,10 +139,13 @@ def process_text(data: dict) -> None:
             data.get("choosen_model", "gemini-2.0-flash")
         )  # second arg = default model
         change_lebgth_checkbox = data.get("change_length_checkbox")
+        # enhancer_checkbox = data.get("enhancer_checkbox")
+        enhancer_checkbox = "True"  # TODO: change when enhancer is ready
         slider_value = data.get("slider_value")
 
         show_pages_checkbox = str(show_pages_checkbox)
         change_lebgth_checkbox = str(change_lebgth_checkbox)
+        enhancer_checkbox = str(enhancer_checkbox)
 
         if slider_value is not None:
             slider_value = float(slider_value)
@@ -217,6 +220,7 @@ def process_text(data: dict) -> None:
                     pdf,
                     model,
                     change_lebgth_checkbox,
+                    enhancer_checkbox,
                     output_size,
                     slider_value,
                     chroma_client,
@@ -226,7 +230,7 @@ def process_text(data: dict) -> None:
                         break
                     if (
                         "error" in result_chunk
-                    ):  # czy tu chodzi o slowo error w odpowiedzi? jezeli tak to do sprawdzenia
+                    ):  # TODO czy tu chodzi o slowo error w odpowiedzi? jezeli tak to do sprawdzenia
                         socketio.emit("error", {"message": "error in chunk response"})
                         return
                     elif "content" in result_chunk:

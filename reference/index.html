@@ -1290,7 +1290,7 @@ Raises:
 
 
 <h2 id="backend.process_query.process_pdf" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">process_pdf</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">change_lebgth_checkbox</span><span class="p">,</span> <span class="n">output_size</span><span class="p">,</span> <span class="n">slider_value</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">process_pdf</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">pdf</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">change_lebgth_checkbox</span><span class="p">,</span> <span class="n">enhancer_checkbox</span><span class="p">,</span> <span class="n">output_size</span><span class="p">,</span> <span class="n">slider_value</span><span class="p">)</span></code>
 
 </h2>
 
@@ -1472,8 +1472,7 @@ text is cleaned to remove double spaces before being returned.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/backend/process_query.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">18</span>
-<span class="normal">19</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">19</span>
 <span class="normal">20</span>
 <span class="normal">21</span>
 <span class="normal">22</span>
@@ -1538,11 +1537,24 @@ text is cleaned to remove double spaces before being returned.</p>
 <span class="normal">81</span>
 <span class="normal">82</span>
 <span class="normal">83</span>
-<span class="normal">84</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">process_pdf</span><span class="p">(</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span>
+<span class="normal">90</span>
+<span class="normal">91</span>
+<span class="normal">92</span>
+<span class="normal">93</span>
+<span class="normal">94</span>
+<span class="normal">95</span>
+<span class="normal">96</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">process_pdf</span><span class="p">(</span>
     <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">pdf</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
     <span class="n">model</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="n">change_lebgth_checkbox</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">enhancer_checkbox</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">output_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">slider_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">:</span>
@@ -1575,6 +1587,16 @@ text is cleaned to remove double spaces before being returned.</p>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">prompt</span><span class="p">:</span>
         <span class="k">yield</span> <span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;No prompt provided&quot;</span><span class="p">}</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">enhancer_checkbox</span> <span class="o">==</span> <span class="s2">&quot;True&quot;</span><span class="p">:</span>
+            <span class="n">prompt</span> <span class="o">=</span> <span class="n">enhance_prompt</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Improved prompt: </span><span class="si">{</span><span class="n">prompt</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Problem with prompt enhancer for </span><span class="si">{</span><span class="n">pdf</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">. </span><span class="se">\n</span><span class="s2"> Error message: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>

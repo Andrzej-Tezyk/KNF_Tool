@@ -216,7 +216,7 @@ def process_text(data: dict) -> None:
 
                 collection_name = pdf_name_to_show.replace(" ", "").lower()
                 collection_name = replace_polish_chars(collection_name) # TODO: better solution for database naming
-                collection_name = collection_name[25:60]
+                collection_name = collection_name[:35]
 
                 accumulated_text = ""
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KNF Insight</title>
+    <title>{{ container_title_langchain }}</title>
     <script 
         src="https://unpkg.com/htmx.org@2.0.3" 
         integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq" 
@@ -12,8 +12,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/logo.ico') }}">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
-    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>   
 </head>
 <body>
     <div class="flex-container">
@@ -55,7 +54,6 @@
                     <img class="sidebar-icon" src="{{ url_for('static', filename='images/gear-solid.svg') }}">
                 </button>
             </div>
-            
         </aside>
         <div class="form-flex-container">
             <div id="input-form">
@@ -126,109 +124,24 @@
                     <!-- output section -->
                     <div class="output-section">
                         <div id="output" class="markdown-body">
-                            <!-- output goes here -->
+                        <!-- output retrieved from cache -->
+   
+                            <div class="output-content" id="retrieved-content-section">
+                                <div class="output-header">
+                                    {{ container_title_chat }}
+                                </div>
+                                <div class="markdown-body">
+                                    {{ content_chat | safe }}
+                                </div>
+                            </div>
+                        <!-- output goes here -->
                         </div>
                         <div class="input-form-container">
                             <div class="input-area-elements">
                                 <textarea id="input" name="input" placeholder="Type your query" required></textarea>
-                                <button id="action-button" class="button-round"> 
+                                <button id="action-button" class="button-round"> <!-- type="submit" class="button-round"> -->
                                     <img class="icon" src="{{ url_for('static', filename='images/arrow-up-solid.svg') }}">
                                 </button>
-                                <button class="button-round" id="file-button" data-tooltip="Documents" type="button"> 
-                                    <img class="sidebar-icon" src="{{ url_for('static', filename='images/file-regular.svg') }}">
-                                </button>
-                            </div>
-                            
-                            <div class="bottom-panel" id="bottom-panel">
-                                <div class="bottom-panel-header">
-                                    <div class="bottom-panel-checkbox-buttons">
-                                        <button id="selectAllBtn" type="button" class="bottom-panel-button">Select All</button>
-                                        <button id="uncheckAllBtn" type="button" class="bottom-panel-button">Uncheck All</button>
-                                    </div>
-                                    <button id="hidePanel-button" class="sidear-button-round" type="button" data-tooltip="Or press Escape">
-                                        <img class="icon" src="{{ url_for('static', filename='images/circle-xmark-regular.svg') }}">
-                                    </button>
-                                </div>
-                                <div class="documents-list">
-                                    <div class="scrollable-list">
-                                        {% for pdf in pdf_files %}
-                                        <div class="file-item">
-                                            <input type="checkbox" class="file-checkbox" id="{{ pdf }}" name="selected_files" value="{{ pdf }}">
-                                            <label for="{{ pdf }}">{{ pdf[11:-4] }}</label>
-                                        </div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="list-of-choosen-files">
-                            <div id="selected-files"></div> <!-- selected files go here -->
-                        </div>
-                        <div id="tutorialPopup">
-                            <div class="header-tutorial-flex-contanier">
-                                <h3>LLM Prompting Tutorial</h3>
-                                <button id="hideTutorial-button" class="sidear-button-round" type="button" data-tooltip="Or press Escape">
-                                    <img class="icon" src="{{ url_for('static', filename='images/circle-xmark-regular.svg') }}">
-                                </button>
-                            </div>
-                            <div class="tutorial-text">
-                                <div class="tutorial-text-paragraph">
-                                    <h4>Understand the context</h4>
-                                    <p>Financial regulations for banks can be complex. Before writing your prompt, ensure you understand:</p>
-                                    <ol>
-                                        <li><strong>The document’s scope.</strong> What regulation or specific section are you targeting?</li>
-                                        <li><strong>Your objective.</strong> Are you looking for a summary, clarification of a term, compliance details, or an interpretation of a clause?</li>
-                                    </ol>
-                                    <em>Tip: Think of your prompt as a question to an expert who is familiar with banking regulations.</em>
-                                </div>
-
-                                <div class="tutorial-text-paragraph">
-                                    <h4>Be specific and targeted</h4>
-                                    <p>General queries might lead to vague or off-target responses. Instead, use specific language.</p>
-                                    <ol>
-                                        <li><strong>Identify the regulation.</strong> Instead of “Explain bank rules,” say “Explain the capital adequacy requirements in Recommendation X.”</li>
-                                        <li><strong>Mention sections or terms.</strong> For example, “What are the implications of the liquidity coverage ratio as described in Section 4.2 of the regulation?”</li>
-                                    </ol>
-                                    <em>Example: “Can you summarize the key requirements related to risk management in the KNF guidelines, focusing on the minimum liquidity coverage ratio?”</em>
-                                </div>    
-
-                                <div class="tutorial-text-paragraph">
-                                    <h4>Structure your prompt clearly</h4>
-                                    <p>A well-structured prompt can guide the model more effectively.</p>
-                                    <ol>
-                                        <li><strong>Bullet points or lists.</strong> When asking for multiple points or criteria, format your request in a list.</li>
-                                        <li><strong>Step-by-step requests.</strong> If the regulation is complex, ask for a breakdown of the topic into understandable steps or segments.</li>
-                                    </ol>
-                                    <em>Example: “Please outline: 1) The key risk factors outlined in the regulation. 2) The steps banks must take to mitigate these risks. 3) Any penalties for non-compliance.”</em>
-                                </div>
-
-                                <div class="tutorial-text-paragraph">
-                                    <h4>Use open-ended and specific questions</h4>
-                                    <p>Balance is key. Open-ended questions allow the model to provide comprehensive answers, while specificity keeps responses focused.</p>
-                                    <ol>
-                                        <li><strong>Open-ended.</strong> “What are the emerging trends in financial regulation for banks?”</li>
-                                        <li><strong>Specific.</strong> “What are the minimum capital requirements for banks under the Basel III framework?”</li>
-                                    </ol>
-                                </div>
-
-                                <div class="tutorial-text-paragraph">
-                                    <h4>Iterate and refine</h4>
-                                    <p>Your first prompt may not yield the perfect answer. Use the LLM’s feedback.</p>
-                                    <ol>
-                                        <li><strong>Clarify ambiguities.</strong> If the response is too broad, refine your query with additional context.</li>
-                                        <li><strong>Ask follow-up questions.</strong> Narrow down further details in subsequent prompts.</li>
-                                    </ol>
-                                    <em>Tip: If a prompt returns too much unrelated information, add a clarifying sentence such as “Focus solely on the implications for mid-sized banks.”</em>
-                                </div>
-
-                                <div class="tutorial-text-paragraph">
-                                    <h4>Incorporate industry jargon carefully</h4>
-                                    <p>While financial terminology is necessary, ensure you’re not overloading your prompt.</p>
-                                    <ol>
-                                        <li><strong>Balance technicality.</strong> Use standard terms, but if a term is very technical or obscure, briefly define it.</li>
-                                        <li><strong>Maintain readability.</strong> The prompt should be understandable for the LLM without ambiguity.</li>
-                                    </ol>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -240,7 +153,7 @@
         var stopIconUrl = "{{ url_for('static', filename='images/stop-solid.svg') }}";
         var arrowUpIconUrl = "{{ url_for('static', filename='images/arrow-up-solid.svg') }}";
     </script>
-    <script src="{{ url_for('static', filename='socket.js') }}"></script>
+    <script src="{{ url_for('static', filename='socketChat.js') }}"></script>
     <script src="{{ url_for('static', filename='stopProcessing.js') }}"></script> 
     <script src="{{ url_for('static', filename='clearOutput.js') }}"></script>
     <script src="{{ url_for('static', filename='advancedOptions.js') }}"></script>

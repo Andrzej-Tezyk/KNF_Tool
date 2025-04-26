@@ -291,7 +291,7 @@ def handle_stop() -> None:
     log.info("Processing Stopped by User")
 
 
-@app.route("/langchainChat")
+@app.route("/documentChat")
 def langchain_chat() -> Any:
     content_id = request.args.get('contentId') # Get ID from URL query ?contentId=...
     log.info(f"Langchain chat request for contentId: {content_id}")
@@ -301,18 +301,18 @@ def langchain_chat() -> Any:
     log.debug(f"Cache lookup for {content_id} returned: {type(cached_data)}")
 
     if cached_data:
-        container_title_langchain = cached_data.get("title", "Unknown Title")
-        content_langchain = cached_data.get("content", "<p>Content not found.</p>")
+        container_title_chat = cached_data.get("title", "Unknown Title")
+        content_chat = cached_data.get("content", "<p>Content not found.</p>")
         log.info(f"Found content for {content_id} in cache.")
     else:
-        container_title_langchain = "Error"
-        content_langchain = f"<p>Could not find content for ID: {content_id}. Cache might be empty or ID is invalid.</p>"
+        container_title_chat = "Error"
+        content_chat = f"<p>Could not find content for ID: {content_id}. Cache might be empty or ID is invalid.</p>"
         log.warning(f"Content for {content_id} not found in cache.")
 
     return render_template(
-        "langchainChat.html",
-        container_title_langchain=container_title_langchain,
-        content_langchain=content_langchain
+        "documentChat.html",
+        container_title_chat=container_title_chat,
+        content_chat=content_chat
         )
 
 

@@ -221,7 +221,7 @@ def process_text(data: dict) -> None:
                 accumulated_text = ""
                 for result_chunk in process_query_with_rag(
                     prompt,
-                    pdf,
+                    pdf_name_to_show,
                     model,
                     change_lebgth_checkbox,
                     enhancer_checkbox,
@@ -281,6 +281,157 @@ def process_text(data: dict) -> None:
         socketio.emit("error", {"message": f"An unexpected error occurred: {str(e)}"})
         streaming = False
 
+@socketio.on("send_chat_message")
+def handle_chat_message(data: dict) -> None:
+    log.info("Received user input. Start processing.")
+
+    try:
+        global streaming
+        streaming = True
+
+        # get data
+        prompt = data.get("input")
+        content_id = data.get("contentId")
+        output_size = data.get("output_size")
+        show_pages_checkbox = data.get("show_pages_checkbox")
+        cached_data = cache.get(content_id)
+        pdf_name = cached_data.get("title") if cached_data else None
+
+        choosen_model = str(
+            data.get("choosen_model", "gemini-2.0-flash")
+        )  # second arg = default model
+        change_lebgth_checkbox = data.get("change_length_checkbox")
+        # enhancer_checkbox = data.get("enhancer_checkbox")
+        enhancer_checkbox = "True"  # TODO: change when enhancer is ready
+        slider_value = data.get("slider_value")
+
+        show_pages_checkbox = str(show_pages_checkbox)
+        change_lebgth_checkbox = str(change_lebgth_checkbox)
+        enhancer_checkbox = str(enhancer_checkbox)
+
+        if slider_value is not None:
+            slider_value = float(slider_value)
+        else:
+            slider_value = 0.0
+
+        if not prompt:
+            log.error("No prompt provided by user")
+            socketio.emit("error", {"message": "No input provided"})
+            streaming = False
+            socketio.emit("stream_stopped")
+            return
+
+        if not content_id:
+            log.error(f"Content ID missing or cached data not found for ID: {content_id}")
+            socketio.emit("error", {"message": "No content ID for the chat provided"})
+            streaming = False
+            socketio.emit("stream_stopped")
+            return
+        
+        if not pdf_name:
+            log.error(f"PDF name not found in cache for content ID: {content_id}")
+            socketio.emit("error", {"message": "No pdf name provided"})
+            streaming = False
+            socketio.emit("stream_stopped")
+            return
+
+        output_size = str(output_size)
+
+        # debug logs for each document
+        log.debug(f"prompt: {prompt}")
+        log.debug(f"content id: {content_id}")
+        log.debug(f"pdf name: {pdf_name}")
+        log.debug(f"output size: {output_size}")
+        log.debug(f"Show pages: {show_pages_checkbox}")
+        log.debug(f"Change output size: {change_lebgth_checkbox}")
+        log.debug(f"selected_model: {choosen_model}")
+
+        # model instance inside the function to allow multiple models
+        genai.configure(api_key=GEMINI_API_KEY)
+        model = genai.GenerativeModel(
+            choosen_model,
+            system_instruction=show_pages(SYSTEM_PROMPT, show_pages_checkbox),
+        )  # another models to be used: "gemini-2.0-flash-thinking-exp-01-21" "gemini-2.0-flash"
+
+        try:
+            if not streaming:
+                socketio.emit("stream_stopped")
+                log.info("Stream stopped before file processing.")
+            pdf_name_to_show = pdf_name
+            container_id = f"content-chat-pdf{index}_{output_index}" # Use current index
+
+            container_html = render_template(
+                "output.html",
+                container_title=pdf_name_to_show,
+                container_id=container_id,
+            )
+
+            # log.info(f"New container created for: {pdf_name_to_show}")
+            # socketio.emit("new_container", {"html": container_html})
+
+            collection_name = pdf_name_to_show.replace(" ", "").lower()
+            collection_name = replace_polish_chars(collection_name) # TODO: better solution for database naming
+            collection_name = collection_name[:35]
+
+            accumulated_text = ""
+            for result_chunk in process_query_with_rag(
+                prompt,
+                pdf_name_to_show,
+                model,
+                change_lebgth_checkbox,
+                enhancer_checkbox,
+                output_size,
+                slider_value,
+                chroma_client,
+                collection_name,
+            ):
+                if not streaming:
+                    log.info("Stopping chat processing due to streaming flag.")
+                    break
+                # Check the structure of the yielded chunk
+                if "content" in result_chunk:
+                    chunk_text = result_chunk["content"]
+                    socketio.emit("receive_chat_message", {"message": chunk_text})
+
+
+                elif "error" in result_chunk:
+                    error_message = result_chunk["error"]
+                    log.error(f"Error chunk from process_query_with_rag: {error_message}")
+                    # --- Emit an error message to the frontend ---
+                    socketio.emit("receive_chat_message", {"error": error_message})
+                    # If an error occurs in a chunk, stop processing the rest of the stream
+                    break
+                else:
+                    socketio.emit("error", {"message": "unexpected error"})
+                    return
+            # if streaming:
+            #     data_to_cache = {
+            #         "title": pdf_name_to_show,
+            #         "content": final_markdown_content # Store final content (could be error msg)
+            #     }
+            #     # Set a timeout (e.g., 1 hour = 3600 seconds)
+            #     cache.set(container_id, data_to_cache, timeout=600)
+            #     log.info(f"Stored content for {container_id} in cache.")
+
+            if not streaming:
+                socketio.emit("stream_stopped")
+                log.info("Stream stopped during request processing.")
+
+        except Exception as e:
+            log.error(f"An error occurred in the generate function: {e}")
+            traceback.print_exc()
+            socketio.emit(
+                "error", {"message": f"An unexpected error occurred: {str(e)}"}
+            )
+
+        streaming = False
+        socketio.emit("stream_stopped")
+
+    except Exception as e:
+        log.error(f"An error occurred in the generate function: {e}")
+        traceback.print_exc()
+        socketio.emit("error", {"message": f"An unexpected error occurred: {str(e)}"})
+        streaming = False
 
 @socketio.on("stop_processing")
 def handle_stop() -> None:
@@ -309,8 +460,9 @@ def langchain_chat() -> Any:
 
     return render_template(
         "documentChat.html",
-        container_title_chat=container_title_chat,
-        content_chat=content_chat
+        content_id = content_id,
+        container_title_chat = container_title_chat,
+        content_chat = content_chat
         )
 
 

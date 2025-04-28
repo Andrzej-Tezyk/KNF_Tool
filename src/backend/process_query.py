@@ -235,18 +235,20 @@ def process_chat_query_with_rag(
                 log.error(
                     f"Problem with prompt enhancer for {pdf}. \n Error message: {e}\n"
                 )
-
             log.debug(f"Context for {pdf}:\n{rag_context}\n")
-            response = model.generate_content(
-                [
-                    (
-                        prompt
-                        + f"(Please provide {output_size} size response)"
-                        + rag_context
-                        if change_lebgth_checkbox == "True"
-                        else prompt + rag_context
-                    ),
-                ],
+
+            chat = model.start_chat(history=chat_history)
+
+            response = chat.send_message(
+                (
+                    prompt
+                    + f"(Please provide {output_size} size response)"
+                    + rag_context 
+                    + "\nChat history:\n"
+                    + chat_history
+                    if change_lebgth_checkbox == "True"
+                    else prompt + rag_context + "\n\nChat history\n" + str(chat_history)
+                ),
                 stream=True,
                 generation_config={"temperature": slider_value},
             )

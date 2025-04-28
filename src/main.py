@@ -383,7 +383,6 @@ def handle_chat_message(data: dict) -> None:
                 socketio.emit("stream_stopped")
                 log.info("Stream stopped before file processing.")
             pdf_name_to_show = pdf_name
-            container_id = f"content-chat-pdf{index}_{output_index}" # Use current index
 
             collection_name = pdf_name_to_show.replace(" ", "").lower()
             collection_name = replace_polish_chars(collection_name) # TODO: better solution for database naming

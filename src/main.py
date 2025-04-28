@@ -11,7 +11,7 @@ import chromadb
 from flask_socketio import SocketIO
 from flask_caching import Cache
 import google.generativeai as genai  # type: ignore[import-untyped]
-from backend.process_query import process_query_with_rag  # type: ignore[import-not-found]
+from backend.process_query import process_query_with_rag, process_chat_query_with_rag  # type: ignore[import-not-found]
 from backend.knf_scraping import scrape_knf  # type: ignore[import-not-found]
 from backend.show_pages import show_pages  # type: ignore[import-not-found]
 from backend.custom_logger import CustomFormatter  # type: ignore[import-not-found]
@@ -254,9 +254,13 @@ def process_text(data: dict) -> None:
                         socketio.emit("error", {"message": "unexpected error"})
                         return
                 if streaming:
+                    chat_history = []
+                    chat_history.append({"role": "user", 'parts': [prompt]})
+                    chat_history.append({"role": "model", 'parts': [accumulated_text]})
                     data_to_cache = {
                         "title": pdf_name_to_show,
-                        "content": final_markdown_content # Store final content (could be error msg)
+                        "content": final_markdown_content,
+                        "chat_history": chat_history
                     }
                     # Set a timeout (e.g., 1 hour = 3600 seconds)
                     cache.set(container_id, data_to_cache, timeout=600)
@@ -294,8 +298,10 @@ def handle_chat_message(data: dict) -> None:
         content_id = data.get("contentId")
         output_size = data.get("output_size")
         show_pages_checkbox = data.get("show_pages_checkbox")
+        # get cached data
         cached_data = cache.get(content_id)
         pdf_name = cached_data.get("title") if cached_data else None
+        chat_history = cached_data.get("chat_history", [])
 
         choosen_model = str(
             data.get("choosen_model", "gemini-2.0-flash")
@@ -328,23 +334,35 @@ def handle_chat_message(data: dict) -> None:
             socketio.emit("stream_stopped")
             return
         
+        if not cached_data:
+            log.error(f"Validation Error: No cached data found for contentId: {content_id}. Cannot load document context or history.")
+            socketio.emit("error", {"message": f"Could not load data for chat session '{content_id}'. It may have expired or is invalid."})
+            streaming = False 
+            socketio.emit("stream_stopped")
+            return 
+        
         if not pdf_name:
             log.error(f"PDF name not found in cache for content ID: {content_id}")
             socketio.emit("error", {"message": "No pdf name provided"})
             streaming = False
             socketio.emit("stream_stopped")
             return
+        
+        if not isinstance(chat_history, list):
+             log.warning(f"Cached data for '{content_id}' contained 'chat_history' but it was not a list (type: {type(chat_history)}). Initializing as empty list.")
+             chat_history = [] # Reset to a valid empty list
 
         output_size = str(output_size)
 
         # debug logs for each document
-        log.debug(f"prompt: {prompt}")
-        log.debug(f"content id: {content_id}")
-        log.debug(f"pdf name: {pdf_name}")
-        log.debug(f"output size: {output_size}")
+        log.debug(f"Prompt: {prompt}")
+        log.debug(f"Content id: {content_id}")
+        log.debug(f"Pdf name (from cache): {pdf_name}")
+        log.debug(f"Initial Chat History (loaded/initialized): {len(chat_history)} messages")
+        log.debug(f"Output size: {output_size}")
         log.debug(f"Show pages: {show_pages_checkbox}")
         log.debug(f"Change output size: {change_lebgth_checkbox}")
-        log.debug(f"selected_model: {choosen_model}")
+        log.debug(f"Selected model: {choosen_model}")
 
         # model instance inside the function to allow multiple models
         genai.configure(api_key=GEMINI_API_KEY)
@@ -360,22 +378,14 @@ def handle_chat_message(data: dict) -> None:
             pdf_name_to_show = pdf_name
             container_id = f"content-chat-pdf{index}_{output_index}" # Use current index
 
-            container_html = render_template(
-                "output.html",
-                container_title=pdf_name_to_show,
-                container_id=container_id,
-            )
-
-            # log.info(f"New container created for: {pdf_name_to_show}")
-            # socketio.emit("new_container", {"html": container_html})
-
             collection_name = pdf_name_to_show.replace(" ", "").lower()
             collection_name = replace_polish_chars(collection_name) # TODO: better solution for database naming
             collection_name = collection_name[:35]
 
             accumulated_text = ""
-            for result_chunk in process_query_with_rag(
+            for result_chunk in process_chat_query_with_rag(
                 prompt,
+                chat_history,
                 pdf_name_to_show,
                 model,
                 change_lebgth_checkbox,
@@ -390,6 +400,8 @@ def handle_chat_message(data: dict) -> None:
                     break
                 # Check the structure of the yielded chunk
                 if "content" in result_chunk:
+                    log.debug(f'Recived response chunk: {result_chunk["content"]}')
+                    accumulated_text += result_chunk["content"]                
                     chunk_text = result_chunk["content"]
                     socketio.emit("receive_chat_message", {"message": chunk_text})
 
@@ -404,14 +416,12 @@ def handle_chat_message(data: dict) -> None:
                 else:
                     socketio.emit("error", {"message": "unexpected error"})
                     return
-            # if streaming:
-            #     data_to_cache = {
-            #         "title": pdf_name_to_show,
-            #         "content": final_markdown_content # Store final content (could be error msg)
-            #     }
-            #     # Set a timeout (e.g., 1 hour = 3600 seconds)
-            #     cache.set(container_id, data_to_cache, timeout=600)
-            #     log.info(f"Stored content for {container_id} in cache.")
+            if streaming:
+                chat_history.append({"role": "user", 'parts': [prompt]})
+                chat_history.append({"role": "model", 'parts': [accumulated_text]})
+                cached_data["chat_history"] = chat_history # <-- Assign the updated list back into the dictionary
+                cache.set(content_id, cached_data, timeout=600)
+                log.info(f"Stored updated data for {content_id} in cache.")
 
             if not streaming:
                 socketio.emit("stream_stopped")

@@ -31,6 +31,9 @@ SCRAPED_FILES_DIR = PROJECT_ROOT / "scraped_files"
 # Cache directory
 CACHE_DIR = PROJECT_ROOT / ".cache"
 
+# Chroma client path
+CHROMA_CLIENT_DIR = str(PROJECT_ROOT / "exp_vector_db")
+
 # Configure Flask-Caching
 # Use FileSystemCache to persist across reloads during development
 # Use SimpleCache for basic in-memory (similar to dict, won't survive reloads)
@@ -110,7 +113,7 @@ def replace_polish_chars(text: str) -> str:
 app = Flask(__name__, template_folder="templates", static_folder="static")
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-chroma_client = get_chroma_client("exp_vector_db")
+chroma_client = get_chroma_client(CHROMA_CLIENT_DIR)
 log.info("Vector DB initialized")
 
 # Initialize cache
@@ -217,6 +220,8 @@ def process_text(data: dict) -> None:
                 collection_name = pdf_name_to_show.replace(" ", "").lower()
                 collection_name = replace_polish_chars(collection_name) # TODO: better solution for database naming
                 collection_name = collection_name[:35]
+                print("-"*10, "COLLECTION NAME", "-"*10)
+                print(collection_name)
 
                 accumulated_text = ""
 
@@ -304,6 +309,8 @@ def handle_chat_message(data: dict) -> None:
         cached_data = cache.get(content_id)
         pdf_name = cached_data.get("title") if cached_data else None
         chat_history = cached_data.get("chat_history", [])
+        print("-"*10, "CHAT HISTORY", "-"*10)
+        print(chat_history)
 
         choosen_model = str(
             data.get("choosen_model", "gemini-2.0-flash")

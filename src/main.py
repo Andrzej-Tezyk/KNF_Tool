@@ -323,7 +323,7 @@ def process_text(data: dict) -> None:
 
 # Linter C901 error ignored -> func will be refactored during complex code refactor
 @socketio.on("send_chat_message")
-def handle_chat_message(data: dict) -> None: # noqa: C901
+def handle_chat_message(data: dict) -> None:  # noqa: C901
     log.info("Received user input. Start processing.")
 
     try:

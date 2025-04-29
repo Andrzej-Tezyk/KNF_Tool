@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 
 import markdown
 from flask import Flask, render_template, request
-import chromadb
 from flask_socketio import SocketIO
 from flask_caching import Cache
 import google.generativeai as genai
@@ -258,6 +257,7 @@ def process_text(data: dict) -> None:
                         "error" in result_chunk
                     ):  # czy tu chodzi o slowo error w odpowiedzi? jezeli tak to do sprawdzenia
                         log.error(f"Error received in chunk")
+                        error_message = {"message": "error in chunk response"}
                         socketio.emit("error", {"message": "error in chunk response"})
                         return
                     elif "content" in result_chunk:
@@ -290,7 +290,8 @@ def process_text(data: dict) -> None:
                     cache.set(container_id, data_to_cache, timeout=600)
                     log.info(f"Stored content for {container_id} in cache.")
                     log.info(
-                        f"Initial processing complete for {pdf_name_to_show} ({container_id}). Emitting completion signal."
+                        f"Initial processing complete for {pdf_name_to_show} ({container_id})."
+                        "Emitting completion signal."
                     )
                     # Emit a custom event indicating completion for THIS container
                     socketio.emit(
@@ -321,8 +322,8 @@ def process_text(data: dict) -> None:
         socketio.emit("error", {"message": f"An unexpected error occurred: {str(e)}"})
         streaming = False
 
-
-@socketio.on("send_chat_message")
+#Linter C901 error ignored -> func will be refactored during complex code refactor
+@socketio.on("send_chat_message") #noqa C901
 def handle_chat_message(data: dict) -> None:
     log.info("Received user input. Start processing.")
 
@@ -377,12 +378,14 @@ def handle_chat_message(data: dict) -> None:
 
         if not cached_data:
             log.error(
-                f"Validation Error: No cached data found for contentId: {content_id}. Cannot load document context or history."
+                f"Validation Error: No cached data found for contentId: {content_id}." 
+                "Cannot load document context or history."
             )
             socketio.emit(
                 "error",
                 {
-                    "message": f"Could not load data for chat session '{content_id}'. It may have expired or is invalid."
+                    "message": f"Could not load data for chat session '{content_id}'. "
+                    "It may have expired or is invalid."
                 },
             )
             streaming = False
@@ -398,7 +401,8 @@ def handle_chat_message(data: dict) -> None:
 
         if not isinstance(chat_history, list):
             log.warning(
-                f"Cached data for '{content_id}' contained 'chat_history' but it was not a list (type: {type(chat_history)}). Initializing as empty list."
+                f"Cached data for '{content_id}' contained 'chat_history' but it was not a list:"
+                f"(type: {type(chat_history)}). Initializing as empty list."
             )
             chat_history = []  # Reset to a valid empty list
 

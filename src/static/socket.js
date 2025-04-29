@@ -29,6 +29,36 @@ document.addEventListener('DOMContentLoaded', function() {
         inputText.addEventListener('keydown', startProcessingOnEnter);
     });
 
+    // Handler for when processing is complete for a SINGLE container (document)
+    // This event carries the container_id for which processing finished
+    socket.on('processing_complete_for_container', function(data) {
+        const containerId = data.container_id;
+        const buttonId = 'chat-button-' + containerId;
+        const chatButton = document.getElementById(buttonId);
+
+        if (chatButton) {
+            const iconSpan = chatButton.querySelector('.icon'); // Find the span with the 'icon' class inside the button
+
+            if (iconSpan) {
+                // --- Change the icon from loading state to ready state (arrow) ---
+                iconSpan.classList.remove('loading-spinner'); // Remove the loading class
+                iconSpan.classList.add('arrow-ready'); // Add the ready class
+                // Set the text content to the arrow character
+                iconSpan.textContent = '➤'; // Make sure the character is there
+                // -----------------------------------------------------------------
+            } else {
+                 console.warn('Could not find .icon span inside button with ID:', buttonId);
+            }
+
+
+            chatButton.disabled = false; // Enable the button
+            console.log('Chat button enabled for container:', containerId);
+
+        } else {
+            console.warn('Could not find chat button with ID:', buttonId, 'to enable after processing complete.');
+        }
+    });
+
     // start processing: 1) on key; 2) on button
     // remove arrow-up -> add stop button + functionality
     function startProcessingOnEnter() {
@@ -71,3 +101,9 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener("click", stopProcessing)      
     }
 });
+
+function openChatView(containerId) {
+    console.log('Opening chat view for container:', containerId);
+    // Navigate to the document chat page, passing the containerId as a query parameter
+    window.location.href = '/documentChat?contentId=' + containerId;
+}

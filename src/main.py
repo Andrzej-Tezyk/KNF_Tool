@@ -269,8 +269,13 @@ def process_text(data: dict) -> None:
                     }
                     # Set a timeout (e.g., 1 hour = 3600 seconds)
                     cache.set(container_id, data_to_cache, timeout=600)
-                    log.info(f"Stored content for {container_id} in cache.")     
-            
+                    log.info(f"Stored content for {container_id} in cache.")
+                    log.info(f"Initial processing complete for {pdf_name_to_show} ({container_id}). Emitting completion signal.")
+                    # Emit a custom event indicating completion for THIS container
+                    socketio.emit("processing_complete_for_container", {"container_id": container_id})                    
+                else:
+                     log.info(f"Processing stopped for {pdf_name_to_show} ({container_id}). Not emitting completion signal.")
+
             if not streaming:
                 socketio.emit("stream_stopped")
                 log.info("Stream stopped during file processing.")

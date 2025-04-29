@@ -11,7 +11,7 @@ from flask import Flask, render_template, request
 import chromadb
 from flask_socketio import SocketIO
 from flask_caching import Cache
-import google.generativeai as genai 
+import google.generativeai as genai
 from backend.process_query import process_query_with_rag, process_chat_query_with_rag  # type: ignore[import-not-found]
 from backend.knf_scraping import scrape_knf  # type: ignore[import-not-found]
 from backend.show_pages import show_pages  # type: ignore[import-not-found]

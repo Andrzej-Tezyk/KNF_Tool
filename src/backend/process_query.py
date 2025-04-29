@@ -183,6 +183,7 @@ def process_query_with_rag(
             traceback.print_exc()
             yield {"error": f"An error occurred while processing {pdf}: {str(e)}"}
 
+
 def process_chat_query_with_rag(
     prompt: str,
     chat_history: str,
@@ -243,7 +244,7 @@ def process_chat_query_with_rag(
                 (
                     prompt
                     + f"(Please provide {output_size} size response)"
-                    + rag_context 
+                    + rag_context
                     + "\nChat history:\n"
                     + chat_history
                     if change_lebgth_checkbox == "True"

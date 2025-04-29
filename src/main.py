@@ -7,7 +7,7 @@ import logging
 from dotenv import load_dotenv
 
 import markdown
-from flask import Flask, render_template, request 
+from flask import Flask, render_template, request
 import chromadb
 from flask_socketio import SocketIO
 from flask_caching import Cache
@@ -41,7 +41,7 @@ CHROMA_CLIENT_DIR = str(PROJECT_ROOT / "exp_vector_db")
 CACHE_CONFIG = {
     "CACHE_TYPE": "FileSystemCache",
     "CACHE_DIR": CACHE_DIR,  # Store cache files in project root/.cache
-    "CACHE_THRESHOLD": 500  # Max number of items in cache
+    "CACHE_THRESHOLD": 500,  # Max number of items in cache
 }
 
 with open(CONFIG_PATH) as file:
@@ -93,20 +93,32 @@ if not SCRAPED_FILES_DIR.exists() or next(SCRAPED_FILES_DIR.iterdir(), None) is 
     scrape_knf(SCRAPED_FILES_DIR, NUM_RETRIES, USER_AGENT_LIST)
 
 
-
 def replace_polish_chars(text: str) -> str:
     """
     For documents names only.
     """
     polish_to_ascii = {
-        "ą": "a", "ć": "c", "ę": "e", "ł": "l", "ń": "n",
-        "ó": "o", "ś": "s", "ż": "z", "ź": "z",
-        "Ą": "A", "Ć": "C", "Ę": "E", "Ł": "L", "Ń": "N",
-        "Ó": "O", "Ś": "S", "Ż": "Z", "Ź": "Z",
+        "ą": "a",
+        "ć": "c",
+        "ę": "e",
+        "ł": "l",
+        "ń": "n",
+        "ó": "o",
+        "ś": "s",
+        "ż": "z",
+        "ź": "z",
+        "Ą": "A",
+        "Ć": "C",
+        "Ę": "E",
+        "Ł": "L",
+        "Ń": "N",
+        "Ó": "O",
+        "Ś": "S",
+        "Ż": "Z",
+        "Ź": "Z",
     }
 
-    return ''.join(polish_to_ascii.get(c, c) for c in text)
-
+    return "".join(polish_to_ascii.get(c, c) for c in text)
 
 
 # flask
@@ -123,6 +135,7 @@ cache = Cache(app)
 
 streaming: bool = False
 output_index: int = -1
+
 
 @app.route("/")
 def index() -> str:
@@ -205,8 +218,8 @@ def process_text(data: dict) -> None:
             for index, pdf in enumerate(pdfs_to_scan):
                 if not streaming:
                     break
-                pdf_name_to_show = str(pdf.stem.split('_', 1)[1])
-                container_id = f"content-pdf{index}_{output_index}" # Use current index
+                pdf_name_to_show = str(pdf.stem.split("_", 1)[1])
+                container_id = f"content-pdf{index}_{output_index}"  # Use current index
 
                 container_html = render_template(
                     "output.html",
@@ -218,9 +231,11 @@ def process_text(data: dict) -> None:
                 socketio.emit("new_container", {"html": container_html})
 
                 collection_name = pdf_name_to_show.replace(" ", "").lower()
-                collection_name = replace_polish_chars(collection_name) # TODO: better solution for database naming
+                collection_name = replace_polish_chars(
+                    collection_name
+                )  # TODO: better solution for database naming
                 collection_name = collection_name[:35]
-                print("-"*10, "COLLECTION NAME", "-"*10)
+                print("-" * 10, "COLLECTION NAME", "-" * 10)
                 print(collection_name)
 
                 accumulated_text = ""
@@ -242,14 +257,16 @@ def process_text(data: dict) -> None:
                     if (
                         "error" in result_chunk
                     ):  # czy tu chodzi o slowo error w odpowiedzi? jezeli tak to do sprawdzenia
-                        log.error(f"Error received in chunk")       
+                        log.error(f"Error received in chunk")
                         socketio.emit("error", {"message": "error in chunk response"})
                         return
                     elif "content" in result_chunk:
                         log.debug(f'Recived response chunk: {result_chunk["content"]}')
                         accumulated_text += result_chunk["content"]
                         markdown_content = markdown.markdown(accumulated_text)
-                        final_markdown_content = markdown_content # Keep track of the latest full content
+                        final_markdown_content = (
+                            markdown_content  # Keep track of the latest full content
+                        )
                         socketio.emit(
                             "update_content",
                             {
@@ -262,21 +279,28 @@ def process_text(data: dict) -> None:
                         return
                 if streaming:
                     chat_history = []
-                    chat_history.append({"role": "user", 'parts': [prompt]})
-                    chat_history.append({"role": "model", 'parts': [accumulated_text]})
+                    chat_history.append({"role": "user", "parts": [prompt]})
+                    chat_history.append({"role": "model", "parts": [accumulated_text]})
                     data_to_cache = {
                         "title": pdf_name_to_show,
                         "content": final_markdown_content,
-                        "chat_history": chat_history
+                        "chat_history": chat_history,
                     }
                     # Set a timeout (e.g., 1 hour = 3600 seconds)
                     cache.set(container_id, data_to_cache, timeout=600)
                     log.info(f"Stored content for {container_id} in cache.")
-                    log.info(f"Initial processing complete for {pdf_name_to_show} ({container_id}). Emitting completion signal.")
+                    log.info(
+                        f"Initial processing complete for {pdf_name_to_show} ({container_id}). Emitting completion signal."
+                    )
                     # Emit a custom event indicating completion for THIS container
-                    socketio.emit("processing_complete_for_container", {"container_id": container_id})                    
+                    socketio.emit(
+                        "processing_complete_for_container",
+                        {"container_id": container_id},
+                    )
                 else:
-                     log.info(f"Processing stopped for {pdf_name_to_show} ({container_id}). Not emitting completion signal.")
+                    log.info(
+                        f"Processing stopped for {pdf_name_to_show} ({container_id}). Not emitting completion signal."
+                    )
 
             if not streaming:
                 socketio.emit("stream_stopped")
@@ -297,6 +321,7 @@ def process_text(data: dict) -> None:
         socketio.emit("error", {"message": f"An unexpected error occurred: {str(e)}"})
         streaming = False
 
+
 @socketio.on("send_chat_message")
 def handle_chat_message(data: dict) -> None:
     log.info("Received user input. Start processing.")
@@ -314,7 +339,7 @@ def handle_chat_message(data: dict) -> None:
         cached_data = cache.get(content_id)
         pdf_name = cached_data.get("title") if cached_data else None
         chat_history = cached_data.get("chat_history", [])
-        print("-"*10, "CHAT HISTORY", "-"*10)
+        print("-" * 10, "CHAT HISTORY", "-" * 10)
         print(chat_history)
 
         choosen_model = str(
@@ -342,29 +367,40 @@ def handle_chat_message(data: dict) -> None:
             return
 
         if not content_id:
-            log.error(f"Content ID missing or cached data not found for ID: {content_id}")
+            log.error(
+                f"Content ID missing or cached data not found for ID: {content_id}"
+            )
             socketio.emit("error", {"message": "No content ID for the chat provided"})
             streaming = False
             socketio.emit("stream_stopped")
             return
-        
+
         if not cached_data:
-            log.error(f"Validation Error: No cached data found for contentId: {content_id}. Cannot load document context or history.")
-            socketio.emit("error", {"message": f"Could not load data for chat session '{content_id}'. It may have expired or is invalid."})
-            streaming = False 
+            log.error(
+                f"Validation Error: No cached data found for contentId: {content_id}. Cannot load document context or history."
+            )
+            socketio.emit(
+                "error",
+                {
+                    "message": f"Could not load data for chat session '{content_id}'. It may have expired or is invalid."
+                },
+            )
+            streaming = False
             socketio.emit("stream_stopped")
-            return 
-        
+            return
+
         if not pdf_name:
             log.error(f"PDF name not found in cache for content ID: {content_id}")
             socketio.emit("error", {"message": "No pdf name provided"})
             streaming = False
             socketio.emit("stream_stopped")
             return
-        
+
         if not isinstance(chat_history, list):
-             log.warning(f"Cached data for '{content_id}' contained 'chat_history' but it was not a list (type: {type(chat_history)}). Initializing as empty list.")
-             chat_history = [] # Reset to a valid empty list
+            log.warning(
+                f"Cached data for '{content_id}' contained 'chat_history' but it was not a list (type: {type(chat_history)}). Initializing as empty list."
+            )
+            chat_history = []  # Reset to a valid empty list
 
         output_size = str(output_size)
 
@@ -372,7 +408,9 @@ def handle_chat_message(data: dict) -> None:
         log.debug(f"Prompt: {prompt}")
         log.debug(f"Content id: {content_id}")
         log.debug(f"Pdf name (from cache): {pdf_name}")
-        log.debug(f"Initial Chat History (loaded/initialized): {len(chat_history)} messages")
+        log.debug(
+            f"Initial Chat History (loaded/initialized): {len(chat_history)} messages"
+        )
         log.debug(f"Output size: {output_size}")
         log.debug(f"Show pages: {show_pages_checkbox}")
         log.debug(f"Change output size: {change_lebgth_checkbox}")
@@ -392,7 +430,9 @@ def handle_chat_message(data: dict) -> None:
             pdf_name_to_show = pdf_name
 
             collection_name = pdf_name_to_show.replace(" ", "").lower()
-            collection_name = replace_polish_chars(collection_name) # TODO: better solution for database naming
+            collection_name = replace_polish_chars(
+                collection_name
+            )  # TODO: better solution for database naming
             collection_name = collection_name[:35]
 
             accumulated_text = ""
@@ -414,14 +454,15 @@ def handle_chat_message(data: dict) -> None:
                 # Check the structure of the yielded chunk
                 if "content" in result_chunk:
                     log.debug(f'Recived response chunk: {result_chunk["content"]}')
-                    accumulated_text += result_chunk["content"]                
+                    accumulated_text += result_chunk["content"]
                     chunk_text = result_chunk["content"]
                     socketio.emit("receive_chat_message", {"message": chunk_text})
 
-
                 elif "error" in result_chunk:
                     error_message = result_chunk["error"]
-                    log.error(f"Error chunk from process_query_with_rag: {error_message}")
+                    log.error(
+                        f"Error chunk from process_query_with_rag: {error_message}"
+                    )
                     # --- Emit an error message to the frontend ---
                     socketio.emit("receive_chat_message", {"error": error_message})
                     # If an error occurs in a chunk, stop processing the rest of the stream
@@ -430,9 +471,11 @@ def handle_chat_message(data: dict) -> None:
                     socketio.emit("error", {"message": "unexpected error"})
                     return
             if streaming:
-                chat_history.append({"role": "user", 'parts': [prompt]})
-                chat_history.append({"role": "model", 'parts': [accumulated_text]})
-                cached_data["chat_history"] = chat_history # <-- Assign the updated list back into the dictionary
+                chat_history.append({"role": "user", "parts": [prompt]})
+                chat_history.append({"role": "model", "parts": [accumulated_text]})
+                cached_data["chat_history"] = (
+                    chat_history  # <-- Assign the updated list back into the dictionary
+                )
                 cache.set(content_id, cached_data, timeout=600)
                 log.info(f"Stored updated data for {content_id} in cache.")
 
@@ -456,6 +499,7 @@ def handle_chat_message(data: dict) -> None:
         socketio.emit("error", {"message": f"An unexpected error occurred: {str(e)}"})
         streaming = False
 
+
 @socketio.on("stop_processing")
 def handle_stop() -> None:
     global streaming
@@ -465,7 +509,7 @@ def handle_stop() -> None:
 
 @app.route("/documentChat")
 def langchain_chat() -> Any:
-    content_id = request.args.get('contentId') # Get ID from URL query ?contentId=...
+    content_id = request.args.get("contentId")  # Get ID from URL query ?contentId=...
     log.info(f"Langchain chat request for contentId: {content_id}")
 
     # Retrieve data from cache
@@ -483,11 +527,10 @@ def langchain_chat() -> Any:
 
     return render_template(
         "documentChat.html",
-        content_id = content_id,
-        container_title_chat = container_title_chat,
-        content_chat = content_chat
-        )
-
+        content_id=content_id,
+        container_title_chat=container_title_chat,
+        content_chat=content_chat,
+    )
 
 
 if __name__ == "__main__":

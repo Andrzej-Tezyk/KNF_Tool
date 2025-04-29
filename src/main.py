@@ -320,8 +320,9 @@ def process_text(data: dict) -> None:
         socketio.emit("error", {"message": f"An unexpected error occurred: {str(e)}"})
         streaming = False
 
-#Linter C901 error ignored -> func will be refactored during complex code refactor
-@socketio.on("send_chat_message") #noqa C901
+
+# Linter C901 error ignored -> func will be refactored during complex code refactor
+@socketio.on("send_chat_message")  # noqa C901
 def handle_chat_message(data: dict) -> None:
     log.info("Received user input. Start processing.")
 
@@ -376,7 +377,7 @@ def handle_chat_message(data: dict) -> None:
 
         if not cached_data:
             log.error(
-                f"Validation Error: No cached data found for contentId: {content_id}." 
+                f"Validation Error: No cached data found for contentId: {content_id}."
                 "Cannot load document context or history."
             )
             socketio.emit(

@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     button.addEventListener('click', startProcessingOnButton);
     inputText.addEventListener('keydown', startProcessingOnEnter);
+
     
     
     // socket events
@@ -86,6 +87,11 @@ document.addEventListener('DOMContentLoaded', function() {
         let change_length_checkbox = document.getElementById('change_lebgth').checked;
         let slider_value = document.getElementById('myRange').value;
         
+        // rise a popup if no file selected
+        if (!selectedFiles.length) {
+            alert("Please select at least one file.");
+        }
+
         window.socket.emit('start_processing', { 
             input: input, 
             pdfFiles: selectedFiles, 

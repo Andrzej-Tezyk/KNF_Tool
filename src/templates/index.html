@@ -22,7 +22,7 @@
                 <img src="{{ url_for('static', filename='images/logo.ico') }}" alt="logo">
             </div>
 
-            <button  class="top-sidear-button-round" id="sidebar-icon" data-tooltip="Open Sidebar">
+            <button  class="sidear-button-round" id="sidebar-icon" data-tooltip="Open Sidebar">
                 <img class="sidebar-icon" src="{{ url_for('static', filename='images/sidebar-show.svg') }}">
             </button>
 
@@ -30,15 +30,15 @@
 
                 <img class="sidebar-arrow-down" src="{{ url_for('static', filename='images/caret-down-solid.svg') }}">
 
-                <button class="top-sidear-button-round" id="sliders-button" data-tooltip="Advanced Options">
+                <button class="sidear-button-round" id="sliders-button" data-tooltip="Advanced Options">
                     <img class="sidebar-icon" src="{{ url_for('static', filename='images/sliders-solid.svg') }}">
                 </button>
                 
-                <button class="top-sidear-button-round" id="chat-button" data-tooltip="Prompt Enchanter">
+                <button class="sidear-button-round" id="chat-button" data-tooltip="Prompt Enchanter">
                     <img class="sidebar-icon" src="{{ url_for('static', filename='images/rocketchat-brands-solid.svg') }}">
                 </button>
 
-                <button class="top-sidear-button-round" id="compare-button" data-tooltip="Compare Documents">
+                <button class="sidear-button-round" id="compare-button" data-tooltip="Compare Documents">
                     <img class="sidebar-icon" src="{{ url_for('static', filename='images/code-compare-solid.svg') }}">
                 </button>
                 <br>
@@ -131,7 +131,7 @@
                         <div class="input-form-container">
                             <div class="input-area-elements">
                                 <textarea id="input" name="input" placeholder="Type your query" required></textarea>
-                                <button id="action-button" class="button-round"> 
+                                <button id="action-button" class="button-round" disabled> 
                                     <img class="icon" src="{{ url_for('static', filename='images/arrow-up-solid.svg') }}">
                                 </button>
                                 <button class="button-round" id="file-button" data-tooltip="Documents" type="button"> 
@@ -247,6 +247,7 @@
     <script src="{{ url_for('static', filename='bottomPanel.js') }}"></script>
     <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
     <script src="{{ url_for('static', filename='popupTutorial.js') }}"></script>
+    <script src="{{ url_for('static', filename='noInputHandler.js') }}"></script>
     <script src="{{ url_for('static', filename='initialChatMessage.js') }}"></script>
 </body>
 </html>

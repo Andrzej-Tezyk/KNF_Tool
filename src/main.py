@@ -4,6 +4,7 @@ import os
 from typing import Any
 import json
 import logging
+from dotenv import load_dotenv
 
 import markdown
 from flask import Flask, render_template, request
@@ -80,6 +81,7 @@ USER_AGENT_LIST = [
 SYSTEM_PROMPT = config["system_prompt"]
 
 
+load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     raise ValueError("GEMINI_API_KEY not found in environment variables.")

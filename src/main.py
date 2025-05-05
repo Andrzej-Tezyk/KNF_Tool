@@ -7,19 +7,44 @@ import logging
 from dotenv import load_dotenv
 
 import markdown
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask_socketio import SocketIO
+from flask_caching import Cache
 import google.generativeai as genai
-from backend.process_query import process_query_with_rag  # type: ignore[import-not-found]
+from backend.process_query import process_query_with_rag, process_chat_query_with_rag  # type: ignore[import-not-found]
 from backend.knf_scraping import scrape_knf  # type: ignore[import-not-found]
 from backend.show_pages import show_pages  # type: ignore[import-not-found]
 from backend.custom_logger import CustomFormatter  # type: ignore[import-not-found]
 from backend.chroma_instance import get_chroma_client  # type: ignore[import-not-found]
 
 
-with open("config/config.json") as file:
-    config = json.load(file)
+# Get the project root directory
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
+# Construct the path to config.json
+CONFIG_PATH = PROJECT_ROOT / "config" / "config.json"
+
+# Directory with pdf files
+SCRAPED_FILES_DIR = PROJECT_ROOT / "scraped_files"
+
+# Cache directory
+CACHE_DIR = PROJECT_ROOT / ".cache"
+
+# Chroma client path
+CHROMA_CLIENT_DIR = str(PROJECT_ROOT / "exp_vector_db")
+
+# Configure Flask-Caching
+# Use FileSystemCache to persist across reloads during development
+# Use SimpleCache for basic in-memory (similar to dict, won't survive reloads)
+# For production, consider RedisCache or MemcachedCache if available
+CACHE_CONFIG = {
+    "CACHE_TYPE": "FileSystemCache",
+    "CACHE_DIR": CACHE_DIR,  # Store cache files in project root/.cache
+    "CACHE_THRESHOLD": 500,  # Max number of items in cache
+}
+
+with open(CONFIG_PATH) as file:
+    config = json.load(file)
 
 log = logging.getLogger("__name__")
 log.setLevel(logging.DEBUG)
@@ -28,10 +53,6 @@ ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
 ch.setFormatter(CustomFormatter())
 log.addHandler(ch)
-
-
-# directory with pdf files
-SCRAPED_FILES_DIR = "scraped_files"
 
 NUM_RETRIES = 5
 
@@ -67,12 +88,8 @@ if not GEMINI_API_KEY:
 
 
 # scrape if no documents on the server
-PROJECT_ROOT = Path(__file__).parent.parent  # go up 2 times
-
-scraped_dir = PROJECT_ROOT / "scraped_files"
-
-if not scraped_dir.exists():
-    scrape_knf(NUM_RETRIES, USER_AGENT_LIST)
+if not SCRAPED_FILES_DIR.exists() or next(SCRAPED_FILES_DIR.iterdir(), None) is None:
+    scrape_knf(SCRAPED_FILES_DIR, NUM_RETRIES, USER_AGENT_LIST)
 
 
 def replace_polish_chars(text: str) -> str:
@@ -107,8 +124,13 @@ def replace_polish_chars(text: str) -> str:
 app = Flask(__name__, template_folder="templates", static_folder="static")
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-chroma_client = get_chroma_client("exp_vector_db")
+chroma_client = get_chroma_client(CHROMA_CLIENT_DIR)
 log.info("Vector DB initialized")
+
+# Initialize cache
+app.config.from_mapping(CACHE_CONFIG)
+cache = Cache(app)
+
 
 streaming: bool = False
 output_index: int = -1
@@ -197,14 +219,13 @@ def process_text(data: dict) -> None:
             for index, pdf in enumerate(pdfs_to_scan):
                 if not streaming:
                     break
-                pdf_name_to_show = str(pdf)
-                container_title = pdf_name_to_show[25:-4]
+                pdf_name_to_show = str(pdf.stem.split("_", 1)[1])
+                container_id = f"content-pdf{index}_{output_index}"  # Use current index
 
                 container_html = render_template(
                     "output.html",
-                    container_title=container_title,
-                    index=index,
-                    output_index=output_index,
+                    container_title=pdf_name_to_show,
+                    container_id=container_id,
                 )
 
                 log.info(f"New container created for: {pdf_name_to_show}")
@@ -214,12 +235,14 @@ def process_text(data: dict) -> None:
                 collection_name = replace_polish_chars(
                     collection_name
                 )  # TODO: better solution for database naming
-                collection_name = collection_name[25:60]
+                collection_name = collection_name[:35]
+                print("-" * 10, "COLLECTION NAME", "-" * 10)
+                print(collection_name)
 
                 accumulated_text = ""
                 for result_chunk in process_query_with_rag(
                     prompt,
-                    pdf,
+                    pdf_name_to_show,
                     model,
                     change_lebgth_checkbox,
                     enhancer_checkbox,
@@ -232,25 +255,57 @@ def process_text(data: dict) -> None:
                         break
                     if (
                         "error" in result_chunk
-                    ):  # TODO czy tu chodzi o slowo error w odpowiedzi? jezeli tak to do sprawdzenia
-                        socketio.emit("error", {"message": "error in chunk response"})
+                    ):  # czy tu chodzi o slowo error w odpowiedzi? jezeli tak to do sprawdzenia
+                        log.error("Error received in chunk")
+                        error_message = {"message": "error in chunk response"}
+                        socketio.emit("error", error_message)
                         return
                     elif "content" in result_chunk:
                         log.debug(f'Recived response chunk: {result_chunk["content"]}')
                         accumulated_text += result_chunk["content"]
                         markdown_content = markdown.markdown(accumulated_text)
+                        final_markdown_content = (
+                            markdown_content  # Keep track of the latest full content
+                        )
                         socketio.emit(
                             "update_content",
                             {
-                                "container_id": f"content-pdf{index}_{output_index}",
+                                "container_id": container_id,
                                 "html": markdown_content,
                             },
                         )
                     else:
                         socketio.emit("error", {"message": "unexpected error"})
                         return
+                if streaming:
+                    chat_history = []
+                    chat_history.append({"role": "user", "parts": [prompt]})
+                    chat_history.append({"role": "model", "parts": [accumulated_text]})
+                    data_to_cache = {
+                        "title": pdf_name_to_show,
+                        "content": final_markdown_content,
+                        "chat_history": chat_history,
+                    }
+                    # Set a timeout (e.g., 1 hour = 3600 seconds)
+                    cache.set(container_id, data_to_cache, timeout=600)
+                    log.info(f"Stored content for {container_id} in cache.")
+                    log.info(
+                        f"Initial processing complete for {pdf_name_to_show} ({container_id})."
+                        "Emitting completion signal."
+                    )
+                    # Emit a custom event indicating completion for THIS container
+                    socketio.emit(
+                        "processing_complete_for_container",
+                        {"container_id": container_id},
+                    )
+                else:
+                    log.info(
+                        f"Processing stopped for {pdf_name_to_show} ({container_id}). Not emitting completion signal."
+                    )
+
             if not streaming:
                 socketio.emit("stream_stopped")
+                log.info("Stream stopped during file processing.")
         except Exception as e:
             log.error(f"An error occurred in the generate function: {e}")
             traceback.print_exc()
@@ -265,6 +320,189 @@ def process_text(data: dict) -> None:
         log.error(f"An error occurred in the generate function: {e}")
         traceback.print_exc()
         socketio.emit("error", {"message": f"An unexpected error occurred: {str(e)}"})
+        streaming = False
+
+
+# Linter C901 error ignored -> func will be refactored during complex code refactor
+@socketio.on("send_chat_message")
+def handle_chat_message(data: dict) -> None:  # noqa: C901
+    log.info("Received user input. Start processing.")
+
+    try:
+        global streaming
+        streaming = True
+
+        # get data
+        prompt = data.get("input")
+        content_id = data.get("contentId")
+        output_size = data.get("output_size")
+        show_pages_checkbox = data.get("show_pages_checkbox")
+        # get cached data
+        cached_data = cache.get(content_id)
+        pdf_name = cached_data.get("title") if cached_data else None
+        chat_history = cached_data.get("chat_history", [])
+        print("-" * 10, "CHAT HISTORY", "-" * 10)
+        print(chat_history)
+
+        choosen_model = str(
+            data.get("choosen_model", "gemini-2.0-flash")
+        )  # second arg = default model
+        change_lebgth_checkbox = data.get("change_length_checkbox")
+        # enhancer_checkbox = data.get("enhancer_checkbox")
+        enhancer_checkbox = "True"  # TODO: change when enhancer is ready
+        slider_value = data.get("slider_value")
+
+        show_pages_checkbox = str(show_pages_checkbox)
+        change_lebgth_checkbox = str(change_lebgth_checkbox)
+        enhancer_checkbox = str(enhancer_checkbox)
+
+        if slider_value is not None:
+            slider_value = float(slider_value)
+        else:
+            slider_value = 0.0
+
+        if not prompt:
+            log.error("No prompt provided by user")
+            socketio.emit("error", {"message": "No input provided"})
+            streaming = False
+            socketio.emit("stream_stopped")
+            return
+
+        if not content_id:
+            log.error(
+                f"Content ID missing or cached data not found for ID: {content_id}"
+            )
+            socketio.emit("error", {"message": "No content ID for the chat provided"})
+            streaming = False
+            socketio.emit("stream_stopped")
+            return
+
+        if not cached_data:
+            log.error(
+                f"Validation Error: No cached data found for contentId: {content_id}."
+                "Cannot load document context or history."
+            )
+            socketio.emit(
+                "error",
+                {
+                    "message": f"Could not load data for chat session '{content_id}'. "
+                    "It may have expired or is invalid."
+                },
+            )
+            streaming = False
+            socketio.emit("stream_stopped")
+            return
+
+        if not pdf_name:
+            log.error(f"PDF name not found in cache for content ID: {content_id}")
+            socketio.emit("error", {"message": "No pdf name provided"})
+            streaming = False
+            socketio.emit("stream_stopped")
+            return
+
+        if not isinstance(chat_history, list):
+            log.warning(
+                f"Cached data for '{content_id}' contained 'chat_history' but it was not a list:"
+                f"(type: {type(chat_history)}). Initializing as empty list."
+            )
+            chat_history = []  # Reset to a valid empty list
+
+        output_size = str(output_size)
+
+        # debug logs for each document
+        log.debug(f"Prompt: {prompt}")
+        log.debug(f"Content id: {content_id}")
+        log.debug(f"Pdf name (from cache): {pdf_name}")
+        log.debug(
+            f"Initial Chat History (loaded/initialized): {len(chat_history)} messages"
+        )
+        log.debug(f"Output size: {output_size}")
+        log.debug(f"Show pages: {show_pages_checkbox}")
+        log.debug(f"Change output size: {change_lebgth_checkbox}")
+        log.debug(f"Selected model: {choosen_model}")
+
+        # model instance inside the function to allow multiple models
+        genai.configure(api_key=GEMINI_API_KEY)
+        model = genai.GenerativeModel(
+            choosen_model,
+            system_instruction=show_pages(SYSTEM_PROMPT, show_pages_checkbox),
+        )  # another models to be used: "gemini-2.0-flash-thinking-exp-01-21" "gemini-2.0-flash"
+
+        try:
+            if not streaming:
+                socketio.emit("stream_stopped")
+                log.info("Stream stopped before file processing.")
+            pdf_name_to_show = pdf_name
+
+            collection_name = pdf_name_to_show.replace(" ", "").lower()
+            collection_name = replace_polish_chars(
+                collection_name
+            )  # TODO: better solution for database naming
+            collection_name = collection_name[:35]
+
+            accumulated_text = ""
+            for result_chunk in process_chat_query_with_rag(
+                prompt,
+                chat_history,
+                pdf_name_to_show,
+                model,
+                change_lebgth_checkbox,
+                enhancer_checkbox,
+                output_size,
+                slider_value,
+                chroma_client,
+                collection_name,
+            ):
+                if not streaming:
+                    log.info("Stopping chat processing due to streaming flag.")
+                    break
+                # Check the structure of the yielded chunk
+                if "content" in result_chunk:
+                    log.debug(f'Recived response chunk: {result_chunk["content"]}')
+                    accumulated_text += result_chunk["content"]
+                    chunk_text = result_chunk["content"]
+                    socketio.emit("receive_chat_message", {"message": chunk_text})
+
+                elif "error" in result_chunk:
+                    error_message = result_chunk["error"]
+                    log.error(
+                        f"Error chunk from process_query_with_rag: {error_message}"
+                    )
+                    # --- Emit an error message to the frontend ---
+                    socketio.emit("receive_chat_message", {"error": error_message})
+                    # If an error occurs in a chunk, stop processing the rest of the stream
+                    break
+                else:
+                    socketio.emit("error", {"message": "unexpected error"})
+                    return
+            if streaming:
+                chat_history.append({"role": "user", "parts": [prompt]})
+                chat_history.append({"role": "model", "parts": [accumulated_text]})
+                cached_data["chat_history"] = (
+                    chat_history  # <-- Assign the updated list back into the dictionary
+                )
+                cache.set(content_id, cached_data, timeout=600)
+                log.info(f"Stored updated data for {content_id} in cache.")
+
+            if not streaming:
+                socketio.emit("stream_stopped")
+                log.info("Stream stopped during request processing.")
+
+        except Exception as e:
+            log.error(f"An error occurred in the generate function: {e}")
+            traceback.print_exc()
+            socketio.emit(
+                "error", {"message": f"An unexpected error occurred: {str(e)}"}
+            )
+
+        streaming = False
+        socketio.emit("stream_stopped")
+
+    except Exception as e:
+        log.error(f"An error occurred in the generate function: {e}")
+        traceback.print_exc()
+        socketio.emit("error", {"message": f"An unexpected error occurred: {str(e)}"})
+        streaming = False
 
 
 @socketio.on("stop_processing")
@@ -274,10 +512,34 @@ def handle_stop() -> None:
     log.info("Processing Stopped by User")
 
 
-@app.route("/langchainChat")
+@app.route("/documentChat")
 def langchain_chat() -> Any:
-    return render_template("langchainChat.html")
+    content_id = request.args.get("contentId")  # Get ID from URL query ?contentId=...
+    log.info(f"Langchain chat request for contentId: {content_id}")
+
+    # Retrieve data from cache
+    cached_data = cache.get(content_id)
+    log.debug(f"Cache lookup for {content_id} returned: {type(cached_data)}")
+
+    if cached_data:
+        container_title_chat = cached_data.get("title", "Unknown Title")
+        content_chat = cached_data.get("content", "<p>Content not found.</p>")
+        log.info(f"Found content for {content_id} in cache.")
+    else:
+        container_title_chat = "Error"
+        content_chat = f"<p>Could not find content for ID: {content_id}. Cache might be empty or ID is invalid.</p>"
+        log.warning(f"Content for {content_id} not found in cache.")
+
+    return render_template(
+        "documentChat.html",
+        content_id=content_id,
+        container_title_chat=container_title_chat,
+        content_chat=content_chat,
+    )
 
 
 if __name__ == "__main__":
+    cache_dir = app.config.get("CACHE_DIR")
+    if cache_dir:
+        Path(cache_dir).mkdir(parents=True, exist_ok=True)
     socketio.run(app, debug=True, allow_unsafe_werkzeug=True)

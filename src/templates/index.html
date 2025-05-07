@@ -72,7 +72,7 @@
                                       <input type="checkbox" id="change_lebgth" name="show-pages">
                                       <label for="change_lebgth">Change length of response</label>
                                     </div>
-                                    <div class="option-object-model">
+                                    <div class="option-object-lengths">
                                         <label for="words-sentence-select" id="select-text">Options:</label>
                                         <select id="words-sentence-select" name="model" class="option-object select-option">
                                             <option value="very short">very short</option>
@@ -90,7 +90,13 @@
                                     </div>
                                 </div>
                                 <div class="segment-side-bar">
-                                    <div class="option-object">
+                                    <div class="option-object checkbox-option-bar">
+                                        <input type="checkbox" id="prompt-enhancer" name="prompt-enhancer">
+                                        <label for="prompt-enhancer">Prompt enhancer</label>
+                                    </div>
+                                </div>
+                                <div class="segment-side-bar">
+                                    <div class="option-object-model">
                                         <label for="model-select">Choose model:</label>
                                         <select id="model-select" name="model"  class="option-object select-option">
                                             <option value="gemini-2.0-flash" selected="selected">gemini-2.0-flash</option>
@@ -99,8 +105,8 @@
                                     </div>
                                 </div>
                                 <div class="segment-side-bar">
-                                    <div class="option-object">
-                                        <label for="model-select">Choose temperature:</label>
+                                    <div class="option-object-temperature">
+                                        <label for="model-select">Change temperature:</label>
                                         <input type="range" min="0" max="1" step="0.05" value="0.8" class="temperature-slider" id="myRange">
                                     </div>
                                     <div class="option-object">
@@ -134,6 +140,13 @@
                                 <button id="action-button" class="button-round" disabled> 
                                     <img class="icon" src="{{ url_for('static', filename='images/arrow-up-solid.svg') }}">
                                 </button>
+                                <label class="switch">
+                                    <input type="checkbox">
+                                    <span class="rag-doc-slider">
+                                      <span class="slider-text left">PAGES</span>
+                                      <span class="slider-text right">ALL</span>
+                                    </span>
+                                </label> 
                                 <button class="button-round" id="file-button" data-tooltip="Documents" type="button"> 
                                     <img class="sidebar-icon" src="{{ url_for('static', filename='images/file-regular.svg') }}">
                                 </button>
@@ -159,7 +172,7 @@
                                         {% endfor %}
                                     </div>
                                 </div>
-                            </div>
+                            </div>                          
                         </div>
                         <div class="list-of-choosen-files">
                             <div id="selected-files"></div> <!-- selected files go here -->

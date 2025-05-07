@@ -9,4 +9,3 @@ ms_colours.txt
 **/__pycache__
 .mypy_cache
 .ruff_cache
-.cache

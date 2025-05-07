@@ -136,18 +136,15 @@ def process_text(data: dict) -> None:
         prompt = data.get("input")
         selected_files = data.get("pdfFiles")
         output_size = data.get("output_size")
-        show_pages_checkbox = data.get("show_pages_checkbox")
+        show_pages_checkbox = str(data.get("show_pages_checkbox"))
         choosen_model = str(
             data.get("choosen_model", "gemini-2.0-flash")
         )  # second arg = default model
-        change_lebgth_checkbox = data.get("change_length_checkbox")
+        change_lebgth_checkbox = str(data.get("change_length_checkbox"))
         # enhancer_checkbox = data.get("enhancer_checkbox")
-        enhancer_checkbox = "True"  # TODO: change when enhancer is ready
+        enhancer_checkbox = str("True")  # TODO: change when enhancer is ready
         slider_value = data.get("slider_value")
-
-        show_pages_checkbox = str(show_pages_checkbox)
-        change_lebgth_checkbox = str(change_lebgth_checkbox)
-        enhancer_checkbox = str(enhancer_checkbox)
+        rag_doc_slider = str(data.get("ragDocSlider"))
 
         if slider_value is not None:
             slider_value = float(slider_value)
@@ -177,6 +174,7 @@ def process_text(data: dict) -> None:
         log.debug(f"Show pages: {show_pages_checkbox}")
         log.debug(f"Change output size: {change_lebgth_checkbox}")
         log.debug(f"selected_model: {choosen_model}")
+        log.debug(f"RAG or document: {rag_doc_slider}")
 
         # files
         pdf_dir = Path(SCRAPED_FILES_DIR)
@@ -217,6 +215,7 @@ def process_text(data: dict) -> None:
                 collection_name = collection_name[25:60]
 
                 accumulated_text = ""
+
                 for result_chunk in process_query_with_rag(
                     prompt,
                     pdf,
@@ -227,6 +226,7 @@ def process_text(data: dict) -> None:
                     slider_value,
                     chroma_client,
                     collection_name,
+                    rag_doc_slider
                 ):
                     if not streaming:
                         break

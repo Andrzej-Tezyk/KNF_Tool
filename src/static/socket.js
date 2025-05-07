@@ -56,6 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let choosen_model = document.getElementById('model-select').value;
         let change_length_checkbox = document.getElementById('change_lebgth').checked;
         let slider_value = document.getElementById('myRange').value;
+        let ragDocSlider = document.getElementById('rag-doc-slider-checkbox').checked;
         
         // rise a popup if no file selected
         if (!selectedFiles.length) {
@@ -69,7 +70,8 @@ document.addEventListener('DOMContentLoaded', function() {
             show_pages_checkbox: show_pages_checkbox, 
             choosen_model: choosen_model,
             change_length_checkbox: change_length_checkbox,
-            slider_value: slider_value });
+            slider_value: slider_value,
+            ragDocSlider: ragDocSlider });
         
         const img = button.querySelector('img');
         img.src = "/static/images/stop-solid.svg"; // changes icon to stop

@@ -73,7 +73,7 @@
                                       <label for="change_lebgth">Change length of response</label>
                                     </div>
                                     <div class="option-object-lengths">
-                                        <label for="words-sentence-select" id="select-text">Options:</label>
+                                        <label for="words-sentence-select" id="select-text"></label>
                                         <select id="words-sentence-select" name="model" class="option-object select-option">
                                             <option value="very short">very short</option>
                                             <option value="short">short</option>
@@ -97,7 +97,7 @@
                                 </div>
                                 <div class="segment-side-bar">
                                     <div class="option-object-model">
-                                        <label for="model-select">Choose model:</label>
+                                        <label class="option-label" for="model-select"><strong>Choose model:</strong></label>
                                         <select id="model-select" name="model"  class="option-object select-option">
                                             <option value="gemini-2.0-flash" selected="selected">gemini-2.0-flash</option>
                                             <option value="gemini-2.0-flash-thinking-exp-01-21">gemini-2.0-flash-thinking-exp-01-21</option>
@@ -106,15 +106,15 @@
                                 </div>
                                 <div class="segment-side-bar">
                                     <div class="option-object-temperature">
-                                        <label for="model-select">Change temperature:</label>
+                                        <label for="model-select"><strong>Change temperature:</strong></label>
                                         <input type="range" min="0" max="1" step="0.05" value="0.8" class="temperature-slider" id="myRange">
                                     </div>
                                     <div class="option-object">
-                                        <label for="model-select">Value of temperature: <span id="demo"></span></label>
+                                        <label for="model-select">Value of temperature: <strong><span id="demo"></span></strong></label>
                                     </div>
                                 </div>
-                                <div>
-                                    <button class="open-button" onclick="toggleTempInfo()">More info about temperature</button>
+                                <div class="temperature-info">
+                                    <button class="open-button" onclick="toggleTempInfo()">About temperature</button>
                                     <div class="form-popup" id="tempInfo">
                                         <form class="form-container">
                                             <label>In AI models like LLMs, temperature controls the randomness

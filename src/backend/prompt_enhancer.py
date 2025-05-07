@@ -1,14 +1,12 @@
 import json
 import logging
 from typing import Any
-from pathlib import Path
+
 
 log = logging.getLogger("__name__")
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
-CONFIG_PATH = PROJECT_ROOT / "config" / "config.json"
-print(CONFIG_PATH)
-with open(CONFIG_PATH) as file:
+
+with open("config/config.json") as file:
     config = json.load(file)
 
 

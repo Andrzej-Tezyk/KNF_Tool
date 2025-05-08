@@ -109,7 +109,7 @@ def process_query_with_rag(
     rag_doc_slider: str,
 ) -> Generator:
     """
-    ToDo: pdf variable is str type, not Path like in process_pdf. 
+    ToDo: pdf variable is str type, not Path like in process_pdf.
     It contains pdf file name only.
     """
     if not prompt:

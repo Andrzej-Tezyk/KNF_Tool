@@ -142,7 +142,7 @@ def process_text(data: dict) -> None:
         )  # second arg = default model
         change_lebgth_checkbox = str(data.get("change_length_checkbox"))
         # enhancer_checkbox = data.get("enhancer_checkbox")
-        enhancer_checkbox = str("True")  # TODO: change when enhancer is ready
+        enhancer_checkbox = "True"  # TODO: change when enhancer is ready
         slider_value = data.get("slider_value")
         rag_doc_slider = str(data.get("ragDocSlider"))
 
@@ -226,7 +226,7 @@ def process_text(data: dict) -> None:
                     slider_value,
                     chroma_client,
                     collection_name,
-                    rag_doc_slider
+                    rag_doc_slider,
                 ):
                     if not streaming:
                         break

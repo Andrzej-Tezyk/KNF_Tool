@@ -106,7 +106,7 @@ def process_query_with_rag(
     slider_value: float,
     chroma_client: Any,
     collection_name: str,
-    rag_doc_slider: str
+    rag_doc_slider: str,
 ) -> Generator:
     if not prompt:
         yield {"error": "No prompt provided"}
@@ -121,7 +121,7 @@ def process_query_with_rag(
                 )
 
                 if rag_doc_slider == "False":
-                    n_pages = 5 
+                    n_pages = 5
                 else:
                     n_pages = len(collection.get()["ids"])
 

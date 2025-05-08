@@ -886,7 +886,7 @@ textarea:focus {
     border: none;
     cursor: pointer;
     font-size: 20px;
-    color: var(--primary-color); /* This is the default inherited color */
+    color: var(--primary-color); /*#B2890F;*/
     font-weight: bold;
     transition: background-color 0.3s ease, transform 0.2s ease;
 }
@@ -988,39 +988,36 @@ input:checked + .rag-doc-slider:before {
 /* Icon Base Styling (from previous step) */
 .output-button .icon {
     display: inline-block;
-    width: 1em; /* Inherits from button font-size (20px) */
-    height: 1em; /* Inherits from button font-size (20px) */
+    width: 1em; 
+    height: 1em; 
     vertical-align: middle;
     text-align: center;
     line-height: 1em;
-    padding: 0; /* Ensure no padding interferes */
-    margin: 0; /* Ensure no margin interferes */
+    padding: 0; 
+    margin: 0; 
 }
 
 /* Style for the loading spinner icon */
 .output-button .icon.loading-spinner {
-    /* Create spinner shape using borders */
-    border: 4px solid #f3f3f3; /* Light grey border for the circle */
-    border-top: 4px solid #303368; /* <-- Set the top border color to the desired color */
-    border-radius: 50%; /* Make it round */
-    animation: spin 1s linear infinite; /* Apply the spin animation */
+    border: 4px solid #f3f3f3; 
+    border-top: 4px solid #303368; 
+    border-radius: 50%; 
+    animation: spin 1s linear infinite; 
 
-    /* Hide the arrow character content while spinning */
     text-indent: -9999px;
     overflow: hidden;
-    content: ''; /* Helps ensure no text is shown */
+    content: ''; 
 }
 
 /* Style for the arrow icon when processing is complete */
 .output-button .icon.arrow-ready {
-    /* Display the actual arrow character */
-    text-indent: 0; /* Make text visible */
-    overflow: visible; /* Allow content to be visible */
-    animation: none; /* Stop the spin animation */
-    border: none; /* Remove any borders from spinner state */
-    content: '➤'; /* Ensure the arrow character is shown */
-    font-size: 1em; /* Use inherited font size */
-    color: #303368; /* <-- Set the text color for the arrow */
+    text-indent: 0;
+    overflow: visible; 
+    animation: none; 
+    border: none; 
+    content: '➤'; 
+    font-size: 1em; 
+    color: #303368; 
 }
 
 /* Optional: Keyframes for the spin animation */

@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         let show_pages_checkbox = document.getElementById('show-pages').checked;
         let choosen_model = document.getElementById('model-select').value;
-        let change_length_checkbox = document.getElementById('change_lebgth').checked;
+        let change_length_checkbox = document.getElementById('change_length').checked;
         let slider_value = document.getElementById('myRange').value;
         let ragDocSlider = document.getElementById('rag-doc-slider-checkbox').checked;
         
@@ -109,9 +109,3 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener("click", stopProcessing)      
     }
 });
-
-function openChatView(containerId) {
-    console.log('Opening chat view for container:', containerId);
-    // Navigate to the document chat page, passing the containerId as a query parameter
-    window.location.href = '/documentChat?contentId=' + containerId;
-}

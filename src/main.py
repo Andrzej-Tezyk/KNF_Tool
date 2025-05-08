@@ -162,7 +162,7 @@ def process_text(data: dict) -> None:
         choosen_model = str(
             data.get("choosen_model", "gemini-2.0-flash")
         )  # second arg = default model
-        change_lebgth_checkbox = str(data.get("change_length_checkbox"))
+        change_length_checkbox = data.get("change_length_checkbox")
         # enhancer_checkbox = data.get("enhancer_checkbox")
         enhancer_checkbox = "True"  # TODO: change when enhancer is ready
         slider_value = data.get("slider_value")
@@ -194,7 +194,7 @@ def process_text(data: dict) -> None:
         log.debug(f"selected files: {selected_files}")
         log.debug(f"output size: {output_size}")
         log.debug(f"Show pages: {show_pages_checkbox}")
-        log.debug(f"Change output size: {change_lebgth_checkbox}")
+        log.debug(f"Change output size: {change_length_checkbox}")
         log.debug(f"selected_model: {choosen_model}")
         log.debug(f"RAG or document: {rag_doc_slider}")
 
@@ -243,7 +243,7 @@ def process_text(data: dict) -> None:
                     prompt,
                     pdf_name_to_show,
                     model,
-                    change_lebgth_checkbox,
+                    change_length_checkbox,
                     enhancer_checkbox,
                     output_size,
                     slider_value,
@@ -347,13 +347,13 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
         choosen_model = str(
             data.get("choosen_model", "gemini-2.0-flash")
         )  # second arg = default model
-        change_lebgth_checkbox = data.get("change_length_checkbox")
+        change_length_checkbox = data.get("change_length_checkbox")
         # enhancer_checkbox = data.get("enhancer_checkbox")
         enhancer_checkbox = "True"  # TODO: change when enhancer is ready
         slider_value = data.get("slider_value")
 
         show_pages_checkbox = str(show_pages_checkbox)
-        change_lebgth_checkbox = str(change_lebgth_checkbox)
+        change_length_checkbox = str(change_length_checkbox)
         enhancer_checkbox = str(enhancer_checkbox)
 
         if slider_value is not None:
@@ -418,7 +418,7 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
         )
         log.debug(f"Output size: {output_size}")
         log.debug(f"Show pages: {show_pages_checkbox}")
-        log.debug(f"Change output size: {change_lebgth_checkbox}")
+        log.debug(f"Change output size: {change_length_checkbox}")
         log.debug(f"Selected model: {choosen_model}")
 
         # model instance inside the function to allow multiple models
@@ -446,7 +446,7 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
                 chat_history,
                 pdf_name_to_show,
                 model,
-                change_lebgth_checkbox,
+                change_length_checkbox,
                 enhancer_checkbox,
                 output_size,
                 slider_value,

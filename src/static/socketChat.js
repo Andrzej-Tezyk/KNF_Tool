@@ -1,20 +1,20 @@
 document.addEventListener('DOMContentLoaded', function() {
 
-    console.log("DOM fully loaded and parsed. socketChat.js running."); // Added log
+    console.log("DOM fully loaded and parsed. socketChat.js running."); 
 
     // variables, listeners
-    window.socket = io.connect('http://127.0.0.1:5000');
-    console.log("Socket connection initiated."); // Added log
+    const socket = io.connect('http://127.0.0.1:5000');
+    console.log("Socket connection initiated.");
 
     const outputDiv = document.getElementById('output');
     const inputText = document.getElementById('input');
     const actionButton = document.getElementById('action-button');
     const img = actionButton ? actionButton.querySelector('img') : null;
 
-    console.log("Elements obtained: outputDiv:", outputDiv, "inputText:", inputText, "actionButton:", actionButton); // Added log
+    console.log("Elements obtained: outputDiv:", outputDiv, "inputText:", inputText, "actionButton:", actionButton); 
 
     const contentId = outputDiv ? outputDiv.dataset.contentId : null;
-    console.log("Content ID:", contentId); // Added log
+    console.log("Content ID:", contentId); 
 
 
     if (!contentId) {
@@ -28,9 +28,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Holder for RAW text chunks as they arrive
     let rawAIMessageText = '';
 
-    // Function to create and display a message (either user or AI)
-    function displayMessage(sender, message, isUser = false) {
-        console.log(`Attempting to display message from ${sender}`); // Added log
+    // Function to create and display a message (either user or error that are not streamed)
+    function displayMessage(sender, message, isUser) {
+        console.log(`Attempting to display message from ${sender}`); 
         if (!outputDiv) {
             console.error("Output div not found in displayMessage.");
             return;
@@ -55,11 +55,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 formattedMessageContent.innerHTML = marked.parse(message);
             } else {
                 console.error("Marked.js not loaded correctly.");
-                formattedMessageContent.textContent = message; // Fallback
+                formattedMessageContent.textContent = message; 
             }
        } catch (e) {
             console.error("Error rendering markdown for complete message:", e);
-            formattedMessageContent.textContent = message; // Fallback to plain text
+            formattedMessageContent.textContent = message; 
        }
 
         messageElement.appendChild(headerElement);
@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         outputDiv.appendChild(messageElement);
         outputDiv.scrollTop = outputDiv.scrollHeight;
-        console.log("Message displayed and scrolled."); // Added log
+        console.log("Message displayed and scrolled."); 
     }
 
     // Function to handle sending messages
@@ -76,22 +76,30 @@ document.addEventListener('DOMContentLoaded', function() {
         const input = inputText ? inputText.value.trim() : '';
         console.log("Message obtained from input:", input); 
 
+        const DEFAULT_OPTIONS = {
+            output_size: "medium",
+            show_pages_checkbox: false,
+            choosen_model: 'gemini-2.0-flash',
+            change_length_checkbox: false,
+            slider_value: 0.8
+        };
+
         // Get advanced options data
-        const output_size = document.getElementById('words-sentence-select') ? document.getElementById('words-sentence-select').value : 'medium';
-        const show_pages_checkbox = document.getElementById('show-pages') ? document.getElementById('show-pages').checked : false;
-        const choosen_model = document.getElementById('model-select') ? document.getElementById('model-select').value : 'gemini-2.0-flash';
-        const change_length_checkbox = document.getElementById('change_lebgth') ? document.getElementById('change_lebgth').checked : false;
-        const slider_value = document.getElementById('myRange') ? document.getElementById('myRange').value : 0.8;
+        const output_size = document.getElementById('words-sentence-select') ? document.getElementById('words-sentence-select').value : DEFAULT_OPTIONS.output_size;
+        const show_pages_checkbox = document.getElementById('show-pages') ? document.getElementById('show-pages').checked : DEFAULT_OPTIONS.show_pages_checkbox;
+        const choosen_model = document.getElementById('model-select') ? document.getElementById('model-select').value : DEFAULT_OPTIONS.choosen_model;
+        const change_length_checkbox = document.getElementById('change_length') ? document.getElementById('change_length').checked : DEFAULT_OPTIONS.change_length_checkbox;
+        const slider_value = document.getElementById('myRange') ? document.getElementById('myRange').value : DEFAULT_OPTIONS.slider_value;
 
 
-        if (input && contentId) { // Check if message is not empty AND contentId exists
-            console.log("Message and ContentId are valid. Proceeding to display and emit."); // Added log
+        if (input && contentId) { 
+            console.log("Message and ContentId are valid. Proceeding to display and emit."); 
 
             // Immediately display the user's message on the frontend
-            displayMessage('You', input, true); // This should call displayMessage
+            displayMessage('You', input, true); 
 
             // Emit the message to the backend with the document contentId
-            window.socket.emit('send_chat_message', {
+            socket.emit('send_chat_message', {
                 input: input,
                 contentId: contentId,
                 output_size: output_size, 
@@ -100,18 +108,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 change_length_checkbox: change_length_checkbox,
                 slider_value: slider_value
             });
-            console.log("Emitted 'send_chat_message'."); // Added log
+            console.log("Emitted 'send_chat_message'."); 
 
             // Clear the input field after sending
             if (inputText) {
                inputText.value = '';
             }
             if (actionButton) {
-                console.log("sendMessage: Removing sendMessage listener, adding stopProcessing listener."); // Added log
-                actionButton.removeEventListener('click', sendMessage); // Remove send listener
-                actionButton.addEventListener('click', stopProcessing); // Add stop listener
+                console.log("sendMessage: Removing sendMessage listener, adding stopProcessing listener."); 
+                actionButton.removeEventListener('click', sendMessage); 
+                actionButton.addEventListener('click', stopProcessing); 
                 actionButton.disabled = false; // Ensure button is enabled to be clickable as stop
-                console.log("sendMessage: Listener swapped to stopProcessing."); // Added log
+                console.log("sendMessage: Listener swapped to stopProcessing."); 
             }
             if (inputText) inputText.disabled = true; // Disable input field
             if (img) {
@@ -122,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
            currentAIMessageContentDiv = null; // Ensure this is null for the new stream
 
         } else {
-            console.log("sendMessage condition not met. message:", message, "contentId:", contentId); // Added log
+            console.log("sendMessage condition not met. message:", message, "contentId:", contentId);
              if (!input) {
                  console.log("Reason: message is empty.");
              }
@@ -132,23 +140,25 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
         // --- Function to handle stopping processing ---
+        // Simmilar function in stopProcessing.js file due to DOM scopes.
+        // Need to change implementation in refactor.
         function stopProcessing() {
             console.log("stopProcessing function called. Emitting 'stop_processing'.");
             // Emit a stop event to the backend
-            window.socket.emit('stop_processing');
-            console.log("stopProcessing: Emitted 'stop_processing' event."); // Added log
+            socket.emit('stop_processing');
+            console.log("stopProcessing: Emitted 'stop_processing' event.");
 
         // Optionally, disable the button temporarily to prevent multiple stop requests
         // It will be re-enabled by the stream_stopped listener.
         if (actionButton) {
             actionButton.disabled = true;
-             console.log("stopProcessing: Button temporarily disabled."); // Added log
+             console.log("stopProcessing: Button temporarily disabled.");
         }
     }
 
     // --- Event Listeners (for sending messages) ---
     if (actionButton) {
-        console.log("Attaching click listener to actionButton."); // Added log
+        console.log("Attaching click listener to actionButton.");
         actionButton.addEventListener('click', sendMessage);
     } else {
         console.error("Send button (#action-button) not found. Cannot attach click listener."); // Added log
@@ -156,10 +166,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     if (inputText) {
-        console.log("Attaching keypress listener to inputText."); // Added log
+        console.log("Attaching keypress listener to inputText.");
         inputText.addEventListener('keypress', function(event) {
             if (event.key === 'Enter' && !event.shiftKey) {
-                console.log("Enter key pressed."); // Added log
+                console.log("Enter key pressed.");
                 event.preventDefault();
                 // Check if the button currently triggers sendMessage before calling
                 // This prevents sending a new message while processing is ongoing (button is stop)
@@ -178,7 +188,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     // --- Socket.IO Event Listeners (for receiving messages) ---
-    window.socket.on('receive_chat_message', function(data) {
+    socket.on('receive_chat_message', function(data) {
         console.log("Received 'receive_chat_message'. Data:", data);
 
         if (data.message !== undefined && data.message !== null) {
@@ -193,11 +203,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 console.log("First AI chunk received. Creating new message element.");
                 const messageElement = document.createElement('div');
-                messageElement.classList.add('output-content', 'ai-message'); // Add ai-message class
+                messageElement.classList.add('output-content', 'ai-message');
 
                 const headerElement = document.createElement('div');
                 headerElement.classList.add('output-header');
-                headerElement.textContent = 'AI'; // Sender is AI
+                headerElement.textContent = 'AI';
 
                 const contentDiv = document.createElement('div');
                 contentDiv.classList.add('markdown-body'); // Use markdown-body for styling
@@ -217,7 +227,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Subsequent chunk of the current AI message - append to the raw text acumulator
                 console.log("Subsequent AI chunk processing. Appending to raw text.");
                 rawAIMessageText += chunkText; // Append the chunk to the accumulated text
-                console.log("Appended chunk. Current rawAIMessageText length:", rawAIMessageText.length); // Log accumulated length
+                console.log("Appended chunk. Current rawAIMessageText length:", rawAIMessageText.length);
             }
 
             // --- Re-render the entire accumulated text with each chunk ---
@@ -263,7 +273,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    window.socket.on('stream_stopped', function(data) {
+    socket.on('stream_stopped', function(data) {
         console.log("Received 'stream_stopped'.");
 
         if (actionButton) {

@@ -100,7 +100,7 @@ def process_query_with_rag(
     prompt: str,
     pdf: str,
     model: Any,
-    change_lebgth_checkbox: str,
+    change_length_checkbox: str,
     enhancer_checkbox: str,
     output_size: int,
     slider_value: float,
@@ -108,6 +108,10 @@ def process_query_with_rag(
     collection_name: str,
     rag_doc_slider: str,
 ) -> Generator:
+    """
+    ToDo: pdf variable is str type, not Path like in process_pdf. 
+    It contains pdf file name only.
+    """
     if not prompt:
         yield {"error": "No prompt provided"}
 
@@ -163,7 +167,7 @@ def process_query_with_rag(
                         prompt
                         + f"(Please provide {output_size} size response)"
                         + rag_context
-                        if change_lebgth_checkbox == "True"
+                        if change_length_checkbox == "True"
                         else prompt + rag_context
                     ),
                 ],
@@ -189,7 +193,7 @@ def process_chat_query_with_rag(
     chat_history: str,
     pdf: str,
     model: Any,
-    change_lebgth_checkbox: str,
+    change_length_checkbox: str,
     enhancer_checkbox: str,
     output_size: int,
     slider_value: float,
@@ -245,9 +249,9 @@ def process_chat_query_with_rag(
                     prompt
                     + f"(Please provide {output_size} size response)"
                     + rag_context
-                    + "\nChat history:\n"
-                    + chat_history
-                    if change_lebgth_checkbox == "True"
+                    + "\n\nChat history:\n"
+                    + str(chat_history)
+                    if change_length_checkbox == "True"
                     else prompt + rag_context + "\n\nChat history\n" + str(chat_history)
                 ),
                 stream=True,

@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     button.addEventListener('click', startProcessingOnButton);
     inputText.addEventListener('keydown', startProcessingOnEnter);
+
     
     
     // socket events
@@ -27,6 +28,36 @@ document.addEventListener('DOMContentLoaded', function() {
         img.src = "/static/images/arrow-up-solid.svg";
         button.addEventListener("click", startProcessingOnButton);
         inputText.addEventListener('keydown', startProcessingOnEnter);
+    });
+
+    // Handler for when processing is complete for a SINGLE container (document)
+    // This event carries the container_id for which processing finished
+    socket.on('processing_complete_for_container', function(data) {
+        const containerId = data.container_id;
+        const buttonId = 'chat-button-' + containerId;
+        const chatButton = document.getElementById(buttonId);
+
+        if (chatButton) {
+            const iconSpan = chatButton.querySelector('.icon'); // Find the span with the 'icon' class inside the button
+
+            if (iconSpan) {
+                // --- Change the icon from loading state to ready state (arrow) ---
+                iconSpan.classList.remove('loading-spinner'); // Remove the loading class
+                iconSpan.classList.add('arrow-ready'); // Add the ready class
+                // Set the text content to the arrow character
+                iconSpan.textContent = '➤'; // Make sure the character is there
+                // -----------------------------------------------------------------
+            } else {
+                 console.warn('Could not find .icon span inside button with ID:', buttonId);
+            }
+
+
+            chatButton.disabled = false; // Enable the button
+            console.log('Chat button enabled for container:', containerId);
+
+        } else {
+            console.warn('Could not find chat button with ID:', buttonId, 'to enable after processing complete.');
+        }
     });
 
     // start processing: 1) on key; 2) on button
@@ -53,9 +84,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         let show_pages_checkbox = document.getElementById('show-pages').checked;
         let choosen_model = document.getElementById('model-select').value;
-        let change_length_checkbox = document.getElementById('change_lebgth').checked;
+        let change_length_checkbox = document.getElementById('change_length').checked;
         let slider_value = document.getElementById('myRange').value;
+        let ragDocSlider = document.getElementById('rag-doc-slider-checkbox').checked;
         
+        // rise a popup if no file selected
+        if (!selectedFiles.length) {
+            alert("Please select at least one file.");
+        }
+
         window.socket.emit('start_processing', { 
             input: input, 
             pdfFiles: selectedFiles, 
@@ -63,7 +100,8 @@ document.addEventListener('DOMContentLoaded', function() {
             show_pages_checkbox: show_pages_checkbox, 
             choosen_model: choosen_model,
             change_length_checkbox: change_length_checkbox,
-            slider_value: slider_value });
+            slider_value: slider_value,
+            ragDocSlider: ragDocSlider });
         
         const img = button.querySelector('img');
         img.src = "/static/images/stop-solid.svg"; // changes icon to stop

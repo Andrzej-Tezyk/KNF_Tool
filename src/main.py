@@ -140,7 +140,7 @@ def process_text(data: dict) -> None:
         )  # second arg = default model
         change_length_checkbox = data.get("change_length_checkbox")
         # enhancer_checkbox = data.get("enhancer_checkbox")
-        enhancer_checkbox = "True"  # TODO: change when enhancer is ready
+        enhancer_checkbox = "True"
         slider_value = data.get("slider_value")
         rag_doc_slider = str(data.get("ragDocSlider"))
 

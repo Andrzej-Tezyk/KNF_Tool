@@ -89,6 +89,12 @@
                                     </div>
                                 </div>
                                 <div class="segment-side-bar">
+                                    <div class="option-object checkbox-option-bar">
+                                        <input type="checkbox" id="prompt-enhancer" name="prompt-enhancer">
+                                        <label for="prompt-enhancer">Prompt enhancer</label>
+                                    </div>
+                                </div>
+                                <div class="segment-side-bar">
                                     <div class="option-object">
                                         <label for="model-select">Choose model:</label>
                                         <select id="model-select" name="model"  class="option-object select-option">
@@ -226,5 +232,6 @@
     <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
     <script src="{{ url_for('static', filename='popupTutorial.js') }}"></script>
     <script src="{{ url_for('static', filename='initialChatMessage.js') }}"></script>
+    <script src="{{ url_for('static', filename='noInputHandler.js') }}"></script>
 </body>
 </html>

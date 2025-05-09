@@ -20,7 +20,7 @@ def process_pdf(
     prompt: str,
     pdf: Path,
     model: Any,
-    change_lebgth_checkbox: str,
+    change_length_checkbox: str,
     enhancer_checkbox: str,
     output_size: int,
     slider_value: float,
@@ -74,7 +74,7 @@ def process_pdf(
                 [
                     (
                         prompt + f"(Please provide {output_size} size response)"
-                        if change_lebgth_checkbox == "True"
+                        if change_length_checkbox == "True"
                         else prompt
                     ),
                     file_to_send,

@@ -8,7 +8,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const img = button.querySelector('img');
 
     button.addEventListener('click', startProcessingOnButton);
-    inputText.addEventListener('keydown', startProcessingOnEnter);
+    //inputText.addEventListener('keydown', startProcessingOnEnter);
+    document.addEventListener('keydown', handleGlobalEnter);
+
+
 
     
     
@@ -27,7 +30,8 @@ document.addEventListener('DOMContentLoaded', function() {
     socket.on('stream_stopped', function(data) {
         img.src = "/static/images/arrow-up-solid.svg";
         button.addEventListener("click", startProcessingOnButton);
-        inputText.addEventListener('keydown', startProcessingOnEnter);
+        //inputText.addEventListener('keydown', startProcessingOnEnter);
+        document.addEventListener('keydown', handleGlobalEnter);
     });
 
     // Handler for when processing is complete for a SINGLE container (document)
@@ -60,21 +64,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // start processing: 1) on key; 2) on button
-    // remove arrow-up -> add stop button + functionality
-    function startProcessingOnEnter() {
-        if (event.key === 'Enter' && !event.shiftKey) {
-            event.preventDefault(); // prevent going to a new line
-        
-            startProcessingOnButton();
-        }       
-    }
+
 
     function startProcessingOnButton() {
         const button = document.getElementById('action-button');
         
         button.removeEventListener("click", startProcessingOnButton)
-        inputText.removeEventListener('keydown', startProcessingOnEnter);
+        //inputText.removeEventListener('keydown', startProcessingOnEnter);
+        document.removeEventListener('keydown', handleGlobalEnter);
 
         let input = document.getElementById('input').value;
         let output_size = document.getElementById('words-sentence-select').value;
@@ -107,5 +104,22 @@ document.addEventListener('DOMContentLoaded', function() {
         img.src = "/static/images/stop-solid.svg"; // changes icon to stop
 
         button.addEventListener("click", stopProcessing)      
+    }
+
+        // start processing: 1) on key; 2) on button
+    // remove arrow-up -> add stop button + functionality
+    //function startProcessingOnEnter() {
+    //    if (event.key === 'Enter' && !event.shiftKey) {
+    //        event.preventDefault(); // prevent going to a new line
+    //    
+    //        startProcessingOnButton();
+    //    }       
+    //}
+
+    function handleGlobalEnter(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault(); // prevent going to a new line
+            startProcessingOnButton();
+        }
     }
 });

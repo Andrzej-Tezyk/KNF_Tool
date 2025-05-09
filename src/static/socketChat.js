@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (inputText) {
         console.log("Attaching keypress listener to inputText.");
-        inputText.addEventListener('keypress', function(event) {
+        document.addEventListener('keypress', function(event) {
             if (event.key === 'Enter' && !event.shiftKey) {
                 console.log("Enter key pressed.");
                 event.preventDefault();

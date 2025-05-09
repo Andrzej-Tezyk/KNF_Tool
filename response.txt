@@ -1,0 +1,58 @@
+Przepraszam, nie rozumiem. Czy chcesz, żebym wypisał wszystkie słowa zaczynające się na literę "B" występujące w tekście Rekomendacji A Komisji Nadzoru Finansowego?
+Streszczenie "Rekomendacji A dotyczącej zarządzania ryzykiem towarzyszącym zawieraniu przez banki transakcji na rynku instrumentów pochodnych":
+
+**Cel dokumentu:**
+Wskazanie dobrych praktyk zarządzania ryzykiem związanym z instrumentami pochodnymi oraz określenie zasad relacji z klientami zawierającymi takie transakcje. Rekomendacje mają na celu zwrócenie uwagi na potrzebę zapewnienia klientom rzetelnych informacji o transakcjach oraz uwzględnienie specyfiki klienta i oferty produktowej banku w zarządzaniu ryzykiem.
+
+**Kluczowe definicje:**
+
+*   **Instrument pochodny (derywat):** Instrument finansowy, którego wartość zależy od zewnętrznego parametru cenowego, nie wymaga dużej płatności początkowej, a jego rozliczenie nastąpi w przyszłości.
+*   **Ryzyko kredytowe (kontrahenta):** Ryzyko niewywiązania się kontrahenta z zobowiązań. Wyróżnia się ryzyko przedrozliczeniowe (utrata przyszłych należności) i ryzyko rozliczeniowe (nieotrzymanie środków w terminie).
+*   **Ryzyko rynkowe:** Możliwość poniesienia strat na skutek zmian cen instrumentu bazowego.
+*   **Ryzyko operacyjne:** Możliwość wystąpienia straty wynikającej z niedostosowania procesów wewnętrznych, ludzi, systemów lub ze zdarzeń zewnętrznych, w tym ryzyko prawne.
+*   **Zabezpieczenie transakcji pochodnej (collateral):** Środki pieniężne lub inne walory, z których bank może zaspokoić swoje należności w przypadku ryzyka kontrahenta.
+*   **Klient:** Strona transakcji z bankiem, z wyłączeniem podmiotów posiadających dużą wiedzę o rynkach finansowych.
+*   **Kontrahent:** Strona zawartej z bankiem transakcji instrumentem pochodnym.
+
+**Kluczowe obowiązki banków:**
+
+1.  **Zarządzanie ryzykiem:**
+
+    *   Posiadanie spójnych systemów zarządzania ryzykiem, adekwatnych do zakresu działalności.
+    *   Efektywny nadzór kierownictwa banku.
+    *   Określenie zasad polityki i procedur zarządzania instrumentami pochodnymi.
+    *   Monitorowanie i kontrola ryzyka, w tym wycena transakcji przez niezależną komórkę.
+    *   Przeprowadzanie testów warunków skrajnych (stress testów).
+    *   Ustanowienie limitów dla ryzyka rynkowego i kredytowego.
+    *   Audyt wewnętrzny procesów zawierania transakcji i zarządzania instrumentami pochodnymi.
+2.  **Ryzyko Kredytowe Kontrahenta:**
+
+    *   Monitorowanie ryzyka kredytowego z uwzględnieniem ryzyka przedrozliczeniowego i rozliczeniowego.
+    *   Stosowanie umów ramowych zawierających klauzule o saldowaniu wzajemnych zobowiązań (netting).
+    *   Oddzielenie funkcji oceny i akceptacji ryzyka kredytowego od funkcji sprzedaży.
+    *   Określenie dopuszczalnego limitu ekspozycji dla każdego kontrahenta.
+    *   Posiadanie procedury postępowania w przypadku przekroczenia limitów.
+    *   Współpraca z kontrahentami i firmami pośredniczącymi.
+3.  **Ryzyko Utraty Płynności:**
+
+    *   Posiadanie polityki płynnościowej umożliwiającej zarządzanie ryzykiem niedopasowania przepływów pieniężnych.
+    *   Monitorowanie pozycji płynnościowych.
+    *   Uwzględnianie ryzyka kredytowego związanego z instrumentami pochodnymi w zarządzaniu płynnością.
+4.  **Ryzyko Operacyjne:**
+
+    *   Zapewnienie spójności systemów zarządzania ryzykiem operacyjnym z ogólną polityką banku.
+    *   Identyfikacja zagrożeń związanych z zarządzaniem, zawieraniem i rozliczaniem transakcji.
+    *   Zapewnienie odpowiedniej jakości personelu i podziału obowiązków.
+5.  **Relacje z klientami:**
+
+    *   Identyfikowanie potrzeb i oczekiwań klienta.
+    *   Jasne i rzetelne informowanie klientów o konsekwencjach zawierania transakcji pochodnych.
+    *   Przedstawianie symulacji wpływu zmian cen instrumentu bazowego na zobowiązania klienta.
+    *   Określenie zasad potwierdzania transakcji i zgłaszania braku akceptacji.
+    *   Informowanie o ryzyku utraty reputacji.
+    *   Uczestnictwo w międzybankowych systemach wymiany informacji o transakcjach.
+    *   Polubowne rozstrzyganie sporów z klientami.
+
+**Potencjalne konsekwencje prawne:**
+
+Dokument wspomina o konieczności upewnienia się, że transakcje są dopuszczalne na podstawie przepisów prawa polskiego oraz że bank i jego kontrahenci mają prawne podstawy do ich zawierania. Bank powinien posiadać procedury zarządzania i monitorowania ryzyka prawnego towarzyszącego transakcjom i kontrahentom. Zaleca się posiadanie opinii prawnych w tym zakresie.

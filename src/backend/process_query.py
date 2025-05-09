@@ -18,6 +18,7 @@ SUBCHUNK_SIZE = 1
 
 load_dotenv()
 
+
 def process_pdf(
     prompt: str,
     pdf: Path,
@@ -91,20 +92,22 @@ def process_pdf(
                 response_file.write(response_chunk.text)
             response_file.close()
             # splits its text into smaller sub-chunks
-            with open(RESPONSE_FILE_PATH, "r", encoding="UTF-8") as response_file:
+            with open(RESPONSE_FILE_PATH, encoding="UTF-8") as response_file:
                 for line in response_file:
                     words = line.split(" ")
                     sub_chunk = ""
                     for word in words:
                         sub_chunk = sub_chunk + " " + word if sub_chunk else word
-                        if len(sub_chunk.split()) >= SUBCHUNK_SIZE:  # size of subchunk here
+                        if (
+                            len(sub_chunk.split()) >= SUBCHUNK_SIZE
+                        ):  # size of subchunk here
                             yield {"pdf_name": pdf, "content": sub_chunk + " "}
                             sub_chunk = ""
                             time.sleep(0.1)
                     # yield remaining words
                     if sub_chunk:
                         yield {"pdf_name": pdf, "content": sub_chunk + " "}
-                        time.sleep(0.1)        
+                        time.sleep(0.1)
             log.debug(f"Response for: {pdf} was saved!\n")
             Path.unlink(RESPONSE_FILE_PATH)
             time.sleep(1)  # lower API request rate per sec
@@ -199,20 +202,22 @@ def process_query_with_rag(
                 response_file.write(response_chunk.text)
             response_file.close()
             # splits its text into smaller sub-chunks
-            with open(RESPONSE_FILE_PATH, "r", encoding="UTF-8") as response_file:
+            with open(RESPONSE_FILE_PATH, encoding="UTF-8") as response_file:
                 for line in response_file:
                     words = line.split(" ")
                     sub_chunk = ""
                     for word in words:
                         sub_chunk = sub_chunk + " " + word if sub_chunk else word
-                        if len(sub_chunk.split()) >= SUBCHUNK_SIZE:  # size of subchunk here
+                        if (
+                            len(sub_chunk.split()) >= SUBCHUNK_SIZE
+                        ):  # size of subchunk here
                             yield {"pdf_name": pdf, "content": sub_chunk + " "}
                             sub_chunk = ""
                             time.sleep(0.1)
                     # yield remaining words
                     if sub_chunk:
                         yield {"pdf_name": pdf, "content": sub_chunk + " "}
-                        time.sleep(0.1)        
+                        time.sleep(0.1)
             log.debug(f"Response for: {pdf} was saved!\n")
             Path.unlink(RESPONSE_FILE_PATH)
             time.sleep(1)  # lower API request rate per sec
@@ -298,20 +303,22 @@ def process_chat_query_with_rag(
                 response_file.write(response_chunk.text)
             response_file.close()
             # splits its text into smaller sub-chunks
-            with open(RESPONSE_FILE_PATH, "r", encoding="UTF-8") as response_file:
+            with open(RESPONSE_FILE_PATH, encoding="UTF-8") as response_file:
                 for line in response_file:
                     words = line.split(" ")
                     sub_chunk = ""
                     for word in words:
                         sub_chunk = sub_chunk + " " + word if sub_chunk else word
-                        if len(sub_chunk.split()) >= SUBCHUNK_SIZE:  # size of subchunk here
+                        if (
+                            len(sub_chunk.split()) >= SUBCHUNK_SIZE
+                        ):  # size of subchunk here
                             yield {"pdf_name": pdf, "content": sub_chunk + " "}
                             sub_chunk = ""
                             time.sleep(0.1)
                     # yield remaining words
                     if sub_chunk:
                         yield {"pdf_name": pdf, "content": sub_chunk + " "}
-                        time.sleep(0.1)        
+                        time.sleep(0.1)
             log.debug(f"Response for: {pdf} was saved!\n")
             Path.unlink(RESPONSE_FILE_PATH)
             time.sleep(1)  # lower API request rate per sec

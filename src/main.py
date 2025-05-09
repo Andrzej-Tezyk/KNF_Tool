@@ -255,7 +255,7 @@ def process_text(data: dict) -> None:
                         break
                     if (
                         "error" in result_chunk
-                    ):  # czy tu chodzi o slowo error w odpowiedzi? jezeli tak to do sprawdzenia
+                    ):
                         log.error("Error received in chunk")
                         error_message = {"message": "error in chunk response"}
                         socketio.emit("error", error_message)

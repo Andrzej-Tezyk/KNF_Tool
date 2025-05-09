@@ -14,7 +14,7 @@ PDF_FILES = Path("scraped_files")
 
 log = logging.getLogger("__name__")
 
-client = PersistentClient(path="exp_vector_db")
+client = PersistentClient(path="chroma_vector_db")
 
 
 async def replace_polish_chars(text: str) -> str:
@@ -63,11 +63,9 @@ async def process_pdf(doc_path: Path) -> None:
             )
             return
 
-        # Extract text (potentially CPU-bound operation)
         text_list = await run_in_executor(extract_text_from_pdf, doc_path)
 
-        # Create ChromaDB (potentially IO-bound operation)
-        await run_in_executor(create_chroma_db, text_list, "exp_vector_db", name)
+        await run_in_executor(create_chroma_db, text_list, "chroma_vector_db", name)
 
         log.info(f"{doc_path} was embedded.")
 

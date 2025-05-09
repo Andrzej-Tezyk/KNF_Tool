@@ -31,7 +31,7 @@ SCRAPED_FILES_DIR = PROJECT_ROOT / "scraped_files"
 CACHE_DIR = PROJECT_ROOT / ".cache"
 
 # Chroma client path
-CHROMA_CLIENT_DIR = str(PROJECT_ROOT / "exp_vector_db")
+CHROMA_CLIENT_DIR = str(PROJECT_ROOT / "chroma_vector_db")
 
 # Configure Flask-Caching
 # Use FileSystemCache to persist across reloads during development
@@ -261,7 +261,7 @@ def process_text(data: dict) -> None:
                         socketio.emit("error", error_message)
                         return
                     elif "content" in result_chunk:
-                        log.debug(f'Recived response chunk: {result_chunk["content"]}')
+                        log.debug(f'Received response chunk: {result_chunk["content"]}')
                         accumulated_text += result_chunk["content"]
                         markdown_content = markdown.markdown(accumulated_text)
                         final_markdown_content = (

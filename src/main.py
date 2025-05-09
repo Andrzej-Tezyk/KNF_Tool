@@ -261,7 +261,7 @@ def process_text(data: dict) -> None:
                         socketio.emit("error", error_message)
                         return
                     elif "content" in result_chunk:
-                        log.debug(f'Recived response chunk: {result_chunk["content"]}')
+                        log.debug(f'Received response chunk: {result_chunk["content"]}')
                         accumulated_text += result_chunk["content"]
                         markdown_content = markdown.markdown(accumulated_text)
                         final_markdown_content = (

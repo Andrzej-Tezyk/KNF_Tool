@@ -58,7 +58,6 @@ USER_AGENT_LIST = [
 
 SYSTEM_PROMPT = config["system_prompt"]
 
-
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     raise ValueError("GEMINI_API_KEY not found in environment variables.")
@@ -234,7 +233,7 @@ def process_text(data: dict) -> None:
                         socketio.emit("error", {"message": "error in chunk response"})
                         return
                     elif "content" in result_chunk:
-                        log.debug(f'Recived response chunk: {result_chunk["content"]}')
+                        log.debug(f'Received response chunk: {result_chunk["content"]}')
                         accumulated_text += result_chunk["content"]
                         markdown_content = markdown.markdown(accumulated_text)
                         socketio.emit(

@@ -16,6 +16,7 @@ from backend.knf_scraping import scrape_knf  # type: ignore[import-not-found]
 from backend.show_pages import show_pages  # type: ignore[import-not-found]
 from backend.custom_logger import CustomFormatter  # type: ignore[import-not-found]
 from backend.chroma_instance import get_chroma_client  # type: ignore[import-not-found]
+from backend.rag_vector_db_name_generation import replace_polish_chars  # type: ignore[import-not-found]
 
 
 # Get the project root directory
@@ -92,32 +93,7 @@ if not SCRAPED_FILES_DIR.exists() or next(SCRAPED_FILES_DIR.iterdir(), None) is 
     scrape_knf(SCRAPED_FILES_DIR, NUM_RETRIES, USER_AGENT_LIST)
 
 
-def replace_polish_chars(text: str) -> str:
-    """
-    For documents names only.
-    """
-    polish_to_ascii = {
-        "ą": "a",
-        "ć": "c",
-        "ę": "e",
-        "ł": "l",
-        "ń": "n",
-        "ó": "o",
-        "ś": "s",
-        "ż": "z",
-        "ź": "z",
-        "Ą": "A",
-        "Ć": "C",
-        "Ę": "E",
-        "Ł": "L",
-        "Ń": "N",
-        "Ó": "O",
-        "Ś": "S",
-        "Ż": "Z",
-        "Ź": "Z",
-    }
 
-    return "".join(polish_to_ascii.get(c, c) for c in text)
 
 
 # flask

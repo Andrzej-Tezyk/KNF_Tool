@@ -103,7 +103,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const img = button.querySelector('img');
         img.src = "/static/images/stop-solid.svg"; // changes icon to stop
 
-        button.addEventListener("click", stopProcessing)      
+        button.addEventListener("click", stopProcessing)
+
+        // delete user mesage
+        if (inputText) {
+               inputText.value = '';
+            }
     }
 
         // start processing: 1) on key; 2) on button

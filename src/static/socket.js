@@ -96,10 +96,10 @@ document.addEventListener('DOMContentLoaded', function() {
         window.socket.emit('start_processing', { 
             input: input, 
             pdfFiles: selectedFiles, 
+            change_length_checkbox: change_length_checkbox,
             output_size: output_size, 
             show_pages_checkbox: show_pages_checkbox, 
             choosen_model: choosen_model,
-            change_length_checkbox: change_length_checkbox,
             slider_value: slider_value,
             ragDocSlider: ragDocSlider });
         

@@ -10,19 +10,17 @@ from dotenv import load_dotenv
 from backend.rag_chromadb import get_relevant_passage, get_gemini_ef  # type: ignore[import-not-found]
 from backend.prompt_enhancer import enhance_prompt  # type: ignore[import-not-found]
 
-log = logging.getLogger("__name__")
-
+log = logging.getLogger(__name__)
 
 load_dotenv()
-
 
 def process_pdf(
     prompt: str,
     pdf: Path,
-    model: Any,
-    change_length_checkbox: str,
-    enhancer_checkbox: str,
-    output_size: int,
+    model: genai.GenerativeModel,
+    change_length_checkbox: bool,
+    output_size: str,
+    enhancer_checkbox: bool,
     slider_value: float,
 ) -> Generator:
     """Processes a single PDF document using the provided prompt and returns the result.
@@ -56,7 +54,7 @@ def process_pdf(
         yield {"error": "No prompt provided"}
 
     try:
-        if enhancer_checkbox == "True":
+        if enhancer_checkbox == True:
             prompt = enhance_prompt(prompt, model)
             log.debug(f"Improved prompt: {prompt}")
 
@@ -74,7 +72,7 @@ def process_pdf(
                 [
                     (
                         prompt + f"(Please provide {output_size} size response)"
-                        if change_length_checkbox == "True"
+                        if change_length_checkbox == True
                         else prompt
                     ),
                     file_to_send,
@@ -100,9 +98,9 @@ def process_query_with_rag(
     prompt: str,
     pdf: str,
     model: Any,
-    change_length_checkbox: str,
-    enhancer_checkbox: str,
-    output_size: int,
+    change_length_checkbox: bool,
+    output_size: str,
+    enhancer_checkbox: bool,
     slider_value: float,
     chroma_client: Any,
     collection_name: str,
@@ -151,7 +149,7 @@ def process_query_with_rag(
                 )
 
             try:
-                if enhancer_checkbox == "True":
+                if enhancer_checkbox == True:
                     prompt = enhance_prompt(prompt, model)
                     log.debug(f"Improved prompt: {prompt}")
 
@@ -167,7 +165,7 @@ def process_query_with_rag(
                         prompt
                         + f"(Please provide {output_size} size response)"
                         + rag_context
-                        if change_length_checkbox == "True"
+                        if change_length_checkbox == True
                         else prompt + rag_context
                     ),
                 ],
@@ -193,9 +191,9 @@ def process_chat_query_with_rag(
     chat_history: str,
     pdf: str,
     model: Any,
-    change_length_checkbox: str,
-    enhancer_checkbox: str,
-    output_size: int,
+    change_length_checkbox: bool,
+    output_size: str,
+    enhancer_checkbox: bool,
     slider_value: float,
     chroma_client: Any,
     collection_name: str,
@@ -232,7 +230,7 @@ def process_chat_query_with_rag(
                 )
 
             try:
-                if enhancer_checkbox == "True":
+                if enhancer_checkbox == True:
                     prompt = enhance_prompt(prompt, model)
                     log.debug(f"Improved prompt: {prompt}")
 
@@ -251,7 +249,7 @@ def process_chat_query_with_rag(
                     + rag_context
                     + "\n\nChat history:\n"
                     + str(chat_history)
-                    if change_length_checkbox == "True"
+                    if change_length_checkbox == True
                     else prompt + rag_context + "\n\nChat history\n" + str(chat_history)
                 ),
                 stream=True,

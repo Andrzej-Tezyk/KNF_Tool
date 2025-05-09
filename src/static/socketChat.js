@@ -77,18 +77,18 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("Message obtained from input:", input); 
 
         const DEFAULT_OPTIONS = {
+            change_length_checkbox: false,
             output_size: "medium",
             show_pages_checkbox: false,
             choosen_model: 'gemini-2.0-flash',
-            change_length_checkbox: false,
             slider_value: 0.8
         };
 
         // Get advanced options data
+        const change_length_checkbox = document.getElementById('change_length') ? document.getElementById('change_length').checked : DEFAULT_OPTIONS.change_length_checkbox;
         const output_size = document.getElementById('words-sentence-select') ? document.getElementById('words-sentence-select').value : DEFAULT_OPTIONS.output_size;
         const show_pages_checkbox = document.getElementById('show-pages') ? document.getElementById('show-pages').checked : DEFAULT_OPTIONS.show_pages_checkbox;
         const choosen_model = document.getElementById('model-select') ? document.getElementById('model-select').value : DEFAULT_OPTIONS.choosen_model;
-        const change_length_checkbox = document.getElementById('change_length') ? document.getElementById('change_length').checked : DEFAULT_OPTIONS.change_length_checkbox;
         const slider_value = document.getElementById('myRange') ? document.getElementById('myRange').value : DEFAULT_OPTIONS.slider_value;
 
 
@@ -102,10 +102,10 @@ document.addEventListener('DOMContentLoaded', function() {
             socket.emit('send_chat_message', {
                 input: input,
                 contentId: contentId,
+                change_length_checkbox: change_length_checkbox,
                 output_size: output_size, 
                 show_pages_checkbox: show_pages_checkbox, 
                 choosen_model: choosen_model,
-                change_length_checkbox: change_length_checkbox,
                 slider_value: slider_value
             });
             console.log("Emitted 'send_chat_message'."); 

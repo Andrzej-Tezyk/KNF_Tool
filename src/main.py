@@ -46,7 +46,7 @@ CACHE_CONFIG = {
 with open(CONFIG_PATH) as file:
     config = json.load(file)
 
-log = logging.getLogger("__name__")
+log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 # create console handler with a higher log level
 ch = logging.StreamHandler()
@@ -157,14 +157,13 @@ def process_text(data: dict) -> None:
         # get data
         prompt = data.get("input")
         selected_files = data.get("pdfFiles")
+        change_length_checkbox = data.get("change_length_checkbox")
         output_size = data.get("output_size")
-        show_pages_checkbox = str(data.get("show_pages_checkbox"))
+        show_pages_checkbox = data.get("show_pages_checkbox")
+        enhancer_checkbox = False  # TODO: change when enhancer is ready
         choosen_model = str(
             data.get("choosen_model", "gemini-2.0-flash")
         )  # second arg = default model
-        change_length_checkbox = data.get("change_length_checkbox")
-        # enhancer_checkbox = data.get("enhancer_checkbox")
-        enhancer_checkbox = "True"  # TODO: change when enhancer is ready
         slider_value = data.get("slider_value")
         rag_doc_slider = str(data.get("ragDocSlider"))
 
@@ -187,14 +186,13 @@ def process_text(data: dict) -> None:
             socketio.emit("stream_stopped")
             return
 
-        output_size = str(output_size)
-
         # debug logs for each document
         log.debug(f"prompt: {prompt}")
         log.debug(f"selected files: {selected_files}")
-        log.debug(f"output size: {output_size}")
-        log.debug(f"Show pages: {show_pages_checkbox}")
         log.debug(f"Change output size: {change_length_checkbox}")
+        log.debug(f"Output size: {output_size}")
+        log.debug(f"Show pages: {show_pages_checkbox}")
+        log.debug(f"Enhancer: {enhancer_checkbox}")
         log.debug(f"selected_model: {choosen_model}")
         log.debug(f"RAG or document: {rag_doc_slider}")
 
@@ -234,8 +232,7 @@ def process_text(data: dict) -> None:
                     collection_name
                 )  # TODO: better solution for database naming
                 collection_name = collection_name[:35]
-                print("-" * 10, "COLLECTION NAME", "-" * 10)
-                print(collection_name)
+                log.debug(f"Collection name: {collection_name}")
 
                 accumulated_text = ""
 
@@ -244,8 +241,8 @@ def process_text(data: dict) -> None:
                     pdf_name_to_show,
                     model,
                     change_length_checkbox,
-                    enhancer_checkbox,
                     output_size,
+                    enhancer_checkbox,
                     slider_value,
                     chroma_client,
                     collection_name,
@@ -332,29 +329,23 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
         global streaming
         streaming = True
 
-        # get data
+        # get sokcet data
         prompt = data.get("input")
         content_id = data.get("contentId")
+        change_length_checkbox = data.get("change_length_checkbox")
         output_size = data.get("output_size")
         show_pages_checkbox = data.get("show_pages_checkbox")
+        enhancer_checkbox = False  # TODO: change when enhancer is ready
+        choosen_model = str(
+            data.get("choosen_model", "gemini-2.0-flash")
+        )  # second arg = default model
+        slider_value = data.get("slider_value")
+        
         # get cached data
         cached_data = cache.get(content_id)
         pdf_name = cached_data.get("title") if cached_data else None
         chat_history = cached_data.get("chat_history", [])
-        print("-" * 10, "CHAT HISTORY", "-" * 10)
-        print(chat_history)
-
-        choosen_model = str(
-            data.get("choosen_model", "gemini-2.0-flash")
-        )  # second arg = default model
-        change_length_checkbox = data.get("change_length_checkbox")
-        # enhancer_checkbox = data.get("enhancer_checkbox")
-        enhancer_checkbox = "True"  # TODO: change when enhancer is ready
-        slider_value = data.get("slider_value")
-
-        show_pages_checkbox = str(show_pages_checkbox)
-        change_length_checkbox = str(change_length_checkbox)
-        enhancer_checkbox = str(enhancer_checkbox)
+        log.info(f"Cached chat history: {chat_history}")
 
         if slider_value is not None:
             slider_value = float(slider_value)
@@ -407,8 +398,6 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
             )
             chat_history = []  # Reset to a valid empty list
 
-        output_size = str(output_size)
-
         # debug logs for each document
         log.debug(f"Prompt: {prompt}")
         log.debug(f"Content id: {content_id}")
@@ -416,9 +405,10 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
         log.debug(
             f"Initial Chat History (loaded/initialized): {len(chat_history)} messages"
         )
+        log.debug(f"Change output size: {change_length_checkbox}")
         log.debug(f"Output size: {output_size}")
         log.debug(f"Show pages: {show_pages_checkbox}")
-        log.debug(f"Change output size: {change_length_checkbox}")
+        log.debug(f"Enhancer: {enhancer_checkbox}")
         log.debug(f"Selected model: {choosen_model}")
 
         # model instance inside the function to allow multiple models
@@ -439,6 +429,7 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
                 collection_name
             )  # TODO: better solution for database naming
             collection_name = collection_name[:35]
+            log.debug(f"Collection name: {collection_name}")
 
             accumulated_text = ""
             for result_chunk in process_chat_query_with_rag(
@@ -447,8 +438,8 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
                 pdf_name_to_show,
                 model,
                 change_length_checkbox,
-                enhancer_checkbox,
                 output_size,
+                enhancer_checkbox,
                 slider_value,
                 chroma_client,
                 collection_name,

@@ -7,13 +7,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const button = document.getElementById('action-button');
     const img = button.querySelector('img');
 
+    inputText.addEventListener('input', checkButtonState);
+
     button.addEventListener('click', startProcessingOnButton);
-    //inputText.addEventListener('keydown', startProcessingOnEnter);
     document.addEventListener('keydown', handleGlobalEnter);
-
-
-
-    
+    checkButtonState();
     
     // socket events
     socket.on('new_container', function(data) {
@@ -30,8 +28,8 @@ document.addEventListener('DOMContentLoaded', function() {
     socket.on('stream_stopped', function(data) {
         img.src = "/static/images/arrow-up-solid.svg";
         button.addEventListener("click", startProcessingOnButton);
-        //inputText.addEventListener('keydown', startProcessingOnEnter);
         document.addEventListener('keydown', handleGlobalEnter);
+        checkButtonState();
     });
 
     // Handler for when processing is complete for a SINGLE container (document)
@@ -45,12 +43,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const iconSpan = chatButton.querySelector('.icon'); // Find the span with the 'icon' class inside the button
 
             if (iconSpan) {
-                // --- Change the icon from loading state to ready state (arrow) ---
-                iconSpan.classList.remove('loading-spinner'); // Remove the loading class
-                iconSpan.classList.add('arrow-ready'); // Add the ready class
+                // Change the icon from loading state to ready state (arrow)
+                iconSpan.classList.remove('loading-spinner');
+                iconSpan.classList.add('arrow-ready');
                 // Set the text content to the arrow character
                 iconSpan.textContent = '➤'; // Make sure the character is there
-                // -----------------------------------------------------------------
             } else {
                  console.warn('Could not find .icon span inside button with ID:', buttonId);
             }
@@ -70,7 +67,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const button = document.getElementById('action-button');
         
         button.removeEventListener("click", startProcessingOnButton)
-        //inputText.removeEventListener('keydown', startProcessingOnEnter);
         document.removeEventListener('keydown', handleGlobalEnter);
 
         let input = document.getElementById('input').value;
@@ -109,22 +105,29 @@ document.addEventListener('DOMContentLoaded', function() {
         if (inputText) {
                inputText.value = '';
             }
-    }
 
-        // start processing: 1) on key; 2) on button
-    // remove arrow-up -> add stop button + functionality
-    //function startProcessingOnEnter() {
-    //    if (event.key === 'Enter' && !event.shiftKey) {
-    //        event.preventDefault(); // prevent going to a new line
-    //    
-    //        startProcessingOnButton();
-    //    }       
-    //}
+        inputText.dispatchEvent(new Event('input'));
+    }
 
     function handleGlobalEnter(event) {
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault(); // prevent going to a new line
             startProcessingOnButton();
+        }
+    }
+
+    function checkButtonState() {
+        const isEmpty = inputText.value.trim() === '';
+        const isArrowUpIcon = img && img.src.includes('arrow-up-solid.svg');
+
+        const shouldDisable = isEmpty && isArrowUpIcon;
+
+        button.disabled = shouldDisable;
+
+        if (shouldDisable) {
+            button.classList.add('disabled');
+        } else {
+            button.classList.remove('disabled');
         }
     }
 });

@@ -48,9 +48,6 @@
                 <button class="sidear-button-round" id="info-button" data-tooltip="How to prompt?">
                     <img class="sidebar-icon" src="{{ url_for('static', filename='images/circle-question-regular.svg') }}">
                 </button>
-                <button type="button" class="sidear-button-round" id="clean-button" data-tooltip="Clear Output">
-                    <img class="icon" src="{{ url_for('static', filename='images/trash-can-solid.svg') }}">
-                </button>
                 <button class="sidear-button-round" id="settings-sidebar-button" data-tooltip="Settings">
                     <img class="sidebar-icon" src="{{ url_for('static', filename='images/gear-solid.svg') }}">
                 </button>
@@ -227,11 +224,9 @@
         var arrowUpIconUrl = "{{ url_for('static', filename='images/arrow-up-solid.svg') }}";
     </script>
     <script src="{{ url_for('static', filename='socketChat.js') }}"></script>
-    <script src="{{ url_for('static', filename='clearOutput.js') }}"></script>
     <script src="{{ url_for('static', filename='advancedOptions.js') }}"></script>
     <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
     <script src="{{ url_for('static', filename='popupTutorial.js') }}"></script>
     <script src="{{ url_for('static', filename='initialChatMessage.js') }}"></script>
-    <script src="{{ url_for('static', filename='noInputHandler.js') }}"></script>
 </body>
 </html>

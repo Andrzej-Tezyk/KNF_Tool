@@ -11,11 +11,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const actionButton = document.getElementById('action-button');
     const img = actionButton ? actionButton.querySelector('img') : null;
 
+    inputText.addEventListener('input', checkButtonState);
+    checkButtonState();
+
     console.log("Elements obtained: outputDiv:", outputDiv, "inputText:", inputText, "actionButton:", actionButton); 
 
     const contentId = outputDiv ? outputDiv.dataset.contentId : null;
     console.log("Content ID:", contentId); 
-
 
     if (!contentId) {
         console.error("contentId not found on #output div. Cannot send chat messages.");
@@ -113,6 +115,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Clear the input field after sending
             if (inputText) {
                inputText.value = '';
+               inputText.dispatchEvent(new Event('input'));
             }
             if (actionButton) {
                 console.log("sendMessage: Removing sendMessage listener, adding stopProcessing listener."); 
@@ -160,6 +163,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (actionButton) {
         console.log("Attaching click listener to actionButton.");
         actionButton.addEventListener('click', sendMessage);
+        checkButtonState();
     } else {
         console.error("Send button (#action-button) not found. Cannot attach click listener."); // Added log
     }
@@ -296,6 +300,21 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("Input and button re-enabled. Icon changed to arrow. Listener swapped back to send. Stream state reset.");
         console.log("--- Finished processing stream_stopped ---");
     });
+
+    function checkButtonState() {
+        const isEmpty = inputText.value.trim() === '';
+        const isArrowUpIcon = img && img.src.includes('arrow-up-solid.svg');
+
+        const shouldDisable = isEmpty && isArrowUpIcon;
+
+        actionButton.disabled = shouldDisable;
+
+        if (shouldDisable) {
+            actionButton.classList.add('disabled');
+        } else {
+            actionButton.classList.remove('disabled');
+        }
+    }
 
     // Add general socket event listeners for debugging
     socket.on('connect', () => console.log('Socket connected.'));

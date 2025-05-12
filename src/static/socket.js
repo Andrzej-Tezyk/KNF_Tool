@@ -1,7 +1,13 @@
 document.addEventListener('DOMContentLoaded', function() {
 
     // variables, listeners
-    window.socket = io.connect('http://127.0.0.1:5000'); // DO ZMIANY
+    const socketUrl = window.location.origin.replace(/^http/, 'ws');
+    window.socket = io(socketUrl, {
+        reconnectionAttempts: 5,  // Retry up to 5 times
+        timeout: 5000,            // 5 seconds timeout
+        transports: ['websocket'] // Enforce WebSocket for better performance
+    });
+    
     const outputDiv = document.getElementById('output');
     const inputText = document.getElementById('input');
     const button = document.getElementById('action-button');

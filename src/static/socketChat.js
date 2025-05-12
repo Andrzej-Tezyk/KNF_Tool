@@ -3,7 +3,13 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log("DOM fully loaded and parsed. socketChat.js running."); 
 
     // variables, listeners
-    const socket = io.connect('http://127.0.0.1:5000');
+    const socketUrl = window.location.origin.replace(/^http/, 'ws');
+    window.socket = io(socketUrl, {
+        reconnectionAttempts: 5,  // Retry up to 5 times
+        timeout: 5000,            // 5 seconds timeout
+        transports: ['websocket'] // Enforce WebSocket for better performance
+    });
+    
     console.log("Socket connection initiated.");
 
     const outputDiv = document.getElementById('output');

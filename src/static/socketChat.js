@@ -19,12 +19,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const contentId = outputDiv ? outputDiv.dataset.contentId : null;
     console.log("Content ID:", contentId); 
 
-    if (!contentId) {
-        console.error("contentId not found on #output div. Cannot send chat messages.");
-        if (inputText) inputText.disabled = true;
-        if (actionButton) actionButton.disabled = true;
-    }
-
     // Content div holder of the current AI message streamed into
     let currentAIMessageContentDiv = null;
     // Holder for RAW text chunks as they arrive
@@ -93,7 +87,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const change_length_checkbox = document.getElementById('change_length') ? document.getElementById('change_length').checked : DEFAULT_OPTIONS.change_length_checkbox;
         const slider_value = document.getElementById('myRange') ? document.getElementById('myRange').value : DEFAULT_OPTIONS.slider_value;
 
-
         if (input && contentId) { 
             console.log("Message and ContentId are valid. Proceeding to display and emit."); 
 
@@ -121,13 +114,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log("sendMessage: Removing sendMessage listener, adding stopProcessing listener."); 
                 actionButton.removeEventListener('click', sendMessage); 
                 actionButton.addEventListener('click', stopProcessing); 
-                actionButton.disabled = false; // Ensure button is enabled to be clickable as stop
                 console.log("sendMessage: Listener swapped to stopProcessing."); 
             }
-            if (inputText) inputText.disabled = true; // Disable input field
             if (img) {
                  console.log("Changing icon to stop.");
                  img.src = stopIconUrl; // Use the variable from documentChat.html
+                 checkButtonState();
             }
            rawAIMessageText = ''; // Ensure this is clear for the new stream
            currentAIMessageContentDiv = null; // Ensure this is null for the new stream
@@ -141,23 +133,17 @@ document.addEventListener('DOMContentLoaded', function() {
                  console.log("Reason: contentId is missing.");
              }
         }
+
+        checkButtonState();
+
     }
         // --- Function to handle stopping processing ---
         // Simmilar function in stopProcessing.js file due to DOM scopes.
         // Need to change implementation in refactor.
         function stopProcessing() {
-            console.log("stopProcessing function called. Emitting 'stop_processing'.");
-            // Emit a stop event to the backend
             socket.emit('stop_processing');
-            console.log("stopProcessing: Emitted 'stop_processing' event.");
-
-        // Optionally, disable the button temporarily to prevent multiple stop requests
-        // It will be re-enabled by the stream_stopped listener.
-        if (actionButton) {
-            actionButton.disabled = true;
-             console.log("stopProcessing: Button temporarily disabled.");
+            checkButtonState();
         }
-    }
 
     // --- Event Listeners (for sending messages) ---
     if (actionButton) {
@@ -178,7 +164,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Check if the button currently triggers sendMessage before calling
                 // This prevents sending a new message while processing is ongoing (button is stop)
                 // A simpler check is if the button is NOT disabled and shows the arrow icon
-                if (actionButton && !actionButton.disabled && img && img.src.includes(arrowUpIconUrl)) {
+                if (actionButton && img && img.src.includes(arrowUpIconUrl)) {
                      console.log("Keypress: Calling sendMessage."); 
                      sendMessage();
                 } else {
@@ -281,17 +267,17 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("Received 'stream_stopped'.");
 
         if (actionButton) {
-            console.log("stream_stopped: Removing stopProcessing listener, adding sendMessage listener."); // Added log
+            console.log("stream_stopped: Removing stopProcessing listener, adding sendMessage listener.");
             actionButton.removeEventListener('click', stopProcessing); // Remove stop listener
             actionButton.addEventListener('click', sendMessage); // Add send listener back
-            actionButton.disabled = false; // Re-enable the button
-            console.log("stream_stopped: Listener swapped back to sendMessage. Button re-enabled."); // Added log
+            console.log("stream_stopped: Listener swapped back to sendMessage. Button re-enabled.");
         }
-        if (inputText) inputText.disabled = false;
         if (img) {
             console.log("Changing icon back to arrow.");
             img.src = arrowUpIconUrl;
         }
+
+        checkButtonState();
 
         // Reset state variables
         rawAIMessageText = ''; // Should be empty if processing finished correctly

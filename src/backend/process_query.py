@@ -13,7 +13,6 @@ from backend.prompt_enhancer import enhance_prompt  # type: ignore[import-not-fo
 log = logging.getLogger("__name__")
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
-RESPONSE_FILE_PATH = PROJECT_ROOT / "response.txt"
 SUBCHUNK_SIZE = 1
 
 load_dotenv()
@@ -86,30 +85,24 @@ def process_pdf(
                 generation_config={"temperature": slider_value},
             )
 
-            # merges the response into one text file
-            response_file = open(RESPONSE_FILE_PATH, "a", encoding="UTF-8")
+            # merges the response into one string
+            response_string = ""
             for response_chunk in response:
-                response_file.write(response_chunk.text)
-            response_file.close()
+                response_string += response_chunk.text
             # splits its text into smaller sub-chunks
-            with open(RESPONSE_FILE_PATH, encoding="UTF-8") as response_file:
-                for line in response_file:
-                    words = line.split(" ")
+            word_list = response_string.split(" ")
+            sub_chunk = ""
+            for word in word_list:
+                sub_chunk = sub_chunk + " " + word if sub_chunk else word
+                if len(sub_chunk.split()) >= SUBCHUNK_SIZE:  # size of subchunk here
+                    yield {"pdf_name": pdf, "content": sub_chunk + " "}
                     sub_chunk = ""
-                    for word in words:
-                        sub_chunk = sub_chunk + " " + word if sub_chunk else word
-                        if (
-                            len(sub_chunk.split()) >= SUBCHUNK_SIZE
-                        ):  # size of subchunk here
-                            yield {"pdf_name": pdf, "content": sub_chunk + " "}
-                            sub_chunk = ""
-                            time.sleep(0.1)
-                    # yield remaining words
-                    if sub_chunk:
-                        yield {"pdf_name": pdf, "content": sub_chunk + " "}
-                        time.sleep(0.1)
+                    time.sleep(0.1)
+            # yield remaining words
+            if sub_chunk:
+                yield {"pdf_name": pdf, "content": sub_chunk + " "}
+                time.sleep(0.1)
             log.debug(f"Response for: {pdf} was saved!\n")
-            Path.unlink(RESPONSE_FILE_PATH)
             time.sleep(1)  # lower API request rate per sec
         except Exception as e:
             log.error(f"There is a problem with {pdf.stem}. \n Error message: {e}\n")
@@ -196,30 +189,24 @@ def process_query_with_rag(
                 generation_config={"temperature": slider_value},
             )
 
-            # merges the response into one text file
-            response_file = open(RESPONSE_FILE_PATH, "a", encoding="UTF-8")
+            # merges the response into one string
+            response_string = ""
             for response_chunk in response:
-                response_file.write(response_chunk.text)
-            response_file.close()
+                response_string += response_chunk.text
             # splits its text into smaller sub-chunks
-            with open(RESPONSE_FILE_PATH, encoding="UTF-8") as response_file:
-                for line in response_file:
-                    words = line.split(" ")
+            word_list = response_string.split(" ")
+            sub_chunk = ""
+            for word in word_list:
+                sub_chunk = sub_chunk + " " + word if sub_chunk else word
+                if len(sub_chunk.split()) >= SUBCHUNK_SIZE:  # size of subchunk here
+                    yield {"pdf_name": pdf, "content": sub_chunk + " "}
                     sub_chunk = ""
-                    for word in words:
-                        sub_chunk = sub_chunk + " " + word if sub_chunk else word
-                        if (
-                            len(sub_chunk.split()) >= SUBCHUNK_SIZE
-                        ):  # size of subchunk here
-                            yield {"pdf_name": pdf, "content": sub_chunk + " "}
-                            sub_chunk = ""
-                            time.sleep(0.1)
-                    # yield remaining words
-                    if sub_chunk:
-                        yield {"pdf_name": pdf, "content": sub_chunk + " "}
-                        time.sleep(0.1)
+                    time.sleep(0.1)
+            # yield remaining words
+            if sub_chunk:
+                yield {"pdf_name": pdf, "content": sub_chunk + " "}
+                time.sleep(0.1)
             log.debug(f"Response for: {pdf} was saved!\n")
-            Path.unlink(RESPONSE_FILE_PATH)
             time.sleep(1)  # lower API request rate per sec
         except Exception as e:
             log.error(f"There is a problem with {pdf}. \n Error message: {e}\n")
@@ -297,30 +284,24 @@ def process_chat_query_with_rag(
                 generation_config={"temperature": slider_value},
             )
 
-            # merges the response into one text file
-            response_file = open(RESPONSE_FILE_PATH, "a", encoding="UTF-8")
+            # merges the response into one string
+            response_string = ""
             for response_chunk in response:
-                response_file.write(response_chunk.text)
-            response_file.close()
+                response_string += response_chunk.text
             # splits its text into smaller sub-chunks
-            with open(RESPONSE_FILE_PATH, encoding="UTF-8") as response_file:
-                for line in response_file:
-                    words = line.split(" ")
+            word_list = response_string.split(" ")
+            sub_chunk = ""
+            for word in word_list:
+                sub_chunk = sub_chunk + " " + word if sub_chunk else word
+                if len(sub_chunk.split()) >= SUBCHUNK_SIZE:  # size of subchunk here
+                    yield {"pdf_name": pdf, "content": sub_chunk + " "}
                     sub_chunk = ""
-                    for word in words:
-                        sub_chunk = sub_chunk + " " + word if sub_chunk else word
-                        if (
-                            len(sub_chunk.split()) >= SUBCHUNK_SIZE
-                        ):  # size of subchunk here
-                            yield {"pdf_name": pdf, "content": sub_chunk + " "}
-                            sub_chunk = ""
-                            time.sleep(0.1)
-                    # yield remaining words
-                    if sub_chunk:
-                        yield {"pdf_name": pdf, "content": sub_chunk + " "}
-                        time.sleep(0.1)
+                    time.sleep(0.1)
+            # yield remaining words
+            if sub_chunk:
+                yield {"pdf_name": pdf, "content": sub_chunk + " "}
+                time.sleep(0.1)
             log.debug(f"Response for: {pdf} was saved!\n")
-            Path.unlink(RESPONSE_FILE_PATH)
             time.sleep(1)  # lower API request rate per sec
         except Exception as e:
             log.error(f"There is a problem with {pdf}. \n Error message: {e}\n")

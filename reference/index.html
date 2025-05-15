@@ -255,15 +255,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#main.replace_polish_chars" class="md-nav__link">
-    <span class="md-ellipsis">
-      replace_polish_chars
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#backend.extract_text" class="md-nav__link">
     <span class="md-ellipsis">
       extract_text
@@ -417,15 +408,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#main.replace_polish_chars" class="md-nav__link">
-    <span class="md-ellipsis">
-      replace_polish_chars
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#backend.extract_text" class="md-nav__link">
     <span class="md-ellipsis">
       extract_text
@@ -557,79 +539,6 @@
 
 
 
-
-<div class="doc doc-object doc-function">
-
-
-<h2 id="main.replace_polish_chars" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">replace_polish_chars</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></code>
-
-</h2>
-
-
-    <div class="doc doc-contents ">
-
-        <p>For documents names only.</p>
-
-
-            <details class="quote">
-              <summary>Source code in <code>src/main.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">replace_polish_chars</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    For documents names only.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">polish_to_ascii</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;ą&quot;</span><span class="p">:</span> <span class="s2">&quot;a&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ć&quot;</span><span class="p">:</span> <span class="s2">&quot;c&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ę&quot;</span><span class="p">:</span> <span class="s2">&quot;e&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ł&quot;</span><span class="p">:</span> <span class="s2">&quot;l&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ń&quot;</span><span class="p">:</span> <span class="s2">&quot;n&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ó&quot;</span><span class="p">:</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ś&quot;</span><span class="p">:</span> <span class="s2">&quot;s&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ż&quot;</span><span class="p">:</span> <span class="s2">&quot;z&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ź&quot;</span><span class="p">:</span> <span class="s2">&quot;z&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Ą&quot;</span><span class="p">:</span> <span class="s2">&quot;A&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Ć&quot;</span><span class="p">:</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Ę&quot;</span><span class="p">:</span> <span class="s2">&quot;E&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Ł&quot;</span><span class="p">:</span> <span class="s2">&quot;L&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Ń&quot;</span><span class="p">:</span> <span class="s2">&quot;N&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Ó&quot;</span><span class="p">:</span> <span class="s2">&quot;O&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Ś&quot;</span><span class="p">:</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Ż&quot;</span><span class="p">:</span> <span class="s2">&quot;Z&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Ź&quot;</span><span class="p">:</span> <span class="s2">&quot;Z&quot;</span><span class="p">,</span>
-    <span class="p">}</span>
-
-    <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">polish_to_ascii</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">text</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
-</div>
 
 
 
@@ -1003,7 +912,8 @@ it logs the error message.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/backend/knf_scraping.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 42</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 41</span>
+<span class="normal"> 42</span>
 <span class="normal"> 43</span>
 <span class="normal"> 44</span>
 <span class="normal"> 45</span>
@@ -1084,10 +994,7 @@ it logs the error message.</p>
 <span class="normal">120</span>
 <span class="normal">121</span>
 <span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">scrape_knf</span><span class="p">(</span><span class="n">scraped_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">num_retries</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">user_agent_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">123</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">scrape_knf</span><span class="p">(</span><span class="n">scraped_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">num_retries</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">user_agent_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Scrapes pdf files from KNF url.</span>
 
 <span class="sd">    This function scrapes pdf files from a KNF url.</span>
@@ -1161,9 +1068,7 @@ it logs the error message.</p>
                     <span class="n">pdf_response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
                     <span class="n">safe_title</span> <span class="o">=</span> <span class="n">windows_safe_filename</span><span class="p">(</span><span class="n">title</span><span class="p">)</span> <span class="k">if</span> <span class="n">title</span> <span class="k">else</span> <span class="s2">&quot;unknown&quot;</span>
                     <span class="c1"># adding datetime from KNF site to file name</span>
-                    <span class="n">pdf_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                        <span class="n">scraped_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">datetime_atr</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">safe_title</span><span class="p">[:</span><span class="o">-</span><span class="mi">11</span><span class="p">]</span><span class="si">}</span><span class="s2">.pdf&quot;</span>
-                    <span class="p">)</span>
+                    <span class="n">pdf_path</span> <span class="o">=</span> <span class="n">scraped_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">datetime_atr</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">safe_title</span><span class="p">[:</span><span class="o">-</span><span class="mi">11</span><span class="p">]</span><span class="si">}</span><span class="s2">.pdf&quot;</span>
                     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pdf_path</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                         <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pdf_response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
                         <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Downloaded: </span><span class="si">{</span><span class="n">pdf_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -1212,7 +1117,8 @@ Raises:
 
             <details class="quote">
               <summary>Source code in <code>src/backend/knf_scraping.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">15</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">14</span>
+<span class="normal">15</span>
 <span class="normal">16</span>
 <span class="normal">17</span>
 <span class="normal">18</span>
@@ -1235,8 +1141,7 @@ Raises:
 <span class="normal">35</span>
 <span class="normal">36</span>
 <span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">windows_safe_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">38</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">windows_safe_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Removes invalid characters from the file name.</span>
 
 <span class="sd">    This function removes any invalid character in Windows file name from the filename.</span>
@@ -1789,7 +1694,11 @@ It contains pdf file name only.</p>
 <span class="normal">211</span>
 <span class="normal">212</span>
 <span class="normal">213</span>
-<span class="normal">214</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">process_query_with_rag</span><span class="p">(</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">process_query_with_rag</span><span class="p">(</span>
     <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">pdf</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">model</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
@@ -1827,6 +1736,10 @@ It contains pdf file name only.</p>
                 <span class="n">passages_with_pages</span> <span class="o">=</span> <span class="n">get_relevant_passage</span><span class="p">(</span>
                     <span class="n">prompt</span><span class="p">,</span> <span class="n">collection</span><span class="p">,</span> <span class="n">n_results</span><span class="o">=</span><span class="n">n_pages</span>
                 <span class="p">)</span>  <span class="c1"># TODO: experiment with different n_results values</span>
+                <span class="c1"># always have an additional page: RAG often pulls table of contents if</span>
+                <span class="c1"># avaliable in the document (which does not have any informational value)</span>
+                <span class="c1"># not all documents contain it and if so, it is placed on different pages</span>
+                <span class="c1"># no robust way to delete it without risk of losing data</span>
 
                 <span class="n">rag_context</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Relevanat context from the document:</span><span class="se">\n</span><span class="s2">&quot;</span>
                 <span class="k">for</span> <span class="n">passage</span><span class="p">,</span> <span class="n">page_number</span> <span class="ow">in</span> <span class="n">passages_with_pages</span><span class="p">:</span>

@@ -48,9 +48,6 @@
                 <button class="sidear-button-round" id="info-button" data-tooltip="How to prompt?">
                     <img class="sidebar-icon" src="{{ url_for('static', filename='images/circle-question-regular.svg') }}">
                 </button>
-                <button type="button" class="sidear-button-round" id="clean-button" data-tooltip="Clear Output">
-                    <img class="icon" src="{{ url_for('static', filename='images/trash-can-solid.svg') }}">
-                </button>
                 <button class="sidear-button-round" id="settings-sidebar-button" data-tooltip="Settings">
                     <img class="sidebar-icon" src="{{ url_for('static', filename='images/gear-solid.svg') }}">
                 </button>
@@ -74,11 +71,9 @@
                                     <div class="option-object-model">
                                         <label for="words-sentence-select" id="select-text">Options:</label>
                                         <select id="words-sentence-select" name="model" class="option-object select-option">
-                                            <option value="very short">very short</option>
                                             <option value="short">short</option>
                                             <option value="medium" selected="selected">medium</option>
                                             <option value="long">long</option>
-                                            <option value="very long">very long</option>
                                         </select>
                                     </div>
                                 </div>
@@ -86,6 +81,12 @@
                                     <div class="option-object checkbox-option-bar">
                                         <input type="checkbox" id="show-pages" name="show-pages">
                                         <label for="show-pages">Show pages</label>
+                                    </div>
+                                </div>
+                                <div class="segment-side-bar">
+                                    <div class="option-object checkbox-option-bar">
+                                        <input type="checkbox" id="prompt-enhancer" name="prompt-enhancer" checked>
+                                        <label for="prompt-enhancer">Prompt enhancer</label>
                                     </div>
                                 </div>
                                 <div class="segment-side-bar">
@@ -142,6 +143,13 @@
                                 <button id="action-button" class="button-round"> <!-- type="submit" class="button-round"> -->
                                     <img class="icon" src="{{ url_for('static', filename='images/arrow-up-solid.svg') }}">
                                 </button>
+                                <label class="switch">
+                                    <input type="checkbox" id="rag-doc-slider-checkbox">
+                                    <span class="rag-doc-slider">
+                                      <span class="slider-text left">PAGES</span>
+                                      <span class="slider-text right">ALL</span>
+                                    </span>
+                                </label> 
                             </div>
                         </div>
                         <div id="tutorialPopup">
@@ -221,7 +229,6 @@
         var arrowUpIconUrl = "{{ url_for('static', filename='images/arrow-up-solid.svg') }}";
     </script>
     <script src="{{ url_for('static', filename='socketChat.js') }}"></script>
-    <script src="{{ url_for('static', filename='clearOutput.js') }}"></script>
     <script src="{{ url_for('static', filename='advancedOptions.js') }}"></script>
     <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
     <script src="{{ url_for('static', filename='popupTutorial.js') }}"></script>

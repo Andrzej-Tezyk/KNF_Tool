@@ -1,4 +1,3 @@
-import os
 import random
 import traceback
 from pathlib import Path
@@ -113,9 +112,7 @@ def scrape_knf(scraped_dir: Path, num_retries: int, user_agent_list: list) -> No
                     pdf_response = requests.get(url, headers=headers)
                     safe_title = windows_safe_filename(title) if title else "unknown"
                     # adding datetime from KNF site to file name
-                    pdf_path = os.path.join(
-                        scraped_dir, f"{datetime_atr}_{safe_title[:-11]}.pdf"
-                    )
+                    pdf_path = scraped_dir / f"{datetime_atr}_{safe_title[:-11]}.pdf"
                     with open(pdf_path, "wb") as f:
                         f.write(pdf_response.content)
                         log.debug(f"Downloaded: {pdf_path}")

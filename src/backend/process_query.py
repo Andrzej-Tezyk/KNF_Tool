@@ -34,13 +34,16 @@ def process_pdf(
         {'pdf_name': 'report', 'content': 'This document summarizes ...'}
 
     Args:
-        prompt: A string containing the user’s prompt for processing the document.
-        pdf: A Path object representing the PDF file to be processed.
-        model: A generative AI model used to process the document.
-        output_size: A string defining the approximate word limit for the response.
+        prompt: User's prompt.
+        pdf_path: Path object for the PDF file.
+        model: The generative AI model.
+        change_length_checkbox: If True, output_size instruction is added.
+        output_size: String defining desired response length (e.g., "short", "approx 100 words").
+        enhancer_checkbox: If True, attempt to enhance the prompt.
+        temperature_slider: Generation temperature.
 
     Returns:
-        A dictionary containing:
+        A StremOutput dictionaries containing:
         - "pdf_name": The name of the processed PDF (without extension).
         - "content": The generated response text.
         - "error": An error message if processing fails.
@@ -97,7 +100,7 @@ def process_pdf(
 def process_query_with_rag(
     prompt: str,
     pdf_name: str,
-    model: Any,
+    model: genai.GenerativeModel,
     change_length_checkbox: bool,
     output_size: str,
     enhancer_checkbox: bool,
@@ -107,7 +110,25 @@ def process_query_with_rag(
     rag_doc_slider: str,
 ) -> Generator:
     """
-    ToDo: pdf variable is str type, not Path like in process_pdf.
+    Processes a query using RAG, yielding the response.
+
+    Args:
+        prompt: User's query.
+        pdf_name: Identifier for the document in RAG. (Reverted name)
+        model: The generative AI model.
+        change_length_checkbox: If True, output_size instruction is added.
+        output_size: String defining desired response length.
+        enhancer_checkbox: If True, attempt to enhance the prompt.
+        slider_value: Generation temperature. (Reverted name)
+        chroma_client: ChromaDB client.
+        collection_name: ChromaDB collection name.
+        rag_doc_slider: String ("False" or other) to control RAG doc retrieval. (Reverted name)
+
+    Yields:
+        StreamOutput dictionaries
+
+    ToDo: 
+        Pdf variable is str type, not Path like in process_pdf.
     It contains pdf file name only.
     """
     if not prompt:

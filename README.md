@@ -6,6 +6,10 @@
 
 
 # Git
+- new feature/bug fix = new branch (use correct names!)
+- commit often
+
+### Merging
 - always use squash (one commit instead of entire history)
 - rebase or merge does not matter
 - however, when many commits behind main, would recommend to use it and solve conflicts before merging

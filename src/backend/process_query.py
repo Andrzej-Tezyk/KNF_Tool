@@ -203,6 +203,7 @@ def process_chat_query_with_rag(
     slider_value: float,
     chroma_client: Any,
     collection_name: str,
+    rag_doc_slider: str,
 ) -> Generator:
     if not prompt:
         yield {"error": "No prompt provided"}
@@ -216,8 +217,15 @@ def process_chat_query_with_rag(
                     name=collection_name, embedding_function=get_gemini_ef()
                 )
 
+                if rag_doc_slider == "False":
+                    n_pages = 5
+                else:
+                    n_pages = len(collection.get()["ids"])
+
+                log.debug(f"Number of pages: {n_pages}")
+
                 passages_with_pages = get_relevant_passage(
-                    prompt, collection, n_results=5
+                    prompt, collection, n_results=n_pages
                 )  # TODO: experiment with different n_results values
 
                 rag_context = "\n\nRelevanat context from the document:\n"

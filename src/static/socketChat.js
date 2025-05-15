@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
         timeout: 5000,            // 5 seconds timeout
         transports: ['websocket'] // Enforce WebSocket for better performance
     });
-    
+
     console.log("Socket connection initiated.");
 
     const outputDiv = document.getElementById('output');
@@ -79,19 +79,22 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("Message obtained from input:", input); 
 
         const DEFAULT_OPTIONS = {
-            output_size: "medium",
             show_pages_checkbox: false,
             choosen_model: 'gemini-2.0-flash',
             change_length_checkbox: false,
-            slider_value: 0.8
+            slider_value: 0.8,
+            ragDocSlider: false,
+            prompt_enhancer: true
         };
 
         // Get advanced options data
-        const output_size = document.getElementById('words-sentence-select') ? document.getElementById('words-sentence-select').value : DEFAULT_OPTIONS.output_size;
+        const output_size = document.getElementById('words-sentence-select').value;
         const show_pages_checkbox = document.getElementById('show-pages') ? document.getElementById('show-pages').checked : DEFAULT_OPTIONS.show_pages_checkbox;
         const choosen_model = document.getElementById('model-select') ? document.getElementById('model-select').value : DEFAULT_OPTIONS.choosen_model;
         const change_length_checkbox = document.getElementById('change_length') ? document.getElementById('change_length').checked : DEFAULT_OPTIONS.change_length_checkbox;
         const slider_value = document.getElementById('myRange') ? document.getElementById('myRange').value : DEFAULT_OPTIONS.slider_value;
+        const ragDocSlider = document.getElementById('rag-doc-slider-checkbox') ? document.getElementById('rag-doc-slider-checkbox').checked : DEFAULT_OPTIONS.ragDocSlider;
+        const prompt_enhancer = document.getElementById('prompt-enhancer') ? document.getElementById('prompt-enhancer').checked : DEFAULT_OPTIONS.prompt_enhancer;
 
         if (input && contentId) { 
             console.log("Message and ContentId are valid. Proceeding to display and emit."); 
@@ -107,7 +110,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 show_pages_checkbox: show_pages_checkbox, 
                 choosen_model: choosen_model,
                 change_length_checkbox: change_length_checkbox,
-                slider_value: slider_value
+                slider_value: slider_value,
+                ragDocSlider: ragDocSlider,
+                prompt_enhancer: prompt_enhancer
             });
             console.log("Emitted 'send_chat_message'."); 
 

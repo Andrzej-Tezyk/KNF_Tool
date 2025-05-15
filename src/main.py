@@ -139,8 +139,7 @@ def process_text(data: dict) -> None:
             data.get("choosen_model", "gemini-2.0-flash")
         )  # second arg = default model
         change_length_checkbox = data.get("change_length_checkbox")
-        # enhancer_checkbox = data.get("enhancer_checkbox")
-        enhancer_checkbox = "True"
+        enhancer_checkbox = str(data.get("prompt_enhancer"))
         slider_value = data.get("slider_value")
         rag_doc_slider = str(data.get("ragDocSlider"))
 
@@ -172,6 +171,7 @@ def process_text(data: dict) -> None:
         log.debug(f"Show pages: {show_pages_checkbox}")
         log.debug(f"Change output size: {change_length_checkbox}")
         log.debug(f"selected_model: {choosen_model}")
+        log.debug(f"Prompt enhancer: {enhancer_checkbox}")
         log.debug(f"RAG or document: {rag_doc_slider}")
 
         # files
@@ -312,25 +312,21 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
         prompt = data.get("input")
         content_id = data.get("contentId")
         output_size = data.get("output_size")
-        show_pages_checkbox = data.get("show_pages_checkbox")
+        show_pages_checkbox = str(data.get("show_pages_checkbox"))
         # get cached data
         cached_data = cache.get(content_id)
         pdf_name = cached_data.get("title") if cached_data else None
         chat_history = cached_data.get("chat_history", [])
+        rag_doc_slider = str(data.get("ragDocSlider"))
         print("-" * 10, "CHAT HISTORY", "-" * 10)
         print(chat_history)
 
         choosen_model = str(
             data.get("choosen_model", "gemini-2.0-flash")
         )  # second arg = default model
-        change_length_checkbox = data.get("change_length_checkbox")
-        # enhancer_checkbox = data.get("enhancer_checkbox")
-        enhancer_checkbox = "True"  # TODO: change when enhancer is ready
+        change_length_checkbox = str(data.get("change_length_checkbox"))
+        enhancer_checkbox = str(data.get("prompt_enhancer"))
         slider_value = data.get("slider_value")
-
-        show_pages_checkbox = str(show_pages_checkbox)
-        change_length_checkbox = str(change_length_checkbox)
-        enhancer_checkbox = str(enhancer_checkbox)
 
         if slider_value is not None:
             slider_value = float(slider_value)
@@ -396,6 +392,8 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
         log.debug(f"Show pages: {show_pages_checkbox}")
         log.debug(f"Change output size: {change_length_checkbox}")
         log.debug(f"Selected model: {choosen_model}")
+        log.debug(f"RAG or document: {rag_doc_slider}")
+        log.debug(f"Prompt enhancer: {enhancer_checkbox}")
 
         # model instance inside the function to allow multiple models
         genai.configure(api_key=GEMINI_API_KEY)
@@ -428,6 +426,7 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
                 slider_value,
                 chroma_client,
                 collection_name,
+                rag_doc_slider
             ):
                 if not streaming:
                     log.info("Stopping chat processing due to streaming flag.")

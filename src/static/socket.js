@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
         timeout: 5000,            // 5 seconds timeout
         transports: ['websocket'] // Enforce WebSocket for better performance
     });
-    
+
     const outputDiv = document.getElementById('output');
     const inputText = document.getElementById('input');
     const button = document.getElementById('action-button');
@@ -75,19 +75,30 @@ document.addEventListener('DOMContentLoaded', function() {
         button.removeEventListener("click", startProcessingOnButton)
         document.removeEventListener('keydown', handleGlobalEnter);
 
-        let input = document.getElementById('input').value;
-        let output_size = document.getElementById('words-sentence-select').value;
-        let selectedFiles = [];
+        const DEFAULT_OPTIONS = {
+            show_pages_checkbox: false,
+            choosen_model: 'gemini-2.0-flash',
+            change_length_checkbox: false,
+            slider_value: 0.8,
+            ragDocSlider: false,
+            prompt_enhancer: true
+        };
+
+        const input = document.getElementById('input').value;
+        const output_size = document.getElementById('words-sentence-select').value;
+        const show_pages_checkbox = document.getElementById('show-pages') ? document.getElementById('show-pages').checked : DEFAULT_OPTIONS.show_pages_checkbox;
+        const choosen_model = document.getElementById('model-select') ? document.getElementById('model-select').value : DEFAULT_OPTIONS.choosen_model;
+        const change_length_checkbox = document.getElementById('change_length') ? document.getElementById('change_length').checked : DEFAULT_OPTIONS.change_length_checkbox;
+        const slider_value = document.getElementById('myRange') ? document.getElementById('myRange').value : DEFAULT_OPTIONS.slider_value;
+        const ragDocSlider = document.getElementById('rag-doc-slider-checkbox') ? document.getElementById('rag-doc-slider-checkbox').checked : DEFAULT_OPTIONS.ragDocSlider;
+        const prompt_enhancer = document.getElementById('prompt-enhancer') ? document.getElementById('prompt-enhancer').checked : DEFAULT_OPTIONS.prompt_enhancer;
+
+        const selectedFiles = [];
         document.querySelectorAll('.file-checkbox:checked').forEach((checkbox) => {
             selectedFiles.push(checkbox.value);
         });
-        let show_pages_checkbox = document.getElementById('show-pages').checked;
-        let choosen_model = document.getElementById('model-select').value;
-        let change_length_checkbox = document.getElementById('change_length').checked;
-        let slider_value = document.getElementById('myRange').value;
-        let ragDocSlider = document.getElementById('rag-doc-slider-checkbox').checked;
         
-        // rise a popup if no file selected
+        // rise a popup if no file selected; do not put return here!
         if (!selectedFiles.length) {
             alert("Please select at least one file.");
         }
@@ -100,7 +111,8 @@ document.addEventListener('DOMContentLoaded', function() {
             choosen_model: choosen_model,
             change_length_checkbox: change_length_checkbox,
             slider_value: slider_value,
-            ragDocSlider: ragDocSlider });
+            ragDocSlider: ragDocSlider,
+            prompt_enhancer: prompt_enhancer });
         
         const img = button.querySelector('img');
         img.src = "/static/images/stop-solid.svg"; // changes icon to stop

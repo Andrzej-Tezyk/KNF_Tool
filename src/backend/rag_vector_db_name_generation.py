@@ -3,6 +3,7 @@
 # TODO: come up with something better
 # will most likely require major code changes
 
+
 def replace_polish_chars(text: str) -> str:
     """
     For documents names only.

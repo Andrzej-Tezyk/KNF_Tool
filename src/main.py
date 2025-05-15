@@ -93,9 +93,6 @@ if not SCRAPED_FILES_DIR.exists() or next(SCRAPED_FILES_DIR.iterdir(), None) is 
     scrape_knf(SCRAPED_FILES_DIR, NUM_RETRIES, USER_AGENT_LIST)
 
 
-
-
-
 # flask
 app = Flask(__name__, template_folder="templates", static_folder="static")
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -229,9 +226,7 @@ def process_text(data: dict) -> None:
                 ):
                     if not streaming:
                         break
-                    if (
-                        "error" in result_chunk
-                    ):
+                    if "error" in result_chunk:
                         log.error("Error received in chunk")
                         error_message = {"message": "error in chunk response"}
                         socketio.emit("error", error_message)
@@ -426,7 +421,7 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
                 slider_value,
                 chroma_client,
                 collection_name,
-                rag_doc_slider
+                rag_doc_slider,
             ):
                 if not streaming:
                     log.info("Stopping chat processing due to streaming flag.")

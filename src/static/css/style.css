@@ -153,7 +153,7 @@ body {
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.5rem;
     margin-top: 10px;
     padding: 0.5rem;
     overflow: auto;
@@ -282,7 +282,7 @@ textarea:focus {
     /* border: 1px solid var(--border-color); */
     border-radius: 20px;
     margin-bottom: 1.1rem;
-    box-shadow: 0px 1px 3px 0px rgba(128, 127, 127, 0.2);
+    /* box-shadow: 0px 1px 3px 0px rgba(128, 127, 127, 0.2); */
     padding: 0.5rem;
     margin: 0.5rem;
 }
@@ -295,7 +295,7 @@ textarea:focus {
     color: var(--primary-color);
     padding: 0.5rem;
     margin: 0;
-    font-size: 1rem;
+    font-size: 1.5rem;
     font-weight: bold;
 }
 
@@ -386,7 +386,6 @@ textarea:focus {
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    gap: 1.4rem;
     margin-top: 10px;
     padding: 0.4rem;
 }
@@ -398,10 +397,24 @@ textarea:focus {
     flex-direction: row;
 }
 
-.option-object-model {
+.option-object-lengths {
     display: flex;
     align-items: center;
     flex-direction: row;
+}
+
+.option-object-temperature {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-direction: column;
+}
+
+.option-object-model{
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-direction: column;
 }
 
 .checkbox-option-bar input[type="checkbox"] {
@@ -497,6 +510,13 @@ textarea:focus {
     width: 210px;
     text-align: center;
     font-weight: bold;
+}
+
+.temperature-info{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
 }
 
 .form-popup {
@@ -903,3 +923,111 @@ textarea:focus {
     transform: scale(1.03);
 }
 
+/* no switch button in original css+html: used checkbox and custom css to create one*/
+.switch {
+    position: relative;
+    display: flex;
+    width: 120px;
+    height: 34px;
+    align-items: center;
+    justify-content: center;
+}
+  
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+  
+.rag-doc-slider {
+    position: relative;
+    cursor: pointer;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 5px;
+    color: var(--icon-color);
+    font-weight: bold;
+    gap: 1rem;
+}
+  
+.rag-doc-slider:before {
+    position: absolute;
+    content: "";
+    height: 30px;
+    width: 55px;
+    left: 0px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 34px;
+    opacity: 0.5;
+}
+  
+input:checked + .rag-doc-slider {
+    background-color: #ccc;
+    color: var(--primary-color);
+}
+  
+input:checked + .rag-doc-slider .right {
+    color: var(--primary-color);
+}
+  
+input:not(:checked) + .rag-doc-slider .left {
+    color: var(--icon-color);;
+}
+  
+input:checked + .rag-doc-slider:before {
+    transform: translateX(66px);
+}  
+/* switch styles finish */
+
+
+/* Icon Base Styling (from previous step) */
+.output-button .icon {
+    display: inline-block;
+    width: 1em; 
+    height: 1em; 
+    vertical-align: middle;
+    text-align: center;
+    line-height: 1em;
+    padding: 0; 
+    margin: 0; 
+}
+
+/* Style for the loading spinner icon */
+.output-button .icon.loading-spinner {
+    border: 4px solid #f3f3f3; 
+    border-top: 4px solid #303368; 
+    border-radius: 50%; 
+    animation: spin 1s linear infinite; 
+
+    text-indent: -9999px;
+    overflow: hidden;
+    content: ''; 
+}
+
+/* Style for the arrow icon when processing is complete */
+.output-button .icon.arrow-ready {
+    text-indent: 0;
+    overflow: visible; 
+    animation: none; 
+    border: none; 
+    content: '➤'; 
+    font-size: 1em; 
+    color: #303368; 
+}
+
+/* Optional: Keyframes for the spin animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Optional: Style the button when it's disabled for better UX */
+.output-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}

@@ -1,5 +1,5 @@
 // advanced options elements
-var checkBox = document.getElementById("change_lebgth");
+var checkBox = document.getElementById("change_length");
 var select = document.getElementById("words-sentence-select");
 var text = document.getElementById("select-text");
 

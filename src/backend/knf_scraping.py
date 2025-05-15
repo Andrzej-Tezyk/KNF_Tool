@@ -39,7 +39,7 @@ def windows_safe_filename(filename: str) -> str:
     return filename
 
 
-def scrape_knf(num_retries: int, user_agent_list: list) -> None:
+def scrape_knf(scraped_dir: Path, num_retries: int, user_agent_list: list) -> None:
     """Scrapes pdf files from KNF url.
 
     This function scrapes pdf files from a KNF url.
@@ -64,15 +64,13 @@ def scrape_knf(num_retries: int, user_agent_list: list) -> None:
         in the response dictionary.
     """
 
-    scraped_files_dir = Path("scraped_files")
-
     knf_base_url = "https://www.knf.gov.pl"
     knf_recommendations_url = (
         f"{knf_base_url}/dla_rynku/regulacje_i_praktyka/rekomendacje_i"
         + "_wytyczne/rekomendacje_dla_bankow?articleId=8522&p_id=18"
     )
 
-    scraped_files_dir.mkdir(parents=True, exist_ok=True)
+    scraped_dir.mkdir(parents=True, exist_ok=True)
 
     response = None
     for _ in range(num_retries):
@@ -116,7 +114,7 @@ def scrape_knf(num_retries: int, user_agent_list: list) -> None:
                     safe_title = windows_safe_filename(title) if title else "unknown"
                     # adding datetime from KNF site to file name
                     pdf_path = os.path.join(
-                        scraped_files_dir, f"{datetime_atr}_{safe_title[:-11]}.pdf"
+                        scraped_dir, f"{datetime_atr}_{safe_title[:-11]}.pdf"
                     )
                     with open(pdf_path, "wb") as f:
                         f.write(pdf_response.content)

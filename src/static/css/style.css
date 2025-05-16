@@ -1047,3 +1047,39 @@ input:checked + .rag-doc-slider:before {
     cursor: not-allowed;
     opacity: 0.5;
 }
+
+/* settings panel styles */
+#settings{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    border-radius: 20px;
+    background-color: var(--input-bg-color);
+    align-items: center;
+    width: 50rem;
+    height: 30rem;
+    box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
+    display: none;
+    transition: opacity 0.3s ease-out;
+}
+
+.header-settings-flex-contanier {
+    width: 50rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0.1px 2.5px 2.5px rgba(128, 127, 127, 0.2);
+    border: none;
+    margin: 0.1rem 0.5rem 0.5rem 0.5rem;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+
+.header-settings-flex-contanier h3{
+    margin: 0 0 0 0.5rem;
+    padding: 0.5rem;
+}
+/* end of settings panel styles */

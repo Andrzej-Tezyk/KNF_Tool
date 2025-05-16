@@ -1019,7 +1019,7 @@ input:checked + .rag-doc-slider:before {
 /* Style for the loading spinner icon */
 .output-button .icon.loading-spinner {
     border: 4px solid #f3f3f3; 
-    border-top: 4px solid #303368; 
+    border-top: 4px solid var(--primary-color);
     border-radius: 50%; 
     animation: spin 1s linear infinite; 
     text-indent: -9999px;
@@ -1035,7 +1035,7 @@ input:checked + .rag-doc-slider:before {
     border: none; 
     content: '➤'; 
     font-size: 1em; 
-    color: #303368; 
+    color: var(--primary-color); 
 }
 
 @keyframes spin {

@@ -94,7 +94,24 @@ if not SCRAPED_FILES_DIR.exists() or next(SCRAPED_FILES_DIR.iterdir(), None) is 
 
 def replace_polish_chars(text: str) -> str:
     """
-    For documents names only.
+    Replaces polish characters with latin characters.
+
+    This function replaces every diacritical sign of the Polish alphabet in a given string
+    with their corresponding character from the Latin alphabet using a mapping dictionary.
+    This function is used for document names only.
+
+    Examples:
+        >>> polish_to_ascii("Zażółć gęślą jaźń.")
+        Zazolc gesla jazn.
+
+    Args:
+        text: A string of characters
+
+    Returns:
+        A string of characters without Polish diacritital signs.
+
+    Raises:
+        None
     """
     polish_to_ascii = {
         "ą": "a",
@@ -138,6 +155,25 @@ output_index: int = -1
 
 @app.route("/")
 def index() -> str:
+    """Serves the main page of the application with a list of available PDF files.
+
+    This route handler is mapped to the root URL ("/"). When accessed, it logs
+    that the application is running, scans the designated directory for PDF files,
+    and renders the homepage template with those files listed.
+
+    This enables users to see which documents are available for analysis.
+
+    Examples:
+        None
+
+    Returns:
+        A rendered HTML page (index.html) with the following context:
+        - pdf_files: A list of available PDF filenames in the scraped directory.
+
+    Raises:
+        None directly
+    """
+
     log.info("App is up")
     pdf_dir = Path(SCRAPED_FILES_DIR)
     pdf_files = [pdf.name for pdf in pdf_dir.glob("*.pdf")] if pdf_dir.exists() else []
@@ -146,6 +182,54 @@ def index() -> str:
 
 @socketio.on("start_processing")
 def process_text(data: dict) -> None:
+    """Handles the initial processing of user input and selected PDFs using a generative model.
+
+    This function is triggered via a Socket.IO event when a user initiates processing.
+    It validates the input prompt and selected PDF files, sets up the selected
+    Gemini model, and processes each PDF using retrieval-augmented generation (RAG).
+    The response is streamed back to the client in real time, rendered in markdown,
+    and cached for future access.
+
+    Each processed PDF results in the creation of a content container, which is
+    dynamically sent to the frontend. If errors occur during processing, they are
+    logged and sent to the client as error events.
+
+    Examples:
+        # Triggered internally by Socket.IO when the user starts processing:
+        >>> process_text({
+                "input": "Summarize the risks mentioned",
+                "pdfFiles": ["KNF_2022_01.pdf"],
+                "output_size": "short",
+                "show_pages_checkbox": True,
+                "choosen_model": "gemini-2.0-flash",
+                ...
+            })
+
+    Args:
+        data: A dictionary containing user input and options. Expected keys include:
+            - "input": User’s prompt (str).
+            - "pdfFiles": List of PDF filenames to process (List[str]).
+            - "output_size": Approximate length of the response (str).
+            - "show_pages_checkbox": Whether to include page numbers (bool or str).
+            - "choosen_model": Selected Gemini model (str).
+            - "change_length_checkbox": Whether output length can vary (bool or str).
+            - "slider_value": Float controlling verbosity or detail (str or float).
+            - "ragDocSlider": Toggle between RAG and document mode (str).
+            - Other UI flags or settings.
+
+    Returns:
+        None. Results are streamed to the client via Socket.IO events:
+            - "new_container": Sends a new HTML container for each PDF.
+            - "update_content": Streams chunks of the model's response.
+            - "processing_complete_for_container": Signals PDF completion.
+            - "error": Sends error messages if validation or processing fails.
+            - "stream_stopped": Indicates the end of the streaming session.
+
+    Raises:
+        Emits error events instead of raising exceptions directly.
+        Internal exceptions are caught, logged, and passed to the client as messages.
+    """
+
     log.info("Started input processing")
 
     try:
@@ -326,6 +410,46 @@ def process_text(data: dict) -> None:
 # Linter C901 error ignored -> func will be refactored during complex code refactor
 @socketio.on("send_chat_message")
 def handle_chat_message(data: dict) -> None:  # noqa: C901
+    """Handles incoming chat messages and generates a streamed response using cached document context.
+
+    This function is triggered via a Socket.IO event when the user sends a new
+    chat message related to a previously processed PDF. It loads the relevant
+    cached document data and chat history, configures the Gemini model,
+    and streams the generated response back to the frontend in real time.
+
+    The function also updates the chat history in the cache after responding,
+    enabling continued conversation with memory of previous exchanges.
+
+    Examples:
+        >>> handle_chat_message({
+                "input": "What are the risks mentioned in the document?",
+                "contentId": "content-pdf0_3",
+                "output_size": "medium",
+                "slider_value": 0.5,
+                ...
+            })
+
+    Args:
+        data: A dictionary containing chat message data and UI parameters. Expected keys include:
+            - "input": User's chat message (prompt) (str).
+            - "contentId": The ID of the document container (str).
+            - "output_size": Desired response length (str).
+            - "choosen_model": Selected Gemini model (str).
+            - "slider_value": Level of detail or verbosity (float or str).
+            - "show_pages_checkbox": Whether to include page numbers (bool or str).
+            - "change_length_checkbox": Whether the output size can be adjusted (bool or str).
+
+    Returns:
+        None. Results are emitted via Socket.IO:
+            - "receive_chat_message": Streams chat responses to the client.
+            - "error": Emits errors if input is invalid or processing fails.
+            - "stream_stopped": Indicates the end of streaming or failure.
+
+    Raises:
+        Does not raise exceptions directly. All exceptions are caught, logged,
+        and emitted as error messages to the client.
+    """
+
     log.info("Received user input. Start processing.")
 
     try:
@@ -507,6 +631,21 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
 
 @socketio.on("stop_processing")
 def handle_stop() -> None:
+    """Stops the current processing stream when triggered by the client.
+
+    This function sets the global streaming flag to False, effectively stopping
+    any ongoing data generation or response processing.
+
+    Examples:
+        None
+
+    Returns:
+        None
+
+    Raises:
+        None
+    """
+
     global streaming
     streaming = False
     log.info("Processing Stopped by User")
@@ -514,6 +653,24 @@ def handle_stop() -> None:
 
 @app.route("/documentChat")
 def langchain_chat() -> Any:
+    """Serves the document chat page using cached content based on the provided content ID.
+
+    Retrieves cached data (title and content) for a given contentId passed as a query parameter
+    and renders a chat interface for continued conversation with the document.
+
+    Examples:
+        None
+
+    Returns:
+        Rendered HTML page (documentChat.html) with:
+        - content_id: The ID of the requested content.
+        - container_title_chat: The title of the document.
+        - content_chat: The previously generated content or an error message.
+
+    Raises:
+        None
+    """
+
     content_id = request.args.get("contentId")  # Get ID from URL query ?contentId=...
     log.info(f"Langchain chat request for contentId: {content_id}")
 

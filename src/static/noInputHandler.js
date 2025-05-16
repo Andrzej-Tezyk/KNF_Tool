@@ -1,20 +1,20 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const input = document.getElementById('input');
-    const button = document.getElementById('action-button');
+document.addEventListener('DOMContentLoaded', function() { 
+  //inputText.addEventListener('input', checkButtonState);
+  function checkButtonState() {
+      const button = document.getElementById('action-button');
+      const inputText = document.getElementById('input');
+      const img = button.querySelector('img');
+      const isEmpty = inputText.value.trim() === '';
+      const isArrowUpIcon = img && img.src.includes('arrow-up-solid.svg');
 
-    checkButtonState();
+      const shouldDisable = isEmpty && isArrowUpIcon;
 
-    input.addEventListener('input', checkButtonState);
+      button.disabled = shouldDisable;
 
-    function checkButtonState() {
-        const isEmpty = input.value.trim() === '';
-
-        button.disabled = isEmpty;
-
-        if (isEmpty) {
-            button.classList.add('disabled');
-          } else {
-            button.classList.remove('disabled');
-          }
-    }
+      if (shouldDisable) {
+          button.classList.add('disabled');
+      } else {
+          button.classList.remove('disabled');
+      }
+  }
 });

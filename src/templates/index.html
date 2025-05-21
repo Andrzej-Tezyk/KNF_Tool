@@ -60,7 +60,7 @@
         <div class="form-flex-container">
             <div id="input-form">
                 <div class="inside-form-container">
-                    <!-- input section -->
+                    <!-- advanced options panel -->
                     <div class="input-section" id="input-section">
                         <div class="section-header-wrapper">
                             <h3 class="side-tab-h3">Advanced Options</h3>
@@ -104,25 +104,18 @@
                                 </div>
                                 <div class="segment-side-bar">
                                     <div class="option-object-temperature">
-                                        <label for="model-select"><strong>Change temperature:</strong></label>
-                                        <input type="range" min="0" max="1" step="0.05" value="0.8" class="temperature-slider" id="myRange">
-                                    </div>
-                                    <div class="option-object">
-                                        <label for="model-select">Value of temperature: <strong><span id="demo"></span></strong></label>
-                                    </div>
-                                </div>
-                                <div class="temperature-info">
-                                    <button class="open-button" onclick="toggleTempInfo()">About temperature</button>
-                                    <div class="form-popup" id="tempInfo">
-                                        <form class="form-container">
-                                            <label>In AI models like LLMs, temperature controls the randomness
-                                                of the model's responses. A value close to 1 results in more varied and creative outputs,
-                                                while a lower value (closer to 0) makes responses more predictable and focused.</label>
-
-                                        </form>
+                                        <label for="myRange"><strong>Change temperature:</strong> <span id="demo"></span></label>
+                                        <div class="temperature-container">
+                                            <input type="range" min="0" max="1" step="0.05" value="0.8" class="temperature-slider" id="myRange">
+                                            <div class="temperature-info">
+                                            <button class="open-button" id="open-button" temperature-tutorial="In AI models like LLMs, temperature controls the randomness
+                                                            of the model's responses. A value close to 1 results in more varied and creative outputs,
+                                                            while a lower value (closer to 0) makes responses more predictable and focused.">
+                                            ?</button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-
                             </div>
                         </div>
                     </div>

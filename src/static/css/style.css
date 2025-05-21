@@ -150,7 +150,7 @@ body {
     font-weight: bold;
     display: flex;
     justify-content: center;
-    /*border-top-right-radius: 10px;*/
+    border-radius: 30px;
     width: 100%;
     box-sizing: border-box;
     border: none;
@@ -182,6 +182,7 @@ body {
     margin-top: 5px;
     padding: 0.5rem 0;
     border-bottom: 1px solid rgba(209, 213, 219, 0.3);
+    font-size: 1.1rem;
 }
 
 .segment-side-bar:last-child {
@@ -258,7 +259,7 @@ body {
 
 .checkbox-option-bar input[type="checkbox"]:checked::after {
     content: '\2713';
-    font-size: 14px;
+    /*font-size: 14px;*/
     color: white;
     position: absolute;
     font-weight: bold;
@@ -295,6 +296,11 @@ body {
 
 .temperature-container{
     display: flex;
+    width: 100%;
+}
+
+.slider-label{
+    width: 100%;
 }
 
 .temperature-slider {
@@ -378,7 +384,7 @@ body {
     padding: 0.5rem;
     border-radius: 10px;
     width: 220px;
-    height: 150px;
+    height: 170px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;

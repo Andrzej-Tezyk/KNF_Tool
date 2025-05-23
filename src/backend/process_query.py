@@ -14,7 +14,6 @@ from backend.prompt_enhancer import enhance_prompt  # type: ignore[import-not-fo
 log = logging.getLogger("__name__")
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
-SUBCHUNK_SIZE = 1
 
 load_dotenv()
 
@@ -86,22 +85,10 @@ def process_pdf(
                 generation_config={"temperature": slider_value},
             )
 
-            # merges the response into one string
-            response_string = ""
             for response_chunk in response:
-                response_string += response_chunk.text
-            # splits its text into smaller sub-chunks
-            word_list = response_string.split(" ")
-            sub_chunk = ""
-            for word in word_list:
-                sub_chunk = sub_chunk + " " + word if sub_chunk else word
-                if len(sub_chunk.split()) >= SUBCHUNK_SIZE:  # size of subchunk here
-                    yield {"pdf_name": pdf, "content": sub_chunk + " "}
-                    sub_chunk = ""
-                    time.sleep(0.1)
-            # yield remaining words
-            if sub_chunk:
-                yield {"pdf_name": pdf, "content": sub_chunk + " "}
+                # replace -> sometimes double space between words occure; most likely reason: pdf formating
+                response_chunk_text = response_chunk.text.replace("  ", " ")
+                yield {"pdf_name": pdf, "content": response_chunk_text}
                 time.sleep(0.1)
             log.debug(f"Response for: {pdf} was saved!\n")
             time.sleep(1)  # lower API request rate per sec
@@ -194,22 +181,10 @@ def process_query_with_rag(
                 generation_config={"temperature": slider_value},
             )
 
-            # merges the response into one string
-            response_string = ""
             for response_chunk in response:
-                response_string += response_chunk.text
-            # splits its text into smaller sub-chunks
-            word_list = response_string.split(" ")
-            sub_chunk = ""
-            for word in word_list:
-                sub_chunk = sub_chunk + " " + word if sub_chunk else word
-                if len(sub_chunk.split()) >= SUBCHUNK_SIZE:  # size of subchunk here
-                    yield {"pdf_name": pdf, "content": sub_chunk + " "}
-                    sub_chunk = ""
-                    time.sleep(0.1)
-            # yield remaining words
-            if sub_chunk:
-                yield {"pdf_name": pdf, "content": sub_chunk + " "}
+                # replace -> sometimes double space between words occure; most likely reason: pdf formating
+                response_chunk_text = response_chunk.text.replace("  ", " ")
+                yield {"pdf_name": pdf, "content": response_chunk_text}
                 time.sleep(0.1)
             log.debug(f"Response for: {pdf} was saved!\n")
             time.sleep(1)  # lower API request rate per sec
@@ -297,22 +272,10 @@ def process_chat_query_with_rag(
                 generation_config={"temperature": slider_value},
             )
 
-            # merges the response into one string
-            response_string = ""
             for response_chunk in response:
-                response_string += response_chunk.text
-            # splits its text into smaller sub-chunks
-            word_list = response_string.split(" ")
-            sub_chunk = ""
-            for word in word_list:
-                sub_chunk = sub_chunk + " " + word if sub_chunk else word
-                if len(sub_chunk.split()) >= SUBCHUNK_SIZE:  # size of subchunk here
-                    yield {"pdf_name": pdf, "content": sub_chunk + " "}
-                    sub_chunk = ""
-                    time.sleep(0.1)
-            # yield remaining words
-            if sub_chunk:
-                yield {"pdf_name": pdf, "content": sub_chunk + " "}
+                # replace -> sometimes double space between words occure; most likely reason: pdf formating
+                response_chunk_text = response_chunk.text.replace("  ", " ")
+                yield {"pdf_name": pdf, "content": response_chunk_text}
                 time.sleep(0.1)
             log.debug(f"Response for: {pdf} was saved!\n")
             time.sleep(1)  # lower API request rate per sec

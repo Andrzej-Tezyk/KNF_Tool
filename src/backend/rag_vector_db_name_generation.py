@@ -6,7 +6,19 @@
 
 def replace_polish_chars(text: str) -> str:
     """
-    For documents names only.
+    Replaces polish characters with latin characters.
+    This function replaces every diacritical sign of the Polish alphabet in a given string
+    with their corresponding character from the Latin alphabet using a mapping dictionary.
+    This function is used for document names only.
+    Examples:
+        >>> polish_to_ascii("Zażółć gęślą jaźń.")
+        Zazolc gesla jazn.
+    Args:
+        text: A string of characters
+    Returns:
+        A string of characters without Polish diacritital signs.
+    Raises:
+        None
     """
     polish_to_ascii = {
         "ą": "a",

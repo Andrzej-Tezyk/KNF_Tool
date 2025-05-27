@@ -131,7 +131,7 @@ def process_text(data: dict) -> None:
         prompt = data.get("input")
         selected_files = data.get("pdfFiles")
         output_size = data.get("output_size")
-        show_pages_checkbox = data.get("show_pages_checkbox")
+        show_pages_checkbox = str(data.get("show_pages_checkbox"))
         choosen_model = str(
             data.get("choosen_model", "gemini-2.0-flash")
         )  # second arg = default model
@@ -307,7 +307,7 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
         prompt = data.get("input")
         content_id = data.get("contentId")
         output_size = data.get("output_size")
-        show_pages_checkbox = data.get("show_pages_checkbox")
+        show_pages_checkbox = str(data.get("show_pages_checkbox"))
         # get cached data
         cached_data = cache.get(content_id)
         pdf_name = cached_data.get("title") if cached_data else None

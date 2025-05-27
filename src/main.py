@@ -16,6 +16,7 @@ from backend.knf_scraping import scrape_knf  # type: ignore[import-not-found]
 from backend.show_pages import show_pages  # type: ignore[import-not-found]
 from backend.custom_logger import CustomFormatter  # type: ignore[import-not-found]
 from backend.chroma_instance import get_chroma_client  # type: ignore[import-not-found]
+from backend.rag_vector_db_name_generation import replace_polish_chars  # type: ignore[import-not-found]
 
 
 # Get the project root directory
@@ -31,7 +32,7 @@ SCRAPED_FILES_DIR = PROJECT_ROOT / "scraped_files"
 CACHE_DIR = PROJECT_ROOT / ".cache"
 
 # Chroma client path
-CHROMA_CLIENT_DIR = str(PROJECT_ROOT / "exp_vector_db")
+CHROMA_CLIENT_DIR = str(PROJECT_ROOT / "chroma_vector_db")
 
 # Configure Flask-Caching
 # Use FileSystemCache to persist across reloads during development
@@ -92,34 +93,6 @@ if not SCRAPED_FILES_DIR.exists() or next(SCRAPED_FILES_DIR.iterdir(), None) is 
     scrape_knf(SCRAPED_FILES_DIR, NUM_RETRIES, USER_AGENT_LIST)
 
 
-def replace_polish_chars(text: str) -> str:
-    """
-    For documents names only.
-    """
-    polish_to_ascii = {
-        "ą": "a",
-        "ć": "c",
-        "ę": "e",
-        "ł": "l",
-        "ń": "n",
-        "ó": "o",
-        "ś": "s",
-        "ż": "z",
-        "ź": "z",
-        "Ą": "A",
-        "Ć": "C",
-        "Ę": "E",
-        "Ł": "L",
-        "Ń": "N",
-        "Ó": "O",
-        "Ś": "S",
-        "Ż": "Z",
-        "Ź": "Z",
-    }
-
-    return "".join(polish_to_ascii.get(c, c) for c in text)
-
-
 # flask
 app = Flask(__name__, template_folder="templates", static_folder="static")
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -138,6 +111,25 @@ output_index: int = -1
 
 @app.route("/")
 def index() -> str:
+    """Serves the main page of the application with a list of available PDF files.
+
+    This route handler is mapped to the root URL ("/"). When accessed, it logs
+    that the application is running, scans the designated directory for PDF files,
+    and renders the homepage template with those files listed.
+
+    This enables users to see which documents are available for analysis.
+
+    Examples:
+        None
+
+    Returns:
+        A rendered HTML page (index.html) with the following context:
+        - pdf_files: A list of available PDF filenames in the scraped directory.
+
+    Raises:
+        None directly
+    """
+
     log.info("App is up")
     pdf_dir = Path(SCRAPED_FILES_DIR)
     pdf_files = [pdf.name for pdf in pdf_dir.glob("*.pdf")] if pdf_dir.exists() else []
@@ -146,6 +138,54 @@ def index() -> str:
 
 @socketio.on("start_processing")
 def process_text(data: dict) -> None:
+    """Handles the initial processing of user input and selected PDFs using a generative model.
+
+    This function is triggered via a Socket.IO event when a user initiates processing.
+    It validates the input prompt and selected PDF files, sets up the selected
+    Gemini model, and processes each PDF using retrieval-augmented generation (RAG).
+    The response is streamed back to the client in real time, rendered in markdown,
+    and cached for future access.
+
+    Each processed PDF results in the creation of a content container, which is
+    dynamically sent to the frontend. If errors occur during processing, they are
+    logged and sent to the client as error events.
+
+    Examples:
+        # Triggered internally by Socket.IO when the user starts processing:
+        >>> process_text({
+                "input": "Summarize the risks mentioned",
+                "pdfFiles": ["KNF_2022_01.pdf"],
+                "output_size": "short",
+                "show_pages_checkbox": True,
+                "choosen_model": "gemini-2.0-flash",
+                ...
+            })
+
+    Args:
+        data: A dictionary containing user input and options. Expected keys include:
+            - "input": User’s prompt (str).
+            - "pdfFiles": List of PDF filenames to process (List[str]).
+            - "output_size": Approximate length of the response (str).
+            - "show_pages_checkbox": Whether to include page numbers (bool or str).
+            - "choosen_model": Selected Gemini model (str).
+            - "change_length_checkbox": Whether output length can vary (bool or str).
+            - "slider_value": Float controlling verbosity or detail (str or float).
+            - "ragDocSlider": Toggle between RAG and document mode (str).
+            - Other UI flags or settings.
+
+    Returns:
+        None. Results are streamed to the client via Socket.IO events:
+            - "new_container": Sends a new HTML container for each PDF.
+            - "update_content": Streams chunks of the model's response.
+            - "processing_complete_for_container": Signals PDF completion.
+            - "error": Sends error messages if validation or processing fails.
+            - "stream_stopped": Indicates the end of the streaming session.
+
+    Raises:
+        Emits error events instead of raising exceptions directly.
+        Internal exceptions are caught, logged, and passed to the client as messages.
+    """
+
     log.info("Started input processing")
 
     try:
@@ -163,8 +203,7 @@ def process_text(data: dict) -> None:
             data.get("choosen_model", "gemini-2.0-flash")
         )  # second arg = default model
         change_length_checkbox = data.get("change_length_checkbox")
-        # enhancer_checkbox = data.get("enhancer_checkbox")
-        enhancer_checkbox = "True"  # TODO: change when enhancer is ready
+        enhancer_checkbox = str(data.get("prompt_enhancer"))
         slider_value = data.get("slider_value")
         rag_doc_slider = str(data.get("ragDocSlider"))
 
@@ -196,6 +235,7 @@ def process_text(data: dict) -> None:
         log.debug(f"Show pages: {show_pages_checkbox}")
         log.debug(f"Change output size: {change_length_checkbox}")
         log.debug(f"selected_model: {choosen_model}")
+        log.debug(f"Prompt enhancer: {enhancer_checkbox}")
         log.debug(f"RAG or document: {rag_doc_slider}")
 
         # files
@@ -253,9 +293,7 @@ def process_text(data: dict) -> None:
                 ):
                     if not streaming:
                         break
-                    if (
-                        "error" in result_chunk
-                    ):  # czy tu chodzi o slowo error w odpowiedzi? jezeli tak to do sprawdzenia
+                    if "error" in result_chunk:
                         log.error("Error received in chunk")
                         error_message = {"message": "error in chunk response"}
                         socketio.emit("error", error_message)
@@ -326,6 +364,46 @@ def process_text(data: dict) -> None:
 # Linter C901 error ignored -> func will be refactored during complex code refactor
 @socketio.on("send_chat_message")
 def handle_chat_message(data: dict) -> None:  # noqa: C901
+    """Handles incoming chat messages and generates a streamed response using cached document context.
+
+    This function is triggered via a Socket.IO event when the user sends a new
+    chat message related to a previously processed PDF. It loads the relevant
+    cached document data and chat history, configures the Gemini model,
+    and streams the generated response back to the frontend in real time.
+
+    The function also updates the chat history in the cache after responding,
+    enabling continued conversation with memory of previous exchanges.
+
+    Examples:
+        >>> handle_chat_message({
+                "input": "What are the risks mentioned in the document?",
+                "contentId": "content-pdf0_3",
+                "output_size": "medium",
+                "slider_value": 0.5,
+                ...
+            })
+
+    Args:
+        data: A dictionary containing chat message data and UI parameters. Expected keys include:
+            - "input": User's chat message (prompt) (str).
+            - "contentId": The ID of the document container (str).
+            - "output_size": Desired response length (str).
+            - "choosen_model": Selected Gemini model (str).
+            - "slider_value": Level of detail or verbosity (float or str).
+            - "show_pages_checkbox": Whether to include page numbers (bool or str).
+            - "change_length_checkbox": Whether the output size can be adjusted (bool or str).
+
+    Returns:
+        None. Results are emitted via Socket.IO:
+            - "receive_chat_message": Streams chat responses to the client.
+            - "error": Emits errors if input is invalid or processing fails.
+            - "stream_stopped": Indicates the end of streaming or failure.
+
+    Raises:
+        Does not raise exceptions directly. All exceptions are caught, logged,
+        and emitted as error messages to the client.
+    """
+
     log.info("Received user input. Start processing.")
 
     try:
@@ -336,25 +414,21 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
         prompt = data.get("input")
         content_id = data.get("contentId")
         output_size = data.get("output_size")
-        show_pages_checkbox = data.get("show_pages_checkbox")
+        show_pages_checkbox = str(data.get("show_pages_checkbox"))
         # get cached data
         cached_data = cache.get(content_id)
         pdf_name = cached_data.get("title") if cached_data else None
         chat_history = cached_data.get("chat_history", [])
+        rag_doc_slider = str(data.get("ragDocSlider"))
         print("-" * 10, "CHAT HISTORY", "-" * 10)
         print(chat_history)
 
         choosen_model = str(
             data.get("choosen_model", "gemini-2.0-flash")
         )  # second arg = default model
-        change_length_checkbox = data.get("change_length_checkbox")
-        # enhancer_checkbox = data.get("enhancer_checkbox")
-        enhancer_checkbox = "True"  # TODO: change when enhancer is ready
+        change_length_checkbox = str(data.get("change_length_checkbox"))
+        enhancer_checkbox = str(data.get("prompt_enhancer"))
         slider_value = data.get("slider_value")
-
-        show_pages_checkbox = str(show_pages_checkbox)
-        change_length_checkbox = str(change_length_checkbox)
-        enhancer_checkbox = str(enhancer_checkbox)
 
         if slider_value is not None:
             slider_value = float(slider_value)
@@ -420,6 +494,8 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
         log.debug(f"Show pages: {show_pages_checkbox}")
         log.debug(f"Change output size: {change_length_checkbox}")
         log.debug(f"Selected model: {choosen_model}")
+        log.debug(f"RAG or document: {rag_doc_slider}")
+        log.debug(f"Prompt enhancer: {enhancer_checkbox}")
 
         # model instance inside the function to allow multiple models
         genai.configure(api_key=GEMINI_API_KEY)
@@ -452,6 +528,7 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
                 slider_value,
                 chroma_client,
                 collection_name,
+                rag_doc_slider,
             ):
                 if not streaming:
                     log.info("Stopping chat processing due to streaming flag.")
@@ -507,6 +584,21 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
 
 @socketio.on("stop_processing")
 def handle_stop() -> None:
+    """Stops the current processing stream when triggered by the client.
+
+    This function sets the global streaming flag to False, effectively stopping
+    any ongoing data generation or response processing.
+
+    Examples:
+        None
+
+    Returns:
+        None
+
+    Raises:
+        None
+    """
+
     global streaming
     streaming = False
     log.info("Processing Stopped by User")
@@ -514,6 +606,24 @@ def handle_stop() -> None:
 
 @app.route("/documentChat")
 def langchain_chat() -> Any:
+    """Serves the document chat page using cached content based on the provided content ID.
+
+    Retrieves cached data (title and content) for a given contentId passed as a query parameter
+    and renders a chat interface for continued conversation with the document.
+
+    Examples:
+        None
+
+    Returns:
+        Rendered HTML page (documentChat.html) with:
+        - content_id: The ID of the requested content.
+        - container_title_chat: The title of the document.
+        - content_chat: The previously generated content or an error message.
+
+    Raises:
+        None
+    """
+
     content_id = request.args.get("contentId")  # Get ID from URL query ?contentId=...
     log.info(f"Langchain chat request for contentId: {content_id}")
 

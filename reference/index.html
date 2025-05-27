@@ -255,6 +255,66 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#main.handle_chat_message" class="md-nav__link">
+    <span class="md-ellipsis">
+      handle_chat_message
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#main.handle_stop" class="md-nav__link">
+    <span class="md-ellipsis">
+      handle_stop
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#main.index" class="md-nav__link">
+    <span class="md-ellipsis">
+      index
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#main.langchain_chat" class="md-nav__link">
+    <span class="md-ellipsis">
+      langchain_chat
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#main.process_text" class="md-nav__link">
+    <span class="md-ellipsis">
+      process_text
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="process_text">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#main.process_text--triggered-internally-by-socketio-when-the-user-starts-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Triggered internally by Socket.IO when the user starts processing:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#backend.extract_text" class="md-nav__link">
     <span class="md-ellipsis">
       extract_text
@@ -408,6 +468,66 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#main.handle_chat_message" class="md-nav__link">
+    <span class="md-ellipsis">
+      handle_chat_message
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#main.handle_stop" class="md-nav__link">
+    <span class="md-ellipsis">
+      handle_stop
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#main.index" class="md-nav__link">
+    <span class="md-ellipsis">
+      index
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#main.langchain_chat" class="md-nav__link">
+    <span class="md-ellipsis">
+      langchain_chat
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#main.process_text" class="md-nav__link">
+    <span class="md-ellipsis">
+      process_text
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="process_text">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#main.process_text--triggered-internally-by-socketio-when-the-user-starts-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Triggered internally by Socket.IO when the user starts processing:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#backend.extract_text" class="md-nav__link">
     <span class="md-ellipsis">
       extract_text
@@ -539,6 +659,1474 @@
 
 
 
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="main.handle_chat_message" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">handle_chat_message</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Handles incoming chat messages and generates a streamed response using cached document context.</p>
+<p>This function is triggered via a Socket.IO event when the user sends a new
+chat message related to a previously processed PDF. It loads the relevant
+cached document data and chat history, configures the Gemini model,
+and streams the generated response back to the frontend in real time.</p>
+<p>The function also updates the chat history in the cache after responding,
+enabling continued conversation with memory of previous exchanges.</p>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">handle_chat_message</span><span class="p">({</span>
+<span class="go">        &quot;input&quot;: &quot;What are the risks mentioned in the document?&quot;,</span>
+<span class="go">        &quot;contentId&quot;: &quot;content-pdf0_3&quot;,</span>
+<span class="go">        &quot;output_size&quot;: &quot;medium&quot;,</span>
+<span class="go">        &quot;slider_value&quot;: 0.5,</span>
+<span class="go">        ...</span>
+<span class="go">    })</span>
+</code></pre></div>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>data</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A dictionary containing chat message data and UI parameters. Expected keys include:
+- "input": User's chat message (prompt) (str).
+- "contentId": The ID of the document container (str).
+- "output_size": Desired response length (str).
+- "choosen_model": Selected Gemini model (str).
+- "slider_value": Level of detail or verbosity (float or str).
+- "show_pages_checkbox": Whether to include page numbers (bool or str).
+- "change_length_checkbox": Whether the output size can be adjusted (bool or str).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code>None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>None. Results are emitted via Socket.IO:
+- "receive_chat_message": Streams chat responses to the client.
+- "error": Emits errors if input is invalid or processing fails.
+- "stream_stopped": Indicates the end of streaming or failure.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/main.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span>
+<span class="normal">420</span>
+<span class="normal">421</span>
+<span class="normal">422</span>
+<span class="normal">423</span>
+<span class="normal">424</span>
+<span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span>
+<span class="normal">433</span>
+<span class="normal">434</span>
+<span class="normal">435</span>
+<span class="normal">436</span>
+<span class="normal">437</span>
+<span class="normal">438</span>
+<span class="normal">439</span>
+<span class="normal">440</span>
+<span class="normal">441</span>
+<span class="normal">442</span>
+<span class="normal">443</span>
+<span class="normal">444</span>
+<span class="normal">445</span>
+<span class="normal">446</span>
+<span class="normal">447</span>
+<span class="normal">448</span>
+<span class="normal">449</span>
+<span class="normal">450</span>
+<span class="normal">451</span>
+<span class="normal">452</span>
+<span class="normal">453</span>
+<span class="normal">454</span>
+<span class="normal">455</span>
+<span class="normal">456</span>
+<span class="normal">457</span>
+<span class="normal">458</span>
+<span class="normal">459</span>
+<span class="normal">460</span>
+<span class="normal">461</span>
+<span class="normal">462</span>
+<span class="normal">463</span>
+<span class="normal">464</span>
+<span class="normal">465</span>
+<span class="normal">466</span>
+<span class="normal">467</span>
+<span class="normal">468</span>
+<span class="normal">469</span>
+<span class="normal">470</span>
+<span class="normal">471</span>
+<span class="normal">472</span>
+<span class="normal">473</span>
+<span class="normal">474</span>
+<span class="normal">475</span>
+<span class="normal">476</span>
+<span class="normal">477</span>
+<span class="normal">478</span>
+<span class="normal">479</span>
+<span class="normal">480</span>
+<span class="normal">481</span>
+<span class="normal">482</span>
+<span class="normal">483</span>
+<span class="normal">484</span>
+<span class="normal">485</span>
+<span class="normal">486</span>
+<span class="normal">487</span>
+<span class="normal">488</span>
+<span class="normal">489</span>
+<span class="normal">490</span>
+<span class="normal">491</span>
+<span class="normal">492</span>
+<span class="normal">493</span>
+<span class="normal">494</span>
+<span class="normal">495</span>
+<span class="normal">496</span>
+<span class="normal">497</span>
+<span class="normal">498</span>
+<span class="normal">499</span>
+<span class="normal">500</span>
+<span class="normal">501</span>
+<span class="normal">502</span>
+<span class="normal">503</span>
+<span class="normal">504</span>
+<span class="normal">505</span>
+<span class="normal">506</span>
+<span class="normal">507</span>
+<span class="normal">508</span>
+<span class="normal">509</span>
+<span class="normal">510</span>
+<span class="normal">511</span>
+<span class="normal">512</span>
+<span class="normal">513</span>
+<span class="normal">514</span>
+<span class="normal">515</span>
+<span class="normal">516</span>
+<span class="normal">517</span>
+<span class="normal">518</span>
+<span class="normal">519</span>
+<span class="normal">520</span>
+<span class="normal">521</span>
+<span class="normal">522</span>
+<span class="normal">523</span>
+<span class="normal">524</span>
+<span class="normal">525</span>
+<span class="normal">526</span>
+<span class="normal">527</span>
+<span class="normal">528</span>
+<span class="normal">529</span>
+<span class="normal">530</span>
+<span class="normal">531</span>
+<span class="normal">532</span>
+<span class="normal">533</span>
+<span class="normal">534</span>
+<span class="normal">535</span>
+<span class="normal">536</span>
+<span class="normal">537</span>
+<span class="normal">538</span>
+<span class="normal">539</span>
+<span class="normal">540</span>
+<span class="normal">541</span>
+<span class="normal">542</span>
+<span class="normal">543</span>
+<span class="normal">544</span>
+<span class="normal">545</span>
+<span class="normal">546</span>
+<span class="normal">547</span>
+<span class="normal">548</span>
+<span class="normal">549</span>
+<span class="normal">550</span>
+<span class="normal">551</span>
+<span class="normal">552</span>
+<span class="normal">553</span>
+<span class="normal">554</span>
+<span class="normal">555</span>
+<span class="normal">556</span>
+<span class="normal">557</span>
+<span class="normal">558</span>
+<span class="normal">559</span>
+<span class="normal">560</span>
+<span class="normal">561</span>
+<span class="normal">562</span>
+<span class="normal">563</span>
+<span class="normal">564</span>
+<span class="normal">565</span>
+<span class="normal">566</span>
+<span class="normal">567</span>
+<span class="normal">568</span>
+<span class="normal">569</span>
+<span class="normal">570</span>
+<span class="normal">571</span>
+<span class="normal">572</span>
+<span class="normal">573</span>
+<span class="normal">574</span>
+<span class="normal">575</span>
+<span class="normal">576</span>
+<span class="normal">577</span>
+<span class="normal">578</span>
+<span class="normal">579</span>
+<span class="normal">580</span>
+<span class="normal">581</span>
+<span class="normal">582</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@socketio</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;send_chat_message&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">handle_chat_message</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa: C901</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Handles incoming chat messages and generates a streamed response using cached document context.</span>
+
+<span class="sd">    This function is triggered via a Socket.IO event when the user sends a new</span>
+<span class="sd">    chat message related to a previously processed PDF. It loads the relevant</span>
+<span class="sd">    cached document data and chat history, configures the Gemini model,</span>
+<span class="sd">    and streams the generated response back to the frontend in real time.</span>
+
+<span class="sd">    The function also updates the chat history in the cache after responding,</span>
+<span class="sd">    enabling continued conversation with memory of previous exchanges.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; handle_chat_message({</span>
+<span class="sd">                &quot;input&quot;: &quot;What are the risks mentioned in the document?&quot;,</span>
+<span class="sd">                &quot;contentId&quot;: &quot;content-pdf0_3&quot;,</span>
+<span class="sd">                &quot;output_size&quot;: &quot;medium&quot;,</span>
+<span class="sd">                &quot;slider_value&quot;: 0.5,</span>
+<span class="sd">                ...</span>
+<span class="sd">            })</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data: A dictionary containing chat message data and UI parameters. Expected keys include:</span>
+<span class="sd">            - &quot;input&quot;: User&#39;s chat message (prompt) (str).</span>
+<span class="sd">            - &quot;contentId&quot;: The ID of the document container (str).</span>
+<span class="sd">            - &quot;output_size&quot;: Desired response length (str).</span>
+<span class="sd">            - &quot;choosen_model&quot;: Selected Gemini model (str).</span>
+<span class="sd">            - &quot;slider_value&quot;: Level of detail or verbosity (float or str).</span>
+<span class="sd">            - &quot;show_pages_checkbox&quot;: Whether to include page numbers (bool or str).</span>
+<span class="sd">            - &quot;change_length_checkbox&quot;: Whether the output size can be adjusted (bool or str).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None. Results are emitted via Socket.IO:</span>
+<span class="sd">            - &quot;receive_chat_message&quot;: Streams chat responses to the client.</span>
+<span class="sd">            - &quot;error&quot;: Emits errors if input is invalid or processing fails.</span>
+<span class="sd">            - &quot;stream_stopped&quot;: Indicates the end of streaming or failure.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        Does not raise exceptions directly. All exceptions are caught, logged,</span>
+<span class="sd">        and emitted as error messages to the client.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Received user input. Start processing.&quot;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">global</span> <span class="n">streaming</span>
+        <span class="n">streaming</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># get data</span>
+        <span class="n">prompt</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;input&quot;</span><span class="p">)</span>
+        <span class="n">content_id</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;contentId&quot;</span><span class="p">)</span>
+        <span class="n">output_size</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;output_size&quot;</span><span class="p">)</span>
+        <span class="n">show_pages_checkbox</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;show_pages_checkbox&quot;</span><span class="p">))</span>
+        <span class="c1"># get cached data</span>
+        <span class="n">cached_data</span> <span class="o">=</span> <span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">content_id</span><span class="p">)</span>
+        <span class="n">pdf_name</span> <span class="o">=</span> <span class="n">cached_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;title&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">cached_data</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">chat_history</span> <span class="o">=</span> <span class="n">cached_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;chat_history&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">rag_doc_slider</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ragDocSlider&quot;</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;CHAT HISTORY&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">chat_history</span><span class="p">)</span>
+
+        <span class="n">choosen_model</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;choosen_model&quot;</span><span class="p">,</span> <span class="s2">&quot;gemini-2.0-flash&quot;</span><span class="p">)</span>
+        <span class="p">)</span>  <span class="c1"># second arg = default model</span>
+        <span class="n">change_length_checkbox</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;change_length_checkbox&quot;</span><span class="p">))</span>
+        <span class="n">enhancer_checkbox</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;prompt_enhancer&quot;</span><span class="p">))</span>
+        <span class="n">slider_value</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;slider_value&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">slider_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">slider_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">slider_value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">slider_value</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">prompt</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;No prompt provided by user&quot;</span><span class="p">)</span>
+            <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;No input provided&quot;</span><span class="p">})</span>
+            <span class="n">streaming</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;stream_stopped&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">content_id</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Content ID missing or cached data not found for ID: </span><span class="si">{</span><span class="n">content_id</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;No content ID for the chat provided&quot;</span><span class="p">})</span>
+            <span class="n">streaming</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;stream_stopped&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">cached_data</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Validation Error: No cached data found for contentId: </span><span class="si">{</span><span class="n">content_id</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="s2">&quot;Cannot load document context or history.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span>
+                <span class="s2">&quot;error&quot;</span><span class="p">,</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Could not load data for chat session &#39;</span><span class="si">{</span><span class="n">content_id</span><span class="si">}</span><span class="s2">&#39;. &quot;</span>
+                    <span class="s2">&quot;It may have expired or is invalid.&quot;</span>
+                <span class="p">},</span>
+            <span class="p">)</span>
+            <span class="n">streaming</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;stream_stopped&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">pdf_name</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;PDF name not found in cache for content ID: </span><span class="si">{</span><span class="n">content_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;No pdf name provided&quot;</span><span class="p">})</span>
+            <span class="n">streaming</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;stream_stopped&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">chat_history</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Cached data for &#39;</span><span class="si">{</span><span class="n">content_id</span><span class="si">}</span><span class="s2">&#39; contained &#39;chat_history&#39; but it was not a list:&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;(type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">chat_history</span><span class="p">)</span><span class="si">}</span><span class="s2">). Initializing as empty list.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">chat_history</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Reset to a valid empty list</span>
+
+        <span class="n">output_size</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">output_size</span><span class="p">)</span>
+
+        <span class="c1"># debug logs for each document</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Prompt: </span><span class="si">{</span><span class="n">prompt</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Content id: </span><span class="si">{</span><span class="n">content_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Pdf name (from cache): </span><span class="si">{</span><span class="n">pdf_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Initial Chat History (loaded/initialized): </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">chat_history</span><span class="p">)</span><span class="si">}</span><span class="s2"> messages&quot;</span>
+        <span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Output size: </span><span class="si">{</span><span class="n">output_size</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Show pages: </span><span class="si">{</span><span class="n">show_pages_checkbox</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Change output size: </span><span class="si">{</span><span class="n">change_length_checkbox</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Selected model: </span><span class="si">{</span><span class="n">choosen_model</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RAG or document: </span><span class="si">{</span><span class="n">rag_doc_slider</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Prompt enhancer: </span><span class="si">{</span><span class="n">enhancer_checkbox</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># model instance inside the function to allow multiple models</span>
+        <span class="n">genai</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="n">GEMINI_API_KEY</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">genai</span><span class="o">.</span><span class="n">GenerativeModel</span><span class="p">(</span>
+            <span class="n">choosen_model</span><span class="p">,</span>
+            <span class="n">system_instruction</span><span class="o">=</span><span class="n">show_pages</span><span class="p">(</span><span class="n">SYSTEM_PROMPT</span><span class="p">,</span> <span class="n">show_pages_checkbox</span><span class="p">),</span>
+        <span class="p">)</span>  <span class="c1"># another models to be used: &quot;gemini-2.0-flash-thinking-exp-01-21&quot; &quot;gemini-2.0-flash&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">streaming</span><span class="p">:</span>
+                <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;stream_stopped&quot;</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Stream stopped before file processing.&quot;</span><span class="p">)</span>
+            <span class="n">pdf_name_to_show</span> <span class="o">=</span> <span class="n">pdf_name</span>
+
+            <span class="n">collection_name</span> <span class="o">=</span> <span class="n">pdf_name_to_show</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="n">collection_name</span> <span class="o">=</span> <span class="n">replace_polish_chars</span><span class="p">(</span>
+                <span class="n">collection_name</span>
+            <span class="p">)</span>  <span class="c1"># TODO: better solution for database naming</span>
+            <span class="n">collection_name</span> <span class="o">=</span> <span class="n">collection_name</span><span class="p">[:</span><span class="mi">35</span><span class="p">]</span>
+
+            <span class="n">accumulated_text</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">for</span> <span class="n">result_chunk</span> <span class="ow">in</span> <span class="n">process_chat_query_with_rag</span><span class="p">(</span>
+                <span class="n">prompt</span><span class="p">,</span>
+                <span class="n">chat_history</span><span class="p">,</span>
+                <span class="n">pdf_name_to_show</span><span class="p">,</span>
+                <span class="n">model</span><span class="p">,</span>
+                <span class="n">change_length_checkbox</span><span class="p">,</span>
+                <span class="n">enhancer_checkbox</span><span class="p">,</span>
+                <span class="n">output_size</span><span class="p">,</span>
+                <span class="n">slider_value</span><span class="p">,</span>
+                <span class="n">chroma_client</span><span class="p">,</span>
+                <span class="n">collection_name</span><span class="p">,</span>
+                <span class="n">rag_doc_slider</span><span class="p">,</span>
+            <span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">streaming</span><span class="p">:</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Stopping chat processing due to streaming flag.&quot;</span><span class="p">)</span>
+                    <span class="k">break</span>
+                <span class="c1"># Check the structure of the yielded chunk</span>
+                <span class="k">if</span> <span class="s2">&quot;content&quot;</span> <span class="ow">in</span> <span class="n">result_chunk</span><span class="p">:</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Recived response chunk: </span><span class="si">{</span><span class="n">result_chunk</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">accumulated_text</span> <span class="o">+=</span> <span class="n">result_chunk</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">]</span>
+                    <span class="n">chunk_text</span> <span class="o">=</span> <span class="n">result_chunk</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">]</span>
+                    <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;receive_chat_message&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">chunk_text</span><span class="p">})</span>
+
+                <span class="k">elif</span> <span class="s2">&quot;error&quot;</span> <span class="ow">in</span> <span class="n">result_chunk</span><span class="p">:</span>
+                    <span class="n">error_message</span> <span class="o">=</span> <span class="n">result_chunk</span><span class="p">[</span><span class="s2">&quot;error&quot;</span><span class="p">]</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Error chunk from process_query_with_rag: </span><span class="si">{</span><span class="n">error_message</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
+                    <span class="c1"># --- Emit an error message to the frontend ---</span>
+                    <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;receive_chat_message&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="n">error_message</span><span class="p">})</span>
+                    <span class="c1"># If an error occurs in a chunk, stop processing the rest of the stream</span>
+                    <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;unexpected error&quot;</span><span class="p">})</span>
+                    <span class="k">return</span>
+            <span class="k">if</span> <span class="n">streaming</span><span class="p">:</span>
+                <span class="n">chat_history</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;parts&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">prompt</span><span class="p">]})</span>
+                <span class="n">chat_history</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="s2">&quot;parts&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">accumulated_text</span><span class="p">]})</span>
+                <span class="n">cached_data</span><span class="p">[</span><span class="s2">&quot;chat_history&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">chat_history</span>  <span class="c1"># &lt;-- Assign the updated list back into the dictionary</span>
+                <span class="p">)</span>
+                <span class="n">cache</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">content_id</span><span class="p">,</span> <span class="n">cached_data</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stored updated data for </span><span class="si">{</span><span class="n">content_id</span><span class="si">}</span><span class="s2"> in cache.&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">streaming</span><span class="p">:</span>
+                <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;stream_stopped&quot;</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Stream stopped during request processing.&quot;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;An error occurred in the generate function: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+            <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span>
+                <span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;An unexpected error occurred: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+            <span class="p">)</span>
+
+        <span class="n">streaming</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;stream_stopped&quot;</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;An error occurred in the generate function: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+        <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;An unexpected error occurred: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">})</span>
+        <span class="n">streaming</span> <span class="o">=</span> <span class="kc">False</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="main.handle_stop" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">handle_stop</span><span class="p">()</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Stops the current processing stream when triggered by the client.</p>
+<p>This function sets the global streaming flag to False, effectively stopping
+any ongoing data generation or response processing.</p>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p>None</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code>None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>None</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/main.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">585</span>
+<span class="normal">586</span>
+<span class="normal">587</span>
+<span class="normal">588</span>
+<span class="normal">589</span>
+<span class="normal">590</span>
+<span class="normal">591</span>
+<span class="normal">592</span>
+<span class="normal">593</span>
+<span class="normal">594</span>
+<span class="normal">595</span>
+<span class="normal">596</span>
+<span class="normal">597</span>
+<span class="normal">598</span>
+<span class="normal">599</span>
+<span class="normal">600</span>
+<span class="normal">601</span>
+<span class="normal">602</span>
+<span class="normal">603</span>
+<span class="normal">604</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@socketio</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;stop_processing&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">handle_stop</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Stops the current processing stream when triggered by the client.</span>
+
+<span class="sd">    This function sets the global streaming flag to False, effectively stopping</span>
+<span class="sd">    any ongoing data generation or response processing.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">global</span> <span class="n">streaming</span>
+    <span class="n">streaming</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Processing Stopped by User&quot;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="main.index" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">index</span><span class="p">()</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Serves the main page of the application with a list of available PDF files.</p>
+<p>This route handler is mapped to the root URL ("/"). When accessed, it logs
+that the application is running, scans the designated directory for PDF files,
+and renders the homepage template with those files listed.</p>
+<p>This enables users to see which documents are available for analysis.</p>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p>None</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A rendered HTML page (index.html) with the following context:</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <ul>
+<li>pdf_files: A list of available PDF filenames in the scraped directory.</li>
+</ul>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/main.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Serves the main page of the application with a list of available PDF files.</span>
+
+<span class="sd">    This route handler is mapped to the root URL (&quot;/&quot;). When accessed, it logs</span>
+<span class="sd">    that the application is running, scans the designated directory for PDF files,</span>
+<span class="sd">    and renders the homepage template with those files listed.</span>
+
+<span class="sd">    This enables users to see which documents are available for analysis.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A rendered HTML page (index.html) with the following context:</span>
+<span class="sd">        - pdf_files: A list of available PDF filenames in the scraped directory.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        None directly</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;App is up&quot;</span><span class="p">)</span>
+    <span class="n">pdf_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">SCRAPED_FILES_DIR</span><span class="p">)</span>
+    <span class="n">pdf_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">pdf</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">pdf</span> <span class="ow">in</span> <span class="n">pdf_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.pdf&quot;</span><span class="p">)]</span> <span class="k">if</span> <span class="n">pdf_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="p">[]</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s2">&quot;index.html&quot;</span><span class="p">,</span> <span class="n">pdf_files</span><span class="o">=</span><span class="n">pdf_files</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="main.langchain_chat" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">langchain_chat</span><span class="p">()</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Serves the document chat page using cached content based on the provided content ID.</p>
+<p>Retrieves cached data (title and content) for a given contentId passed as a query parameter
+and renders a chat interface for continued conversation with the document.</p>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <p>None</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Rendered HTML page (documentChat.html) with:</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <ul>
+<li>content_id: The ID of the requested content.</li>
+</ul>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <ul>
+<li>container_title_chat: The title of the document.</li>
+</ul>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <ul>
+<li>content_chat: The previously generated content or an error message.</li>
+</ul>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/main.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">607</span>
+<span class="normal">608</span>
+<span class="normal">609</span>
+<span class="normal">610</span>
+<span class="normal">611</span>
+<span class="normal">612</span>
+<span class="normal">613</span>
+<span class="normal">614</span>
+<span class="normal">615</span>
+<span class="normal">616</span>
+<span class="normal">617</span>
+<span class="normal">618</span>
+<span class="normal">619</span>
+<span class="normal">620</span>
+<span class="normal">621</span>
+<span class="normal">622</span>
+<span class="normal">623</span>
+<span class="normal">624</span>
+<span class="normal">625</span>
+<span class="normal">626</span>
+<span class="normal">627</span>
+<span class="normal">628</span>
+<span class="normal">629</span>
+<span class="normal">630</span>
+<span class="normal">631</span>
+<span class="normal">632</span>
+<span class="normal">633</span>
+<span class="normal">634</span>
+<span class="normal">635</span>
+<span class="normal">636</span>
+<span class="normal">637</span>
+<span class="normal">638</span>
+<span class="normal">639</span>
+<span class="normal">640</span>
+<span class="normal">641</span>
+<span class="normal">642</span>
+<span class="normal">643</span>
+<span class="normal">644</span>
+<span class="normal">645</span>
+<span class="normal">646</span>
+<span class="normal">647</span>
+<span class="normal">648</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/documentChat&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">langchain_chat</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Serves the document chat page using cached content based on the provided content ID.</span>
+
+<span class="sd">    Retrieves cached data (title and content) for a given contentId passed as a query parameter</span>
+<span class="sd">    and renders a chat interface for continued conversation with the document.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Rendered HTML page (documentChat.html) with:</span>
+<span class="sd">        - content_id: The ID of the requested content.</span>
+<span class="sd">        - container_title_chat: The title of the document.</span>
+<span class="sd">        - content_chat: The previously generated content or an error message.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">content_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;contentId&quot;</span><span class="p">)</span>  <span class="c1"># Get ID from URL query ?contentId=...</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Langchain chat request for contentId: </span><span class="si">{</span><span class="n">content_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Retrieve data from cache</span>
+    <span class="n">cached_data</span> <span class="o">=</span> <span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">content_id</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cache lookup for </span><span class="si">{</span><span class="n">content_id</span><span class="si">}</span><span class="s2"> returned: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">cached_data</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">cached_data</span><span class="p">:</span>
+        <span class="n">container_title_chat</span> <span class="o">=</span> <span class="n">cached_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;title&quot;</span><span class="p">,</span> <span class="s2">&quot;Unknown Title&quot;</span><span class="p">)</span>
+        <span class="n">content_chat</span> <span class="o">=</span> <span class="n">cached_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;p&gt;Content not found.&lt;/p&gt;&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found content for </span><span class="si">{</span><span class="n">content_id</span><span class="si">}</span><span class="s2"> in cache.&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">container_title_chat</span> <span class="o">=</span> <span class="s2">&quot;Error&quot;</span>
+        <span class="n">content_chat</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&lt;p&gt;Could not find content for ID: </span><span class="si">{</span><span class="n">content_id</span><span class="si">}</span><span class="s2">. Cache might be empty or ID is invalid.&lt;/p&gt;&quot;</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Content for </span><span class="si">{</span><span class="n">content_id</span><span class="si">}</span><span class="s2"> not found in cache.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
+        <span class="s2">&quot;documentChat.html&quot;</span><span class="p">,</span>
+        <span class="n">content_id</span><span class="o">=</span><span class="n">content_id</span><span class="p">,</span>
+        <span class="n">container_title_chat</span><span class="o">=</span><span class="n">container_title_chat</span><span class="p">,</span>
+        <span class="n">content_chat</span><span class="o">=</span><span class="n">content_chat</span><span class="p">,</span>
+    <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="main.process_text" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">process_text</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Handles the initial processing of user input and selected PDFs using a generative model.</p>
+<p>This function is triggered via a Socket.IO event when a user initiates processing.
+It validates the input prompt and selected PDF files, sets up the selected
+Gemini model, and processes each PDF using retrieval-augmented generation (RAG).
+The response is streamed back to the client in real time, rendered in markdown,
+and cached for future access.</p>
+<p>Each processed PDF results in the creation of a content container, which is
+dynamically sent to the frontend. If errors occur during processing, they are
+logged and sent to the client as error events.</p>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <h3 id="main.process_text--triggered-internally-by-socketio-when-the-user-starts-processing">Triggered internally by Socket.IO when the user starts processing:</h3>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">process_text</span><span class="p">({</span>
+<span class="go">        &quot;input&quot;: &quot;Summarize the risks mentioned&quot;,</span>
+<span class="go">        &quot;pdfFiles&quot;: [&quot;KNF_2022_01.pdf&quot;],</span>
+<span class="go">        &quot;output_size&quot;: &quot;short&quot;,</span>
+<span class="go">        &quot;show_pages_checkbox&quot;: True,</span>
+<span class="go">        &quot;choosen_model&quot;: &quot;gemini-2.0-flash&quot;,</span>
+<span class="go">        ...</span>
+<span class="go">    })</span>
+</code></pre></div>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>data</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A dictionary containing user input and options. Expected keys include:
+- "input": User’s prompt (str).
+- "pdfFiles": List of PDF filenames to process (List[str]).
+- "output_size": Approximate length of the response (str).
+- "show_pages_checkbox": Whether to include page numbers (bool or str).
+- "choosen_model": Selected Gemini model (str).
+- "change_length_checkbox": Whether output length can vary (bool or str).
+- "slider_value": Float controlling verbosity or detail (str or float).
+- "ragDocSlider": Toggle between RAG and document mode (str).
+- Other UI flags or settings.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code>None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>None. Results are streamed to the client via Socket.IO events:
+- "new_container": Sends a new HTML container for each PDF.
+- "update_content": Streams chunks of the model's response.
+- "processing_complete_for_container": Signals PDF completion.
+- "error": Sends error messages if validation or processing fails.
+- "stream_stopped": Indicates the end of the streaming session.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/main.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@socketio</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;start_processing&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_text</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Handles the initial processing of user input and selected PDFs using a generative model.</span>
+
+<span class="sd">    This function is triggered via a Socket.IO event when a user initiates processing.</span>
+<span class="sd">    It validates the input prompt and selected PDF files, sets up the selected</span>
+<span class="sd">    Gemini model, and processes each PDF using retrieval-augmented generation (RAG).</span>
+<span class="sd">    The response is streamed back to the client in real time, rendered in markdown,</span>
+<span class="sd">    and cached for future access.</span>
+
+<span class="sd">    Each processed PDF results in the creation of a content container, which is</span>
+<span class="sd">    dynamically sent to the frontend. If errors occur during processing, they are</span>
+<span class="sd">    logged and sent to the client as error events.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        # Triggered internally by Socket.IO when the user starts processing:</span>
+<span class="sd">        &gt;&gt;&gt; process_text({</span>
+<span class="sd">                &quot;input&quot;: &quot;Summarize the risks mentioned&quot;,</span>
+<span class="sd">                &quot;pdfFiles&quot;: [&quot;KNF_2022_01.pdf&quot;],</span>
+<span class="sd">                &quot;output_size&quot;: &quot;short&quot;,</span>
+<span class="sd">                &quot;show_pages_checkbox&quot;: True,</span>
+<span class="sd">                &quot;choosen_model&quot;: &quot;gemini-2.0-flash&quot;,</span>
+<span class="sd">                ...</span>
+<span class="sd">            })</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data: A dictionary containing user input and options. Expected keys include:</span>
+<span class="sd">            - &quot;input&quot;: User’s prompt (str).</span>
+<span class="sd">            - &quot;pdfFiles&quot;: List of PDF filenames to process (List[str]).</span>
+<span class="sd">            - &quot;output_size&quot;: Approximate length of the response (str).</span>
+<span class="sd">            - &quot;show_pages_checkbox&quot;: Whether to include page numbers (bool or str).</span>
+<span class="sd">            - &quot;choosen_model&quot;: Selected Gemini model (str).</span>
+<span class="sd">            - &quot;change_length_checkbox&quot;: Whether output length can vary (bool or str).</span>
+<span class="sd">            - &quot;slider_value&quot;: Float controlling verbosity or detail (str or float).</span>
+<span class="sd">            - &quot;ragDocSlider&quot;: Toggle between RAG and document mode (str).</span>
+<span class="sd">            - Other UI flags or settings.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None. Results are streamed to the client via Socket.IO events:</span>
+<span class="sd">            - &quot;new_container&quot;: Sends a new HTML container for each PDF.</span>
+<span class="sd">            - &quot;update_content&quot;: Streams chunks of the model&#39;s response.</span>
+<span class="sd">            - &quot;processing_complete_for_container&quot;: Signals PDF completion.</span>
+<span class="sd">            - &quot;error&quot;: Sends error messages if validation or processing fails.</span>
+<span class="sd">            - &quot;stream_stopped&quot;: Indicates the end of the streaming session.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        Emits error events instead of raising exceptions directly.</span>
+<span class="sd">        Internal exceptions are caught, logged, and passed to the client as messages.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Started input processing&quot;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">global</span> <span class="n">output_index</span>
+        <span class="n">output_index</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">global</span> <span class="n">streaming</span>
+        <span class="n">streaming</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># get data</span>
+        <span class="n">prompt</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;input&quot;</span><span class="p">)</span>
+        <span class="n">selected_files</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;pdfFiles&quot;</span><span class="p">)</span>
+        <span class="n">output_size</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;output_size&quot;</span><span class="p">)</span>
+        <span class="n">show_pages_checkbox</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;show_pages_checkbox&quot;</span><span class="p">))</span>
+        <span class="n">choosen_model</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;choosen_model&quot;</span><span class="p">,</span> <span class="s2">&quot;gemini-2.0-flash&quot;</span><span class="p">)</span>
+        <span class="p">)</span>  <span class="c1"># second arg = default model</span>
+        <span class="n">change_length_checkbox</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;change_length_checkbox&quot;</span><span class="p">)</span>
+        <span class="n">enhancer_checkbox</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;prompt_enhancer&quot;</span><span class="p">))</span>
+        <span class="n">slider_value</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;slider_value&quot;</span><span class="p">)</span>
+        <span class="n">rag_doc_slider</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ragDocSlider&quot;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">slider_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">slider_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">slider_value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">slider_value</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">prompt</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;No prompt provided&quot;</span><span class="p">)</span>
+            <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;No input provided&quot;</span><span class="p">})</span>
+            <span class="n">streaming</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;stream_stopped&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">selected_files</span> <span class="ow">or</span> <span class="n">selected_files</span> <span class="o">==</span> <span class="p">[]:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;no selected files&quot;</span><span class="p">)</span>
+            <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;No files selected&quot;</span><span class="p">})</span>
+            <span class="n">streaming</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;stream_stopped&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">output_size</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">output_size</span><span class="p">)</span>
+
+        <span class="c1"># debug logs for each document</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;prompt: </span><span class="si">{</span><span class="n">prompt</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;selected files: </span><span class="si">{</span><span class="n">selected_files</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;output size: </span><span class="si">{</span><span class="n">output_size</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Show pages: </span><span class="si">{</span><span class="n">show_pages_checkbox</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Change output size: </span><span class="si">{</span><span class="n">change_length_checkbox</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;selected_model: </span><span class="si">{</span><span class="n">choosen_model</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Prompt enhancer: </span><span class="si">{</span><span class="n">enhancer_checkbox</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RAG or document: </span><span class="si">{</span><span class="n">rag_doc_slider</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># files</span>
+        <span class="n">pdf_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">SCRAPED_FILES_DIR</span><span class="p">)</span>
+
+        <span class="n">pdfs_to_scan</span> <span class="o">=</span> <span class="p">[</span><span class="n">pdf_dir</span> <span class="o">/</span> <span class="n">file_name</span> <span class="k">for</span> <span class="n">file_name</span> <span class="ow">in</span> <span class="n">selected_files</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">pdf</span> <span class="ow">in</span> <span class="n">pdfs_to_scan</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">pdf</span><span class="p">)</span>
+
+        <span class="c1"># model instance inside the function to allow multiple models</span>
+        <span class="n">genai</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="n">GEMINI_API_KEY</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">genai</span><span class="o">.</span><span class="n">GenerativeModel</span><span class="p">(</span>
+            <span class="n">choosen_model</span><span class="p">,</span>
+            <span class="n">system_instruction</span><span class="o">=</span><span class="n">show_pages</span><span class="p">(</span><span class="n">SYSTEM_PROMPT</span><span class="p">,</span> <span class="n">show_pages_checkbox</span><span class="p">),</span>
+        <span class="p">)</span>  <span class="c1"># another models to be used: &quot;gemini-2.0-flash-thinking-exp-01-21&quot; &quot;gemini-2.0-flash&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">pdf</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pdfs_to_scan</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">streaming</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="n">pdf_name_to_show</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pdf</span><span class="o">.</span><span class="n">stem</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">container_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;content-pdf</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">output_index</span><span class="si">}</span><span class="s2">&quot;</span>  <span class="c1"># Use current index</span>
+
+                <span class="n">container_html</span> <span class="o">=</span> <span class="n">render_template</span><span class="p">(</span>
+                    <span class="s2">&quot;output.html&quot;</span><span class="p">,</span>
+                    <span class="n">container_title</span><span class="o">=</span><span class="n">pdf_name_to_show</span><span class="p">,</span>
+                    <span class="n">container_id</span><span class="o">=</span><span class="n">container_id</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;New container created for: </span><span class="si">{</span><span class="n">pdf_name_to_show</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;new_container&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;html&quot;</span><span class="p">:</span> <span class="n">container_html</span><span class="p">})</span>
+
+                <span class="n">collection_name</span> <span class="o">=</span> <span class="n">pdf_name_to_show</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="n">collection_name</span> <span class="o">=</span> <span class="n">replace_polish_chars</span><span class="p">(</span>
+                    <span class="n">collection_name</span>
+                <span class="p">)</span>  <span class="c1"># TODO: better solution for database naming</span>
+                <span class="n">collection_name</span> <span class="o">=</span> <span class="n">collection_name</span><span class="p">[:</span><span class="mi">35</span><span class="p">]</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;COLLECTION NAME&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">collection_name</span><span class="p">)</span>
+
+                <span class="n">accumulated_text</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+                <span class="k">for</span> <span class="n">result_chunk</span> <span class="ow">in</span> <span class="n">process_query_with_rag</span><span class="p">(</span>
+                    <span class="n">prompt</span><span class="p">,</span>
+                    <span class="n">pdf_name_to_show</span><span class="p">,</span>
+                    <span class="n">model</span><span class="p">,</span>
+                    <span class="n">change_length_checkbox</span><span class="p">,</span>
+                    <span class="n">enhancer_checkbox</span><span class="p">,</span>
+                    <span class="n">output_size</span><span class="p">,</span>
+                    <span class="n">slider_value</span><span class="p">,</span>
+                    <span class="n">chroma_client</span><span class="p">,</span>
+                    <span class="n">collection_name</span><span class="p">,</span>
+                    <span class="n">rag_doc_slider</span><span class="p">,</span>
+                <span class="p">):</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">streaming</span><span class="p">:</span>
+                        <span class="k">break</span>
+                    <span class="k">if</span> <span class="s2">&quot;error&quot;</span> <span class="ow">in</span> <span class="n">result_chunk</span><span class="p">:</span>
+                        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Error received in chunk&quot;</span><span class="p">)</span>
+                        <span class="n">error_message</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;error in chunk response&quot;</span><span class="p">}</span>
+                        <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="n">error_message</span><span class="p">)</span>
+                        <span class="k">return</span>
+                    <span class="k">elif</span> <span class="s2">&quot;content&quot;</span> <span class="ow">in</span> <span class="n">result_chunk</span><span class="p">:</span>
+                        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Received response chunk: </span><span class="si">{</span><span class="n">result_chunk</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                        <span class="n">accumulated_text</span> <span class="o">+=</span> <span class="n">result_chunk</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">]</span>
+                        <span class="n">markdown_content</span> <span class="o">=</span> <span class="n">markdown</span><span class="o">.</span><span class="n">markdown</span><span class="p">(</span><span class="n">accumulated_text</span><span class="p">)</span>
+                        <span class="n">final_markdown_content</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="n">markdown_content</span>  <span class="c1"># Keep track of the latest full content</span>
+                        <span class="p">)</span>
+                        <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span>
+                            <span class="s2">&quot;update_content&quot;</span><span class="p">,</span>
+                            <span class="p">{</span>
+                                <span class="s2">&quot;container_id&quot;</span><span class="p">:</span> <span class="n">container_id</span><span class="p">,</span>
+                                <span class="s2">&quot;html&quot;</span><span class="p">:</span> <span class="n">markdown_content</span><span class="p">,</span>
+                            <span class="p">},</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;unexpected error&quot;</span><span class="p">})</span>
+                        <span class="k">return</span>
+                <span class="k">if</span> <span class="n">streaming</span><span class="p">:</span>
+                    <span class="n">chat_history</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">chat_history</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;parts&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">prompt</span><span class="p">]})</span>
+                    <span class="n">chat_history</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="s2">&quot;parts&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">accumulated_text</span><span class="p">]})</span>
+                    <span class="n">data_to_cache</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">pdf_name_to_show</span><span class="p">,</span>
+                        <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">final_markdown_content</span><span class="p">,</span>
+                        <span class="s2">&quot;chat_history&quot;</span><span class="p">:</span> <span class="n">chat_history</span><span class="p">,</span>
+                    <span class="p">}</span>
+                    <span class="c1"># Set a timeout (e.g., 1 hour = 3600 seconds)</span>
+                    <span class="n">cache</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">container_id</span><span class="p">,</span> <span class="n">data_to_cache</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stored content for </span><span class="si">{</span><span class="n">container_id</span><span class="si">}</span><span class="s2"> in cache.&quot;</span><span class="p">)</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Initial processing complete for </span><span class="si">{</span><span class="n">pdf_name_to_show</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">container_id</span><span class="si">}</span><span class="s2">).&quot;</span>
+                        <span class="s2">&quot;Emitting completion signal.&quot;</span>
+                    <span class="p">)</span>
+                    <span class="c1"># Emit a custom event indicating completion for THIS container</span>
+                    <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span>
+                        <span class="s2">&quot;processing_complete_for_container&quot;</span><span class="p">,</span>
+                        <span class="p">{</span><span class="s2">&quot;container_id&quot;</span><span class="p">:</span> <span class="n">container_id</span><span class="p">},</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Processing stopped for </span><span class="si">{</span><span class="n">pdf_name_to_show</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">container_id</span><span class="si">}</span><span class="s2">). Not emitting completion signal.&quot;</span>
+                    <span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">streaming</span><span class="p">:</span>
+                <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;stream_stopped&quot;</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Stream stopped during file processing.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;An error occurred in the generate function: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+            <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span>
+                <span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;An unexpected error occurred: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+            <span class="p">)</span>
+
+        <span class="n">streaming</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;stream_stopped&quot;</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;An error occurred in the generate function: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+        <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;An unexpected error occurred: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">})</span>
+        <span class="n">streaming</span> <span class="o">=</span> <span class="kc">False</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
 
 
 

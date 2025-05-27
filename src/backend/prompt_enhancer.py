@@ -29,7 +29,8 @@ def enhance_prompt(prompt: str, model: Any) -> Any:
 
     instructions_and_prompt = f"{instructions}\n\nUser Prompt: {prompt}"
 
-    enchaced_prompt = model.generate_content(instructions_and_prompt)
+    enhanced_prompt = model.generate_content(instructions_and_prompt)
     log.debug("User prompt sent to enchancer.")
+    log.debug(f"Enhanced prompt: \n {enhanced_prompt}")
 
-    return enchaced_prompt.candidates[0].content.parts[0].text
+    return enhanced_prompt.candidates[0].content.parts[0].text

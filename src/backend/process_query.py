@@ -12,6 +12,8 @@ from backend.prompt_enhancer import enhance_prompt  # type: ignore[import-not-fo
 
 log = logging.getLogger("__name__")
 
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+SUBCHUNK_SIZE = 1
 
 load_dotenv()
 
@@ -82,11 +84,23 @@ def process_pdf(
                 stream=True,
                 generation_config={"temperature": slider_value},
             )
-            # split its text into smaller sub-chunks
+
+            # merges the response into one string
+            response_string = ""
             for response_chunk in response:
-                # replace -> sometimes double space between words occure; most likely reason: pdf formating
-                response_chunk_text = response_chunk.text.replace("  ", " ")
-                yield {"pdf_name": pdf, "content": response_chunk_text}
+                response_string += response_chunk.text
+            # splits its text into smaller sub-chunks
+            word_list = response_string.split(" ")
+            sub_chunk = ""
+            for word in word_list:
+                sub_chunk = sub_chunk + " " + word if sub_chunk else word
+                if len(sub_chunk.split()) >= SUBCHUNK_SIZE:  # size of subchunk here
+                    yield {"pdf_name": pdf, "content": sub_chunk + " "}
+                    sub_chunk = ""
+                    time.sleep(0.1)
+            # yield remaining words
+            if sub_chunk:
+                yield {"pdf_name": pdf, "content": sub_chunk + " "}
                 time.sleep(0.1)
             log.debug(f"Response for: {pdf} was saved!\n")
             time.sleep(1)  # lower API request rate per sec
@@ -134,6 +148,10 @@ def process_query_with_rag(
                 passages_with_pages = get_relevant_passage(
                     prompt, collection, n_results=n_pages
                 )  # TODO: experiment with different n_results values
+                # always have an additional page: RAG often pulls table of contents if
+                # avaliable in the document (which does not have any informational value)
+                # not all documents contain it and if so, it is placed on different pages
+                # no robust way to delete it without risk of losing data
 
                 rag_context = "\n\nRelevanat context from the document:\n"
                 for passage, page_number in passages_with_pages:
@@ -174,11 +192,23 @@ def process_query_with_rag(
                 stream=True,
                 generation_config={"temperature": slider_value},
             )
-            # split its text into smaller sub-chunks
+
+            # merges the response into one string
+            response_string = ""
             for response_chunk in response:
-                # replace -> sometimes double space between words occure; most likely reason: pdf formating
-                response_chunk_text = response_chunk.text.replace("  ", " ")
-                yield {"pdf_name": pdf, "content": response_chunk_text}
+                response_string += response_chunk.text
+            # splits its text into smaller sub-chunks
+            word_list = response_string.split(" ")
+            sub_chunk = ""
+            for word in word_list:
+                sub_chunk = sub_chunk + " " + word if sub_chunk else word
+                if len(sub_chunk.split()) >= SUBCHUNK_SIZE:  # size of subchunk here
+                    yield {"pdf_name": pdf, "content": sub_chunk + " "}
+                    sub_chunk = ""
+                    time.sleep(0.1)
+            # yield remaining words
+            if sub_chunk:
+                yield {"pdf_name": pdf, "content": sub_chunk + " "}
                 time.sleep(0.1)
             log.debug(f"Response for: {pdf} was saved!\n")
             time.sleep(1)  # lower API request rate per sec
@@ -199,6 +229,7 @@ def process_chat_query_with_rag(
     slider_value: float,
     chroma_client: Any,
     collection_name: str,
+    rag_doc_slider: str,
 ) -> Generator:
     if not prompt:
         yield {"error": "No prompt provided"}
@@ -212,8 +243,15 @@ def process_chat_query_with_rag(
                     name=collection_name, embedding_function=get_gemini_ef()
                 )
 
+                if rag_doc_slider == "False":
+                    n_pages = 5
+                else:
+                    n_pages = len(collection.get()["ids"])
+
+                log.debug(f"Number of pages: {n_pages}")
+
                 passages_with_pages = get_relevant_passage(
-                    prompt, collection, n_results=5
+                    prompt, collection, n_results=n_pages
                 )  # TODO: experiment with different n_results values
 
                 rag_context = "\n\nRelevanat context from the document:\n"
@@ -257,11 +295,23 @@ def process_chat_query_with_rag(
                 stream=True,
                 generation_config={"temperature": slider_value},
             )
-            # split its text into smaller sub-chunks
+
+            # merges the response into one string
+            response_string = ""
             for response_chunk in response:
-                # replace -> sometimes double space between words occure; most likely reason: pdf formating
-                response_chunk_text = response_chunk.text.replace("  ", " ")
-                yield {"pdf_name": pdf, "content": response_chunk_text}
+                response_string += response_chunk.text
+            # splits its text into smaller sub-chunks
+            word_list = response_string.split(" ")
+            sub_chunk = ""
+            for word in word_list:
+                sub_chunk = sub_chunk + " " + word if sub_chunk else word
+                if len(sub_chunk.split()) >= SUBCHUNK_SIZE:  # size of subchunk here
+                    yield {"pdf_name": pdf, "content": sub_chunk + " "}
+                    sub_chunk = ""
+                    time.sleep(0.1)
+            # yield remaining words
+            if sub_chunk:
+                yield {"pdf_name": pdf, "content": sub_chunk + " "}
                 time.sleep(0.1)
             log.debug(f"Response for: {pdf} was saved!\n")
             time.sleep(1)  # lower API request rate per sec

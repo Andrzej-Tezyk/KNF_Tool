@@ -16,6 +16,7 @@ from backend.knf_scraping import scrape_knf  # type: ignore[import-not-found]
 from backend.show_pages import show_pages  # type: ignore[import-not-found]
 from backend.custom_logger import CustomFormatter  # type: ignore[import-not-found]
 from backend.chroma_instance import get_chroma_client  # type: ignore[import-not-found]
+from backend.rag_vector_db_name_generation import replace_polish_chars  # type: ignore[import-not-found]
 
 
 # Get the project root directory
@@ -31,7 +32,7 @@ SCRAPED_FILES_DIR = PROJECT_ROOT / "scraped_files"
 CACHE_DIR = PROJECT_ROOT / ".cache"
 
 # Chroma client path
-CHROMA_CLIENT_DIR = str(PROJECT_ROOT / "exp_vector_db")
+CHROMA_CLIENT_DIR = str(PROJECT_ROOT / "chroma_vector_db")
 
 # Configure Flask-Caching
 # Use FileSystemCache to persist across reloads during development
@@ -92,34 +93,6 @@ if not SCRAPED_FILES_DIR.exists() or next(SCRAPED_FILES_DIR.iterdir(), None) is 
     scrape_knf(SCRAPED_FILES_DIR, NUM_RETRIES, USER_AGENT_LIST)
 
 
-def replace_polish_chars(text: str) -> str:
-    """
-    For documents names only.
-    """
-    polish_to_ascii = {
-        "ą": "a",
-        "ć": "c",
-        "ę": "e",
-        "ł": "l",
-        "ń": "n",
-        "ó": "o",
-        "ś": "s",
-        "ż": "z",
-        "ź": "z",
-        "Ą": "A",
-        "Ć": "C",
-        "Ę": "E",
-        "Ł": "L",
-        "Ń": "N",
-        "Ó": "O",
-        "Ś": "S",
-        "Ż": "Z",
-        "Ź": "Z",
-    }
-
-    return "".join(polish_to_ascii.get(c, c) for c in text)
-
-
 # flask
 app = Flask(__name__, template_folder="templates", static_folder="static")
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -163,8 +136,7 @@ def process_text(data: dict) -> None:
             data.get("choosen_model", "gemini-2.0-flash")
         )  # second arg = default model
         change_length_checkbox = data.get("change_length_checkbox")
-        # enhancer_checkbox = data.get("enhancer_checkbox")
-        enhancer_checkbox = "True"  # TODO: change when enhancer is ready
+        enhancer_checkbox = str(data.get("prompt_enhancer"))
         slider_value = data.get("slider_value")
         rag_doc_slider = str(data.get("ragDocSlider"))
 
@@ -196,6 +168,7 @@ def process_text(data: dict) -> None:
         log.debug(f"Show pages: {show_pages_checkbox}")
         log.debug(f"Change output size: {change_length_checkbox}")
         log.debug(f"selected_model: {choosen_model}")
+        log.debug(f"Prompt enhancer: {enhancer_checkbox}")
         log.debug(f"RAG or document: {rag_doc_slider}")
 
         # files
@@ -253,15 +226,13 @@ def process_text(data: dict) -> None:
                 ):
                     if not streaming:
                         break
-                    if (
-                        "error" in result_chunk
-                    ):  # czy tu chodzi o slowo error w odpowiedzi? jezeli tak to do sprawdzenia
+                    if "error" in result_chunk:
                         log.error("Error received in chunk")
                         error_message = {"message": "error in chunk response"}
                         socketio.emit("error", error_message)
                         return
                     elif "content" in result_chunk:
-                        log.debug(f'Recived response chunk: {result_chunk["content"]}')
+                        log.debug(f'Received response chunk: {result_chunk["content"]}')
                         accumulated_text += result_chunk["content"]
                         markdown_content = markdown.markdown(accumulated_text)
                         final_markdown_content = (
@@ -336,25 +307,21 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
         prompt = data.get("input")
         content_id = data.get("contentId")
         output_size = data.get("output_size")
-        show_pages_checkbox = data.get("show_pages_checkbox")
+        show_pages_checkbox = str(data.get("show_pages_checkbox"))
         # get cached data
         cached_data = cache.get(content_id)
         pdf_name = cached_data.get("title") if cached_data else None
         chat_history = cached_data.get("chat_history", [])
+        rag_doc_slider = str(data.get("ragDocSlider"))
         print("-" * 10, "CHAT HISTORY", "-" * 10)
         print(chat_history)
 
         choosen_model = str(
             data.get("choosen_model", "gemini-2.0-flash")
         )  # second arg = default model
-        change_length_checkbox = data.get("change_length_checkbox")
-        # enhancer_checkbox = data.get("enhancer_checkbox")
-        enhancer_checkbox = "True"  # TODO: change when enhancer is ready
+        change_length_checkbox = str(data.get("change_length_checkbox"))
+        enhancer_checkbox = str(data.get("prompt_enhancer"))
         slider_value = data.get("slider_value")
-
-        show_pages_checkbox = str(show_pages_checkbox)
-        change_length_checkbox = str(change_length_checkbox)
-        enhancer_checkbox = str(enhancer_checkbox)
 
         if slider_value is not None:
             slider_value = float(slider_value)
@@ -420,6 +387,8 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
         log.debug(f"Show pages: {show_pages_checkbox}")
         log.debug(f"Change output size: {change_length_checkbox}")
         log.debug(f"Selected model: {choosen_model}")
+        log.debug(f"RAG or document: {rag_doc_slider}")
+        log.debug(f"Prompt enhancer: {enhancer_checkbox}")
 
         # model instance inside the function to allow multiple models
         genai.configure(api_key=GEMINI_API_KEY)
@@ -452,6 +421,7 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
                 slider_value,
                 chroma_client,
                 collection_name,
+                rag_doc_slider,
             ):
                 if not streaming:
                     log.info("Stopping chat processing due to streaming flag.")

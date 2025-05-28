@@ -1096,15 +1096,24 @@ input:checked + .rag-doc-slider:before {
     margin: 0; 
 }
 
+.icon.loading-spinner {
+    filter: none;
+}
+
 /* Style for the loading spinner icon */
 .output-button .icon.loading-spinner {
     border: 4px solid #f3f3f3; 
-    border-top: 4px solid var(--primary-color);
+    border-top: 4px solid var(--primary-color) !important;
+    color: var(--primary-color) !important;
     border-radius: 50%; 
     animation: spin 1s linear infinite; 
     text-indent: -9999px;
     overflow: hidden;
     content: ''; 
+}
+
+.icon.arrow-ready {
+    filter: none;
 }
 
 /* Style for the arrow icon when processing is complete */
@@ -1115,7 +1124,7 @@ input:checked + .rag-doc-slider:before {
     border: none; 
     content: '➤'; 
     font-size: 1em; 
-    color: var(--primary-color); 
+    color: var(--primary-color) !important;
 }
 
 @keyframes spin {

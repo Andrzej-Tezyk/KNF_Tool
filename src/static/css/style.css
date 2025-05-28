@@ -605,6 +605,7 @@ textarea:focus {
     color: white;
     font-weight: bold;
     transition: background-color 0.3s ease, transform 0.2s ease;
+    z-index: 2; /* tooltip is "part" of the button and inherits it z score, so it is needed here for them to overfloat other elements*/
 }
 
 .sidear-button-round:hover {
@@ -638,7 +639,7 @@ textarea:focus {
     border: solid var(--border-color);
     border-width: 0.2px;
     box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
-    z-index: 1000;
+    z-index: 9999 !important;
 }
 
 #sliders-button:hover::before {
@@ -655,7 +656,7 @@ textarea:focus {
     border: solid var(--border-color);
     border-width: 0.2px;
     box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
-    z-index: 1000;
+    z-index: 9999 !important;
 }
 
 #chat-button:hover::before {
@@ -672,7 +673,7 @@ textarea:focus {
     border: solid var(--border-color);
     border-width: 0.2px;
     box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
-    z-index: 1000;
+    z-index: 9999 !important;
 }
 
 #compare-button:hover::before {
@@ -689,7 +690,7 @@ textarea:focus {
     border: solid var(--border-color);
     border-width: 0.2px;
     box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
-    z-index: 1000;
+    z-index: 9999 !important;
 }
 
 #info-button:hover::before {
@@ -706,7 +707,7 @@ textarea:focus {
     border: solid var(--border-color);
     border-width: 0.2px;
     box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
-    z-index: 1000;
+    z-index: 9999 !important;
 }
 
 #file-button:hover::before {
@@ -723,7 +724,7 @@ textarea:focus {
     border: solid var(--border-color);
     border-width: 0.2px;
     box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
-    z-index: 1000;
+    z-index: 9999 !important;
 }
 
 #settings-sidebar-button:hover::before {
@@ -740,7 +741,7 @@ textarea:focus {
     border: solid var(--border-color);
     border-width: 0.2px;
     box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
-    z-index: 1000;
+    z-index: 9999 !important;
 }
 
 #clean-button:hover::before {
@@ -757,7 +758,7 @@ textarea:focus {
     border: solid var(--border-color);
     border-width: 0.2px;
     box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
-    z-index: 1000;
+    z-index: 9999 !important;
 }
 
 #hidePanel-button:hover::before {
@@ -774,7 +775,7 @@ textarea:focus {
     border: solid var(--border-color);
     border-width: 0.2px;
     box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
-    z-index: 1000;
+    z-index: 9999 !important;
 }
 
 .bottom-panel {

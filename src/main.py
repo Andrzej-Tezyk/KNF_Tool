@@ -29,19 +29,16 @@ CONFIG_PATH = PROJECT_ROOT / "config" / "config.json"
 SCRAPED_FILES_DIR = PROJECT_ROOT / "scraped_files"
 
 # Cache directory
-CACHE_DIR = PROJECT_ROOT / ".cache"
+CACHE_DIR = PROJECT_ROOT / "cache"
 
 # Chroma client path
 CHROMA_CLIENT_DIR = str(PROJECT_ROOT / "chroma_vector_db")
 
 # Configure Flask-Caching
-# Use FileSystemCache to persist across reloads during development
-# Use SimpleCache for basic in-memory (similar to dict, won't survive reloads)
-# For production, consider RedisCache or MemcachedCache if available
 CACHE_CONFIG = {
     "CACHE_TYPE": "FileSystemCache",
-    "CACHE_DIR": CACHE_DIR,  # Store cache files in project root/.cache
-    "CACHE_THRESHOLD": 500,  # Max number of items in cache
+    "CACHE_DIR": CACHE_DIR,
+    "CACHE_THRESHOLD": 500,
 }
 
 with open(CONFIG_PATH) as file:

@@ -10,7 +10,7 @@ OPTIONAL_PAGE_NUMBER_SP = (
 )
 
 
-def show_pages(system_prompt: str, show_pages_checkbox: bool) -> str:
+def show_pages(system_prompt: str, show_pages_checkbox: str) -> str:
     """
     Add an additional string to the system prompt to instruct model to include page name in outputs.
     """

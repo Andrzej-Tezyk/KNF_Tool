@@ -1,5 +1,5 @@
 import chromadb
-from rag_chromadb import load_chroma_collection, get_relevant_passage  # type: ignore[import-not-found]
+from rag_use_chroma_collections import load_chroma_collection, get_relevant_passage  # type: ignore[import-not-found]
 
 client = chromadb.PersistentClient(path="chroma_vector_db")
 collections = client.list_collections()

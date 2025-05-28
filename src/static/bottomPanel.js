@@ -49,7 +49,17 @@ document.querySelectorAll('.file-checkbox').forEach((checkbox) => { // eventlist
     checkbox.addEventListener('change', updateSelectedFilesDisplay);
 });        
 
-
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll(".file-item").forEach(item => {
+        item.addEventListener("click", function(event) {
+            if (event.target.tagName !== 'INPUT' && event.target.tagName !== 'LABEL') {
+                const checkbox = item.querySelector(".file-checkbox");
+                checkbox.checked = !checkbox.checked;
+                updateSelectedFilesDisplay();
+            }
+        });
+    });
+});
 
 // show shorten filenames under input textfield
 function updateSelectedFilesDisplay() {
@@ -75,6 +85,5 @@ function updateSelectedFilesDisplay() {
         }
     }
 }
-
 // call once to initialize state correctly
 updateSelectedFilesDisplay();

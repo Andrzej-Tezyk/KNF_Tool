@@ -22,7 +22,7 @@
                 <img src="{{ url_for('static', filename='images/logo.ico') }}" alt="logo">
             </div>
 
-            <button  class="sidear-button-round" id="sidebar-icon" data-tooltip="Open Sidebar">
+            <button  class="top-sidear-button-round" id="sidebar-icon" data-tooltip="Open Sidebar">
                 <img class="sidebar-icon" src="{{ url_for('static', filename='images/sidebar-show.svg') }}">
             </button>
 
@@ -30,15 +30,15 @@
 
                 <img class="sidebar-arrow-down" src="{{ url_for('static', filename='images/caret-down-solid.svg') }}">
 
-                <button class="sidear-button-round" id="sliders-button" data-tooltip="Advanced Options">
+                <button class="top-sidear-button-round" id="sliders-button" data-tooltip="Advanced Options">
                     <img class="sidebar-icon" src="{{ url_for('static', filename='images/sliders-solid.svg') }}">
                 </button>
                 
-                <button class="sidear-button-round" id="chat-button" data-tooltip="Prompt Enchanter">
+                <button class="top-sidear-button-round" id="chat-button" data-tooltip="Prompt Enchanter">
                     <img class="sidebar-icon" src="{{ url_for('static', filename='images/rocketchat-brands-solid.svg') }}">
                 </button>
 
-                <button class="sidear-button-round" id="compare-button" data-tooltip="Compare Documents">
+                <button class="top-sidear-button-round" id="compare-button" data-tooltip="Compare Documents">
                     <img class="sidebar-icon" src="{{ url_for('static', filename='images/code-compare-solid.svg') }}">
                 </button>
                 <br>
@@ -60,7 +60,7 @@
         <div class="form-flex-container">
             <div id="input-form">
                 <div class="inside-form-container">
-                    <!-- input section -->
+                    <!-- advanced options panel -->
                     <div class="input-section" id="input-section">
                         <div class="section-header-wrapper">
                             <h3 class="side-tab-h3">Advanced Options</h3>
@@ -104,25 +104,18 @@
                                 </div>
                                 <div class="segment-side-bar">
                                     <div class="option-object-temperature">
-                                        <label for="model-select"><strong>Change temperature:</strong></label>
-                                        <input type="range" min="0" max="1" step="0.05" value="0.8" class="temperature-slider" id="myRange">
-                                    </div>
-                                    <div class="option-object">
-                                        <label for="model-select">Value of temperature: <strong><span id="demo"></span></strong></label>
-                                    </div>
-                                </div>
-                                <div class="temperature-info">
-                                    <button class="open-button" onclick="toggleTempInfo()">About temperature</button>
-                                    <div class="form-popup" id="tempInfo">
-                                        <form class="form-container">
-                                            <label>In AI models like LLMs, temperature controls the randomness
-                                                of the model's responses. A value close to 1 results in more varied and creative outputs,
-                                                while a lower value (closer to 0) makes responses more predictable and focused.</label>
-
-                                        </form>
+                                        <div class="slider-label">Change temperature:&nbsp;&nbsp;<strong></strong><span id="demo"></span></strong></div>
+                                        <div class="temperature-container">
+                                            <input type="range" min="0" max="1" step="0.05" value="0.8" class="temperature-slider" id="myRange">
+                                            <div class="temperature-info">
+                                            <button class="open-button" id="open-button" temperature-tutorial="In AI models like LLMs, temperature controls the randomness
+                                                            of the model's responses. A value close to 1 results in more varied and creative outputs,
+                                                            while a lower value (closer to 0) makes responses more predictable and focused.">
+                                            ?</button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-
                             </div>
                         </div>
                     </div>
@@ -141,10 +134,10 @@
                                 <label class="switch">
                                     <input type="checkbox" id="rag-doc-slider-checkbox">
                                     <span class="rag-doc-slider">
-                                      <span class="slider-text left">PAGES</span>
-                                      <span class="slider-text right">ALL</span>
+                                        <span class="slider-text left">PAGES</span>
+                                        <span class="slider-text right">&nbsp;&nbsp;ALL</span>
                                     </span>
-                                </label> 
+                                </label>
                                 <button class="button-round" id="file-button" data-tooltip="Documents" type="button"> 
                                     <img class="sidebar-icon" src="{{ url_for('static', filename='images/file-regular.svg') }}">
                                 </button>
@@ -242,6 +235,15 @@
                                 </div>
                             </div>
                         </div>
+                        <div id="settings">
+                            <div class="header-settings-flex-contanier">
+                                <h3>Settings</h3>
+                                <button id="hideSettings-button" class="sidear-button-round" type="button" data-tooltip="Or press Escape">
+                                    <img class="icon" src="{{ url_for('static', filename='images/circle-xmark-regular.svg') }}">
+                                </button>
+                            </div>
+                            <div class="tutorial-text"> --- in development --- </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -258,6 +260,7 @@
     <script src="{{ url_for('static', filename='bottomPanel.js') }}"></script>
     <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
     <script src="{{ url_for('static', filename='popupTutorial.js') }}"></script>
+    <script src="{{ url_for('static', filename='settingsPanel.js') }}"></script>
     <script src="{{ url_for('static', filename='initialChatMessage.js') }}"></script>
 </body>
 </html>

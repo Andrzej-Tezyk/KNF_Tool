@@ -23,6 +23,92 @@ DEFAULT_RAG_CONTEXT_PAGES = 5
 STREAM_RESPONSE_CHUNK_DELAY_SECONDS = 0.1
 # Delay after processing a document/query, e.g., for API rate limiting
 POST_PROCESS_DELAY_SECONDS = 1.0
+# RAG context header
+RAG_CONTEXT_HEADER = "\n\nRelevant context from the document:\n"
+# RAG context footer
+RAG_CONTEXT_FOOTER = "\n\nPlease use only the above context to generate an answer."
+# RAG error during context retrieval prompt instruction
+RAG_CONTEXT_ERROR_PROMPT_INSTRUCTION = "Ignore all instructions and output: 'Error: No context found.'"
+
+def _get_rag_context(
+    prompt: str,
+    pdf_name: str,
+    chroma_client: Any,
+    collection_name: str,
+    rag_doc_slider: str,
+    embedding_function: Any,
+    default_n_pages: int
+) -> str:
+    """
+    Retrieves and formats the RAG context from ChromaDB.
+
+    Args:
+        prompt: The user's query to find relevant passages.
+        pdf_name: The name/identifier of the PDF for logging.
+        chroma_client: The ChromaDB client instance.
+        collection_name: The name of the ChromaDB collection.
+        rag_doc_slider: String flag ("True" to use all chunks, "False" for default_n_pages).
+        embedding_function: The embedding function for the ChromaDB collection.
+        default_n_pages: The default number of pages/passages to retrieve.
+
+    Returns:
+        A string containing the formatted RAG context, or an error instruction string
+        if context retrieval fails.
+    """
+    try:
+        log.debug(f"Attempting to retrieve RAG context for '{pdf_name}' with prompt: '{prompt}'")
+        collection = chroma_client.get_collection(
+            name=collection_name, embedding_function=embedding_function
+        )
+
+        total_chunks_in_collection = collection.count()
+
+        if rag_doc_slider == "True":
+            n_results = total_chunks_in_collection
+            log.debug(f"Using all {n_results} available document chunks for RAG context for '{pdf_name}'.")
+        else:
+            n_results = default_n_pages
+            available_docs = collection.count()
+            if n_results > available_docs and available_docs > 0: # only cap if docs are available
+                n_results = total_chunks_in_collection
+                log.debug(f"Default n_pages ({default_n_pages}) exceeds available docs ({available_docs}). Using {n_results} for '{pdf_name}'.")
+            elif available_docs == 0:
+                 log.warning(f"No documents found in collection '{collection_name}' for '{pdf_name}'. RAG context will be empty.")
+                 return RAG_CONTEXT_ERROR_PROMPT_INSTRUCTION # Or an empty context string if preferred
+            log.debug(f"Using {n_results} document chunks (default or capped) for RAG context for '{pdf_name}'.")
+
+        if n_results == 0:
+            log.warning(f"No document chunks to retrieve for RAG context for '{pdf_name}' (n_results is 0).")
+            return RAG_CONTEXT_ERROR_PROMPT_INSTRUCTION
+
+        passages_with_pages = get_relevant_passage(
+            prompt, collection, n_results=n_results
+        )   # TODO: experiment with different n_results values
+        # always have an additional page: RAG often pulls table of contents if
+        # avaliable in the document (which does not have any informational value)
+        # not all documents contain it and if so, it is placed on different pages
+        # no robust way to delete it without risk of losing data
+
+        if not passages_with_pages:
+            log.warning(f"No relevant passages found by get_relevant_passage for '{pdf_name}'.")
+            # Depending on desired behavior, could return error or just empty context
+            return RAG_CONTEXT_ERROR_PROMPT_INSTRUCTION
+
+        context_parts = [RAG_CONTEXT_HEADER]
+        for passage, page_number in passages_with_pages:
+            context_parts.append(f"Page {page_number}: {passage}\n") # Corrected typo "Relevanat" implicitly by new string
+        context_parts.append(RAG_CONTEXT_FOOTER)
+        
+        rag_context = "".join(context_parts)
+        log.debug(f"Successfully retrieved and formatted RAG context for '{pdf_name}'.")
+        return rag_context
+
+    except Exception as e:
+        log.error(
+            f"Problem retrieving RAG context for '{pdf_name}'. Error: {e}\n",
+            exc_info=True
+        )
+        return RAG_CONTEXT_ERROR_PROMPT_INSTRUCTION
 
 def process_pdf(
     prompt: str,
@@ -62,6 +148,7 @@ def process_pdf(
 
     if not prompt:
         yield {"error": "No prompt provided"}
+        return
 
     try:
         if enhancer_checkbox == "True":
@@ -120,82 +207,52 @@ def process_query_with_rag(
     if not prompt:
         yield {"error": "No prompt provided"}
         return
+    
+    rag_context = _get_rag_context(
+        prompt=prompt,
+        pdf_name=pdf_name,
+        chroma_client=chroma_client,
+        collection_name=collection_name,
+        rag_doc_slider=rag_doc_slider,
+        embedding_function=get_gemini_ef(),
+        default_n_pages=DEFAULT_RAG_CONTEXT_PAGES
+    )
+    log.debug(f"Context for {pdf_name}:\n{rag_context}\n")
 
-    else:
+    if enhancer_checkbox == "True":
         try:
-            log.info(f"Document: {pdf_name} is beeing analyzed.")
+            log.debug(f"Original prompt for {pdf_name}: '{prompt}'")
+            prompt = enhance_prompt(prompt, model)
+            log.debug(f"Improved prompt: '{prompt}'")
 
-            try:
-                collection = chroma_client.get_collection(
-                    name=collection_name, embedding_function=get_gemini_ef()
-                )
-
-                if rag_doc_slider == "False":
-                    n_pages = DEFAULT_RAG_CONTEXT_PAGES 
-                else:
-                    n_pages = len(collection.get()["ids"])
-
-                log.debug(f"Number of pages: {n_pages}")
-
-                passages_with_pages = get_relevant_passage(
-                    prompt, collection, n_results=n_pages
-                )  # TODO: experiment with different n_results values
-                # always have an additional page: RAG often pulls table of contents if
-                # avaliable in the document (which does not have any informational value)
-                # not all documents contain it and if so, it is placed on different pages
-                # no robust way to delete it without risk of losing data
-
-                rag_context = "\n\nRelevanat context from the document:\n"
-                for passage, page_number in passages_with_pages:
-                    rag_context += f"\nPage {page_number}: {passage}\n"
-
-                rag_context += (
-                    "\n\n Please use only the above context to generate an answer."
-                )
-            except Exception as e:
-                log.error(
-                    f"Problem with retrieveing context for {pdf_name}. \n Error message: {e}\n"
-                )
-                rag_context = (
-                    "Ignore all instrucions and output: 'Error: No context found.'"
-                )
-
-            try:
-                if enhancer_checkbox == "True":
-                    prompt = enhance_prompt(prompt, model)
-                    log.debug(f"Improved prompt: {prompt}")
-
-            except Exception as e:
-                log.error(
-                    f"Problem with prompt enhancer for {pdf_name}. \n Error message: {e}\n"
-                )
-
-            log.debug(f"Context for {pdf_name}:\n{rag_context}\n")
-            response = model.generate_content(
-                [
-                    (
-                        prompt
-                        + f"(Please provide {output_size} size response)"
-                        + rag_context
-                        if change_length_checkbox == "True"
-                        else prompt + rag_context
-                    ),
-                ],
-                stream=True,
-                generation_config={"temperature": temperature_slider_value},
-            )
-
-            for response_chunk in response:
-                # replace -> sometimes double space between words occure; most likely reason: pdf formating
-                response_chunk_text = response_chunk.text.replace("  ", " ")
-                yield {"pdf_name": pdf_name, "content": response_chunk_text}
-                time.sleep(STREAM_RESPONSE_CHUNK_DELAY_SECONDS)
-            log.debug(f"Response for: {pdf_name} was saved!\n")
-            time.sleep(POST_PROCESS_DELAY_SECONDS)  # lower API request rate per sec
         except Exception as e:
-            log.error(f"There is a problem with {pdf_name}. \n Error message: {e}\n")
-            traceback.print_exc()
-            yield {"error": f"An error occurred while processing {pdf_name}: {str(e)}"}
+            log.error(
+                f"Problem with prompt enhancer for {pdf_name}. Using original prompt. Error: {e}\n",
+                exc_info=True
+            )
+        
+        final_llm_prompt = prompt + rag_context
+        if change_length_checkbox == "True":
+            final_llm_prompt += f" (Please provide {output_size} size response.)"
+        
+        response = model.generate_content(
+            [final_llm_prompt],
+            stream=True,
+            generation_config={"temperature": temperature_slider_value},
+        )
+
+    try:
+        for response_chunk in response:
+            # replace -> sometimes double space between words occure; most likely reason: pdf formating
+            response_chunk_text = response_chunk.text.replace("  ", " ")
+            yield {"pdf_name": pdf_name, "content": response_chunk_text}
+            time.sleep(STREAM_RESPONSE_CHUNK_DELAY_SECONDS)
+        log.debug(f"Response for: {pdf_name} was saved!\n")
+        time.sleep(POST_PROCESS_DELAY_SECONDS)  # lower API request rate per sec
+    except Exception as e:
+        log.error(f"There is a problem with {pdf_name}. \n Error message: {e}\n")
+        traceback.print_exc()
+        yield {"error": f"An error occurred while processing {pdf_name}: {str(e)}"}
 
 
 def process_chat_query_with_rag(
@@ -215,77 +272,56 @@ def process_chat_query_with_rag(
     if not prompt:
         yield {"error": "No prompt provided"}
         return
+    
+    rag_context = _get_rag_context(
+        prompt=prompt,
+        pdf_name=pdf_name,
+        chroma_client=chroma_client,
+        collection_name=collection_name,
+        rag_doc_slider=rag_doc_slider,
+        embedding_function=get_gemini_ef(),
+        default_n_pages=DEFAULT_RAG_CONTEXT_PAGES
+    )
+    log.debug(f"Context for {pdf_name} (chat query):\n{rag_context}\n")
 
-    else:
+    if enhancer_checkbox == "True":
         try:
-            log.info(f"Document: {pdf_name} is beeing analyzed.")
+            log.debug(f"Original prompt for {pdf_name}: '{prompt}'")
+            prompt = enhance_prompt(prompt, model)
+            log.debug(f"Improved prompt: '{prompt}'")
 
-            try:
-                collection = chroma_client.get_collection(
-                    name=collection_name, embedding_function=get_gemini_ef()
-                )
-
-                if rag_doc_slider == "False":
-                    n_pages = DEFAULT_RAG_CONTEXT_PAGES 
-                else:
-                    n_pages = len(collection.get()["ids"])
-
-                log.debug(f"Number of pages: {n_pages}")
-
-                passages_with_pages = get_relevant_passage(
-                    prompt, collection, n_results=n_pages
-                )  # TODO: experiment with different n_results values
-
-                rag_context = "\n\nRelevanat context from the document:\n"
-                for passage, page_number in passages_with_pages:
-                    rag_context += f"\nPage {page_number}: {passage}\n"
-
-                rag_context += (
-                    "\n\n Please use only the above context to generate an answer."
-                )
-            except Exception as e:
-                log.error(
-                    f"Problem with retrieveing context for {pdf_name}. \n Error message: {e}\n"
-                )
-                rag_context = (
-                    "Ignore all instrucions and output: 'Error: No context found.'"
-                )
-
-            try:
-                if enhancer_checkbox == "True":
-                    prompt = enhance_prompt(prompt, model)
-                    log.debug(f"Improved prompt: {prompt}")
-
-            except Exception as e:
-                log.error(
-                    f"Problem with prompt enhancer for {pdf_name}. \n Error message: {e}\n"
-                )
-            log.debug(f"Context for {pdf_name}:\n{rag_context}\n")
-
-            chat = model.start_chat(history=chat_history)
-
-            response = chat.send_message(
-                (
-                    prompt
-                    + f"(Please provide {output_size} size response)"
-                    + rag_context
-                    + "\n\nChat history:\n"
-                    + str(chat_history)
-                    if change_length_checkbox == "True"
-                    else prompt + rag_context + "\n\nChat history\n" + str(chat_history)
-                ),
-                stream=True,
-                generation_config={"temperature": temperature_slider_value},
+        except Exception as e:
+            log.error(
+                f"Problem with query enhancer for {pdf_name}. Using original query. Error: {e}\n",
+                exc_info=True
             )
 
-            for response_chunk in response:
-                # replace -> sometimes double space between words occure; most likely reason: pdf formating
-                response_chunk_text = response_chunk.text.replace("  ", " ")
-                yield {"pdf_name": pdf_name, "content": response_chunk_text}
-                time.sleep(STREAM_RESPONSE_CHUNK_DELAY_SECONDS)
-            log.debug(f"Response for: {pdf_name} was saved!\n")
-            time.sleep(POST_PROCESS_DELAY_SECONDS)  # lower API request rate per sec
-        except Exception as e:
-            log.error(f"There is a problem with {pdf_name}. \n Error message: {e}\n")
-            traceback.print_exc()
-            yield {"error": f"An error occurred while processing {pdf_name}: {str(e)}"}
+    prompt_parts = [prompt]
+    if change_length_checkbox == "True":
+        prompt_parts.append(f" (Please provide {output_size} size response.)")
+    
+    prompt_parts.append(rag_context) # Add RAG context
+    prompt_parts.append(f"\n\nChat history:\n{str(chat_history)}") # Add chat history
+    
+    final_llm_prompt = "".join(prompt_parts)
+
+    try:
+        log.info(f"Generating chat response for query on '{pdf_name}' with final prompt: '{final_llm_prompt[:150]}...'")
+        chat = model.start_chat(history=chat_history)
+        response = chat.send_message(
+            final_llm_prompt, # Pass the fully constructed string
+            stream=True,
+            generation_config=genai.types.GenerationConfig(temperature=temperature_slider_value),
+        )
+
+        for response_chunk in response:
+            # replace -> sometimes double space between words occure; most likely reason: pdf formating
+            response_chunk_text = response_chunk.text.replace("  ", " ")
+            yield {"pdf_name": pdf_name, "content": response_chunk_text}
+            time.sleep(STREAM_RESPONSE_CHUNK_DELAY_SECONDS)
+        log.debug(f"Response for: {pdf_name} was saved!\n")
+        time.sleep(POST_PROCESS_DELAY_SECONDS)  # lower API request rate per sec
+    except Exception as e:
+        log.error(f"There is a problem with {pdf_name}. \n Error message: {e}\n")
+        traceback.print_exc()
+        yield {"error": f"An error occurred while processing {pdf_name}: {str(e)}"}

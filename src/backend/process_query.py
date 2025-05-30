@@ -293,20 +293,16 @@ def process_chat_query_with_rag(
                 exc_info=True
             )
 
-    prompt_parts = [prompt]
+    final_llm_prompt = prompt + rag_context
     if change_length_checkbox == "True":
-        prompt_parts.append(f" (Please provide {output_size} size response.)")
+        final_llm_prompt += f"\n(Please provide {output_size} size response.)"
+    final_llm_prompt += f"\n\nChat history:\n{str(chat_history)}"
     
-    prompt_parts.append(rag_context) # Add RAG context
-    prompt_parts.append(f"\n\nChat history:\n{str(chat_history)}") # Add chat history
-    
-    final_llm_prompt = "".join(prompt_parts)
-
     try:
         log.info(f"Generating chat response for query on '{pdf_name}' with final prompt: '{final_llm_prompt[:150]}...'")
         chat = model.start_chat(history=chat_history)
         response = chat.send_message(
-            final_llm_prompt, # Pass the fully constructed string
+            [final_llm_prompt],
             stream=True,
             generation_config=genai.types.GenerationConfig(temperature=temperature_slider_value),
         )

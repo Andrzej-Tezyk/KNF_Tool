@@ -228,15 +228,15 @@ def process_query_with_rag(
                 exc_info=True
             )
         
-        final_llm_prompt = prompt + rag_context
-        if change_length_checkbox == "True":
-            final_llm_prompt += f" (Please provide {output_size} size response.)"
-        
-        response = model.generate_content(
-            [final_llm_prompt],
-            stream=True,
-            generation_config={"temperature": temperature_slider_value},
-        )
+    final_llm_prompt = prompt + rag_context
+    if change_length_checkbox == "True":
+        final_llm_prompt += f" (Please provide {output_size} size response.)"
+    
+    response = model.generate_content(
+        [final_llm_prompt],
+        stream=True,
+        generation_config={"temperature": temperature_slider_value},
+    )
 
     try:
         for response_chunk in response:

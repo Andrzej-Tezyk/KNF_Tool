@@ -31,7 +31,7 @@ def process_pdf(
     change_length_checkbox: str,
     enhancer_checkbox: str,
     output_size: int,
-    slider_value: float,
+    temperature_slider_value: float,
 ) -> Generator:
     """Processes a single PDF document using the provided prompt and returns the result.
 
@@ -88,7 +88,7 @@ def process_pdf(
                     file_to_send,
                 ],
                 stream=True,
-                generation_config={"temperature": slider_value},
+                generation_config={"temperature": temperature_slider_value},
             )
 
             for response_chunk in response:
@@ -111,7 +111,7 @@ def process_query_with_rag(
     change_length_checkbox: str,
     enhancer_checkbox: str,
     output_size: int,
-    slider_value: float,
+    temperature_slider_value: float,
     chroma_client: Any,
     collection_name: str,
     rag_doc_slider: str,
@@ -184,7 +184,7 @@ def process_query_with_rag(
                     ),
                 ],
                 stream=True,
-                generation_config={"temperature": slider_value},
+                generation_config={"temperature": temperature_slider_value},
             )
 
             for response_chunk in response:
@@ -208,7 +208,7 @@ def process_chat_query_with_rag(
     change_length_checkbox: str,
     enhancer_checkbox: str,
     output_size: int,
-    slider_value: float,
+    temperature_slider_value: float,
     chroma_client: Any,
     collection_name: str,
     rag_doc_slider: str,
@@ -275,7 +275,7 @@ def process_chat_query_with_rag(
                     else prompt + rag_context + "\n\nChat history\n" + str(chat_history)
                 ),
                 stream=True,
-                generation_config={"temperature": slider_value},
+                generation_config={"temperature": temperature_slider_value},
             )
 
             for response_chunk in response:

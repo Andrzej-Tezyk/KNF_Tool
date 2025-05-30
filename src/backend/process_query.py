@@ -37,7 +37,7 @@ RAG_CONTEXT_ERROR_PROMPT_INSTRUCTION = (
 def _build_final_llm_prompt(
     base_prompt: str,
     change_length_flag: str,
-    output_size: int,
+    output_size: str,
     enhancer_flag: str,
     model: genai,
     identifier: str,
@@ -216,8 +216,7 @@ def process_pdf(
                                 output size instruction should be added.
         enhancer_checkbox: String flag ("True"/"False") to indicate if the
                            prompt should be enhanced.
-        output_size: An integer defining the approximate desired word/token
-                     limit for the response when change_length_checkbox is "True".
+        output_size: The desired output size (e.g., number of words).
         temperature_slider_value: The temperature setting for model generation.
 
     Yields:
@@ -268,7 +267,7 @@ def process_query_with_rag(
     model: genai,
     change_length_checkbox: str,
     enhancer_checkbox: str,
-    output_size: int,
+    output_size: str,
     temperature_slider_value: float,
     chroma_client: ChromaClient,
     collection_name: str,
@@ -288,7 +287,7 @@ def process_query_with_rag(
         model: The generative AI model instance (e.g., genai.GenerativeModel).
         change_length_checkbox: String flag ("True"/"False") to modify response length.
         enhancer_checkbox: String flag ("True"/"False") for prompt enhancement.
-        output_size: Integer for approximate response word/token limit.
+        output_size: The desired output size (e.g., number of words).
         temperature_slider_value: Temperature for model generation.
         chroma_client: The ChromaDB client instance.
         collection_name: Name of the ChromaDB collection for this document.
@@ -351,7 +350,7 @@ def process_chat_query_with_rag(
     model: genai,
     change_length_checkbox: str,
     enhancer_checkbox: str,
-    output_size: int,
+    output_size: str,
     temperature_slider_value: float,
     chroma_client: ChromaClient,
     collection_name: str,
@@ -373,7 +372,7 @@ def process_chat_query_with_rag(
         model: The generative AI model instance (e.g., genai.GenerativeModel).
         change_length_checkbox: String flag ("True"/"False") to modify response length.
         enhancer_checkbox: String flag ("True"/"False") for prompt enhancement.
-        output_size: Integer for approximate response word/token limit.
+        output_size: The desired output size (e.g., number of words).
         temperature_slider_value: Temperature for model generation.
         chroma_client: The ChromaDB client instance.
         collection_name: Name of the ChromaDB collection for this document.

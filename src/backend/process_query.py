@@ -103,7 +103,6 @@ def _get_rag_context(
         collection_name: The name of the ChromaDB collection.
         rag_doc_slider: String flag ("True" to use all chunks, "False" for default_n_pages).
         embedding_function: The embedding function for the ChromaDB collection.
-        default_n_pages: The default number of pages/passages to retrieve.
 
     Returns:
         A string containing the formatted RAG context, or an error instruction string
@@ -169,34 +168,34 @@ def process_pdf(
     model: genai,
     change_length_checkbox: str,
     enhancer_checkbox: str,
-    output_size: int,
+    output_size: str,
     temperature_slider_value: float,
 ) -> Generator:
-    """Processes a single PDF document using the provided prompt and returns the result.
+    """
+    Uploads a PDF, processes it with a generative model, and streams content.
 
-    This function uploads a PDF document, sends it to a model with the given prompt,
-    and retrieves a generated response. The response
-    text is cleaned to remove double spaces before being returned.
-
-    Examples:
-        >>> process_pdf("Summarize this document", Path("report.pdf"), model, 100)
-        {'pdf_name': 'report', 'content': 'This document summarizes ...'}
+    This function takes a PDF file and a prompt, uploads the file,
+    and then calls the generative model to process the content based on
+    the (potentially enhanced) prompt. It streams the model's response,
+    yielding cleaned text chunks or an error dictionary.
 
     Args:
-        prompt: A string containing the user’s prompt for processing the document.
+        prompt: The base prompt for processing the document.
         pdf: A Path object representing the PDF file to be processed.
-        model: A generative AI model used to process the document.
-        output_size: A string defining the approximate word limit for the response.
+        model: The generative AI model instance (e.g., genai.GenerativeModel).
+        change_length_checkbox: String flag ("True"/"False") to indicate if
+                                output size instruction should be added.
+        enhancer_checkbox: String flag ("True"/"False") to indicate if the
+                           prompt should be enhanced.
+        output_size: An integer defining the approximate desired word/token
+                     limit for the response when change_length_checkbox is "True".
+        temperature_slider_value: The temperature setting for model generation.
 
-    Returns:
-        A dictionary containing:
-        - "pdf_name": The name of the processed PDF (without extension).
-        - "content": The generated response text.
-        - "error": An error message if processing fails.
-
-    Raises:
-        Exception: If an error occurs during processing, it is logged and returned
-        in the response dictionary.
+    Yields:
+        dict: A dictionary for each chunk of the response or for an error.
+              For content: `{"pdf_name": str, "content": str}`
+                           (where `pdf_name` is the PDF filename without extension).
+              For error: `{"error": str}`.
     """
 
     if not prompt:
@@ -247,7 +246,33 @@ def process_query_with_rag(
     collection_name: str,
     rag_doc_slider: str,
 ) -> Generator:
-    
+    """
+    Processes a query using RAG, combining it with context from a document.
+
+    This function retrieves relevant context from a specified document collection
+    (via ChromaDB) based on the user's prompt. It then combines the
+    (potentially enhanced) prompt with this context and queries the generative
+    model, streaming the response.
+
+    Args:
+        prompt: The user's base query/prompt.
+        pdf_name: The identifier/name of the document (for RAG context and logging).
+        model: The generative AI model instance (e.g., genai.GenerativeModel).
+        change_length_checkbox: String flag ("True"/"False") to modify response length.
+        enhancer_checkbox: String flag ("True"/"False") for prompt enhancement.
+        output_size: Integer for approximate response word/token limit.
+        temperature_slider_value: Temperature for model generation.
+        chroma_client: The ChromaDB client instance.
+        collection_name: Name of the ChromaDB collection for this document.
+        rag_doc_slider: String flag ("True" to use all chunks from the document's
+                        collection, "False" for a default number).
+
+    Yields:
+        dict: A dictionary for each chunk of the response or for an error.
+              For content: `{"pdf_name": str, "content": str}`.
+              For error: `{"error": str}`.
+    """
+
     if not prompt:
         yield {"error": "No prompt provided"}
         return
@@ -304,6 +329,34 @@ def process_chat_query_with_rag(
     collection_name: str,
     rag_doc_slider: str,
 ) -> Generator:
+    """
+    Processes a chat query using RAG, incorporating conversation history.
+
+    Retrieves relevant context from a document collection based on the current
+    user prompt. It then combines the (potentially enhanced) prompt with this
+    context and the existing chat history, queries the generative model,
+    and streams the response.
+
+    Args:
+        prompt: The user's current query/message in the conversation.
+        chat_history: A string representation of the conversation history.
+                      (Note: Assumes model.start_chat() accepts this string format).
+        pdf_name: The identifier/name of the document (for RAG context and logging).
+        model: The generative AI model instance (e.g., genai.GenerativeModel).
+        change_length_checkbox: String flag ("True"/"False") to modify response length.
+        enhancer_checkbox: String flag ("True"/"False") for prompt enhancement.
+        output_size: Integer for approximate response word/token limit.
+        temperature_slider_value: Temperature for model generation.
+        chroma_client: The ChromaDB client instance.
+        collection_name: Name of the ChromaDB collection for this document.
+        rag_doc_slider: String flag ("True" to use all chunks from the document's
+                        collection, "False" for a default number).
+
+    Yields:
+        dict: A dictionary for each chunk of the response or for an error.
+              For content: `{"pdf_name": str, "content": str}`.
+              For error: `{"error": str}`.
+    """
     
     if not prompt:
         yield {"error": "No prompt provided"}

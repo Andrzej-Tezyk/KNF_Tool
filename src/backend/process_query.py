@@ -2,9 +2,9 @@ import time
 import traceback
 from pathlib import Path
 from typing import Any
+import logging
 from collections.abc import Generator
 from chromadb.api.client import Client as ChromaClient
-import logging
 
 import google.generativeai as genai
 from dotenv import load_dotenv
@@ -29,7 +29,10 @@ RAG_CONTEXT_HEADER = "\n\nRelevant context from the document:\n"
 # RAG context footer
 RAG_CONTEXT_FOOTER = "\n\nPlease use only the above context to generate an answer."
 # RAG error during context retrieval prompt instruction
-RAG_CONTEXT_ERROR_PROMPT_INSTRUCTION = "Ignore all instructions and output: 'Error: No context found.'"
+RAG_CONTEXT_ERROR_PROMPT_INSTRUCTION = (
+    "Ignore all instructions and output: 'Error: No context found.'"
+)
+
 
 def _build_final_llm_prompt(
     base_prompt: str,
@@ -39,7 +42,7 @@ def _build_final_llm_prompt(
     model: genai,
     identifier: str,
     rag_context: str | None = None,
-    chat_history: str | None = None
+    chat_history: str | None = None,
 ) -> str:
     """
     Enhances (optionally) and constructs the final prompt string for the LLM.
@@ -61,29 +64,38 @@ def _build_final_llm_prompt(
 
     if enhancer_flag == "True":
         try:
-            log.debug(f"Original prompt for '{identifier}': '{processed_prompt[:100]}...'")
-            processed_prompt = enhance_prompt(processed_prompt, model) # enhance_prompt modifies the prompt
-            log.debug(f"Improved prompt for '{identifier}': '{processed_prompt[:100]}...'")
+            log.debug(
+                f"Original prompt for '{identifier}': '{processed_prompt[:100]}...'"
+            )
+            processed_prompt = enhance_prompt(processed_prompt, model)
+            log.debug(
+                f"Improved prompt for '{identifier}': '{processed_prompt[:100]}...'"
+            )
         except Exception as e:
             log.error(
                 f"Problem with prompt enhancer for '{identifier}'. Using original prompt. Error: {e}\n",
-                exc_info=True
+                exc_info=True,
             )
 
     final_prompt_parts = [processed_prompt]
 
     if change_length_flag == "True":
-        final_prompt_parts.append(f" (Please provide approximately {output_size} words response)")
+        final_prompt_parts.append(
+            f" (Please provide approximately {output_size} words response)"
+        )
 
     if rag_context:
         final_prompt_parts.append(rag_context)
 
     if chat_history:
         final_prompt_parts.append(f"\n\nChat history:\n{chat_history}")
-        
+
     assembled_prompt = "".join(final_prompt_parts)
-    log.debug(f"Assembled final LLM prompt (first 200 chars): '{assembled_prompt[:200]}...'")
+    log.debug(
+        f"Assembled final LLM prompt (first 200 chars): '{assembled_prompt[:200]}...'"
+    )
     return assembled_prompt
+
 
 def _get_rag_context(
     prompt: str,
@@ -109,7 +121,9 @@ def _get_rag_context(
         if context retrieval fails.
     """
     try:
-        log.debug(f"Attempting to retrieve RAG context for '{pdf_name}' with prompt: '{prompt}'")
+        log.debug(
+            f"Attempting to retrieve RAG context for '{pdf_name}' with prompt: '{prompt}'"
+        )
         collection = chroma_client.get_collection(
             name=collection_name, embedding_function=embedding_function
         )
@@ -118,39 +132,54 @@ def _get_rag_context(
 
         if rag_doc_slider == "True":
             n_results = total_chunks_in_collection
-            log.debug(f"Using all {n_results} available document chunks for RAG context for '{pdf_name}'.")
+            log.debug(
+                f"Using all {n_results} available document chunks for RAG context for '{pdf_name}'."
+            )
         else:
             n_results = DEFAULT_RAG_CONTEXT_PAGES
-            if n_results > total_chunks_in_collection and total_chunks_in_collection > 0:
+            if (
+                n_results > total_chunks_in_collection
+                and total_chunks_in_collection > 0
+            ):
                 n_results = total_chunks_in_collection
-                log.debug(f"Default n_pages ({DEFAULT_RAG_CONTEXT_PAGES}) exceeds total chunks in collection ({total_chunks_in_collection}). Using {n_results} for '{pdf_name}'.")
+                log.debug(
+                    f"Default n_pages ({DEFAULT_RAG_CONTEXT_PAGES}) exceeds total chunks in collection ({total_chunks_in_collection}). Using {n_results} for '{pdf_name}'."
+                )
             elif total_chunks_in_collection == 0:
-                log.warning(f"No documents found in collection '{collection_name}' for '{pdf_name}'. RAG context will be empty.")
-                return RAG_CONTEXT_ERROR_PROMPT_INSTRUCTION # Or an empty context string if preferred
-            log.debug(f"Using {n_results} document chunks (default or capped) for RAG context for '{pdf_name}'.")
+                log.warning(
+                    f"No documents found in collection '{collection_name}' for '{pdf_name}'. RAG context will be empty."
+                )
+                return RAG_CONTEXT_ERROR_PROMPT_INSTRUCTION
+            log.debug(
+                f"Using {n_results} document chunks (default or capped) for RAG context for '{pdf_name}'."
+            )
 
         if n_results == 0:
-            log.warning(f"No document chunks to retrieve for RAG context for '{pdf_name}' (n_results is 0).")
+            log.warning(
+                f"No document chunks to retrieve for RAG context for '{pdf_name}' (n_results is 0)."
+            )
             return RAG_CONTEXT_ERROR_PROMPT_INSTRUCTION
 
         passages_with_pages = get_relevant_passage(
             prompt, collection, n_results=n_results
-        )   # TODO: experiment with different n_results values
+        )  # TODO: experiment with different n_results values
         # always have an additional page: RAG often pulls table of contents if
         # avaliable in the document (which does not have any informational value)
         # not all documents contain it and if so, it is placed on different pages
         # no robust way to delete it without risk of losing data
 
         if not passages_with_pages:
-            log.warning(f"No relevant passages found by get_relevant_passage for '{pdf_name}'.")
+            log.warning(
+                f"No relevant passages found by get_relevant_passage for '{pdf_name}'."
+            )
             # Depending on desired behavior, could return error or just empty context
             return RAG_CONTEXT_ERROR_PROMPT_INSTRUCTION
 
         context_parts = [RAG_CONTEXT_HEADER]
         for passage, page_number in passages_with_pages:
-            context_parts.append(f"Page {page_number}: {passage}\n") # Corrected typo "Relevanat" implicitly by new string
+            context_parts.append(f"Page {page_number}: {passage}\n")
         context_parts.append(RAG_CONTEXT_FOOTER)
-        
+
         rag_context = "".join(context_parts)
         log.debug(f"Successfully retrieved and formatted RAG context for '{pdf_name}'.")
         return rag_context
@@ -158,9 +187,10 @@ def _get_rag_context(
     except Exception as e:
         log.error(
             f"Problem retrieving RAG context for '{pdf_name}'. Error: {e}\n",
-            exc_info=True
+            exc_info=True,
         )
         return RAG_CONTEXT_ERROR_PROMPT_INSTRUCTION
+
 
 def process_pdf(
     prompt: str,
@@ -213,10 +243,10 @@ def process_pdf(
             output_size=output_size,
             enhancer_flag=enhancer_checkbox,
             model=model,
-            identifier=pdf.stem
-        ) 
+            identifier=pdf.stem,
+        )
         response = model.generate_content(
-            [final_llm_prompt_for_model, file_to_send], # Pass the assembled prompt
+            [final_llm_prompt_for_model, file_to_send],
             stream=True,
             generation_config={"temperature": temperature_slider_value},
         )
@@ -276,7 +306,7 @@ def process_query_with_rag(
     if not prompt:
         yield {"error": "No prompt provided"}
         return
-    
+
     rag_context = _get_rag_context(
         prompt=prompt,
         pdf_name=pdf_name,
@@ -294,7 +324,7 @@ def process_query_with_rag(
         enhancer_flag=enhancer_checkbox,
         model=model,
         identifier=pdf_name,
-        rag_context=rag_context
+        rag_context=rag_context,
     )
 
     try:
@@ -357,11 +387,11 @@ def process_chat_query_with_rag(
               For content: `{"pdf_name": str, "content": str}`.
               For error: `{"error": str}`.
     """
-    
+
     if not prompt:
         yield {"error": "No prompt provided"}
         return
-    
+
     rag_context = _get_rag_context(
         prompt=prompt,
         pdf_name=pdf_name,
@@ -380,16 +410,20 @@ def process_chat_query_with_rag(
         model=model,
         identifier=pdf_name,
         rag_context=rag_context,
-        chat_history=chat_history
+        chat_history=chat_history,
     )
 
     try:
-        log.info(f"Generating chat response for query on '{pdf_name}' with final prompt: '{final_llm_prompt[:200]}...'")
+        log.info(
+            f"Generating chat response for query on '{pdf_name}' with final prompt: '{final_llm_prompt[:200]}...'"
+        )
         chat = model.start_chat(history=chat_history)
         response = chat.send_message(
             [final_llm_prompt],
             stream=True,
-            generation_config=genai.types.GenerationConfig(temperature=temperature_slider_value),
+            generation_config=genai.types.GenerationConfig(
+                temperature=temperature_slider_value
+            ),
         )
 
         for response_chunk in response:

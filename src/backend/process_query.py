@@ -67,7 +67,6 @@ def _get_rag_context(
             log.debug(f"Using all {n_results} available document chunks for RAG context for '{pdf_name}'.")
         else:
             n_results = DEFAULT_RAG_CONTEXT_PAGES
-            available_docs = collection.count()
             if n_results > total_chunks_in_collection and total_chunks_in_collection > 0: # only cap if docs are available
                 n_results = total_chunks_in_collection
                 log.debug(f"Default n_pages ({DEFAULT_RAG_CONTEXT_PAGES}) exceeds available docs ({available_docs}). Using {n_results} for '{pdf_name}'.")

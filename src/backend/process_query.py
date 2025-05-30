@@ -119,6 +119,7 @@ def process_query_with_rag(
     
     if not prompt:
         yield {"error": "No prompt provided"}
+        return
 
     else:
         try:
@@ -210,8 +211,10 @@ def process_chat_query_with_rag(
     collection_name: str,
     rag_doc_slider: str,
 ) -> Generator:
+    
     if not prompt:
         yield {"error": "No prompt provided"}
+        return
 
     else:
         try:

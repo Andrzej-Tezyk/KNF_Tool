@@ -116,10 +116,7 @@ def process_query_with_rag(
     collection_name: str,
     rag_doc_slider: str,
 ) -> Generator:
-    """
-    ToDo: pdf variable is str type, not Path like in process_pdf.
-    It contains pdf file name only.
-    """
+    
     if not prompt:
         yield {"error": "No prompt provided"}
 

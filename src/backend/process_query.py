@@ -11,7 +11,7 @@ from backend.rag_chromadb import get_gemini_ef  # type: ignore[import-not-found]
 from backend.rag_use_chroma_collections import get_relevant_passage  # type: ignore[import-not-found]
 from backend.prompt_enhancer import enhance_prompt  # type: ignore[import-not-found]
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("__name__")
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 

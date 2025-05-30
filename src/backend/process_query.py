@@ -17,6 +17,12 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 load_dotenv()
 
+# Number of pages to retrieve for RAG context by default
+DEFAULT_RAG_CONTEXT_PAGES = 5
+# Delay between yielding response chunks
+STREAM_RESPONSE_CHUNK_DELAY_SECONDS = 0.1
+# Delay after processing a document/query, e.g., for API rate limiting
+POST_PROCESS_DELAY_SECONDS = 1.0
 
 def process_pdf(
     prompt: str,
@@ -89,9 +95,9 @@ def process_pdf(
                 # replace -> sometimes double space between words occure; most likely reason: pdf formating
                 response_chunk_text = response_chunk.text.replace("  ", " ")
                 yield {"pdf_name": pdf, "content": response_chunk_text}
-                time.sleep(0.1)
+                time.sleep(STREAM_RESPONSE_CHUNK_DELAY_SECONDS)
             log.debug(f"Response for: {pdf} was saved!\n")
-            time.sleep(1)  # lower API request rate per sec
+            time.sleep(POST_PROCESS_DELAY_SECONDS)  # lower API request rate per sec
         except Exception as e:
             log.error(f"There is a problem with {pdf.stem}. \n Error message: {e}\n")
             traceback.print_exc()
@@ -127,7 +133,7 @@ def process_query_with_rag(
                 )
 
                 if rag_doc_slider == "False":
-                    n_pages = 5
+                    n_pages = DEFAULT_RAG_CONTEXT_PAGES 
                 else:
                     n_pages = len(collection.get()["ids"])
 
@@ -185,9 +191,9 @@ def process_query_with_rag(
                 # replace -> sometimes double space between words occure; most likely reason: pdf formating
                 response_chunk_text = response_chunk.text.replace("  ", " ")
                 yield {"pdf_name": pdf, "content": response_chunk_text}
-                time.sleep(0.1)
+                time.sleep(STREAM_RESPONSE_CHUNK_DELAY_SECONDS)
             log.debug(f"Response for: {pdf} was saved!\n")
-            time.sleep(1)  # lower API request rate per sec
+            time.sleep(POST_PROCESS_DELAY_SECONDS)  # lower API request rate per sec
         except Exception as e:
             log.error(f"There is a problem with {pdf}. \n Error message: {e}\n")
             traceback.print_exc()
@@ -220,7 +226,7 @@ def process_chat_query_with_rag(
                 )
 
                 if rag_doc_slider == "False":
-                    n_pages = 5
+                    n_pages = DEFAULT_RAG_CONTEXT_PAGES 
                 else:
                     n_pages = len(collection.get()["ids"])
 
@@ -276,9 +282,9 @@ def process_chat_query_with_rag(
                 # replace -> sometimes double space between words occure; most likely reason: pdf formating
                 response_chunk_text = response_chunk.text.replace("  ", " ")
                 yield {"pdf_name": pdf, "content": response_chunk_text}
-                time.sleep(0.1)
+                time.sleep(STREAM_RESPONSE_CHUNK_DELAY_SECONDS)
             log.debug(f"Response for: {pdf} was saved!\n")
-            time.sleep(1)  # lower API request rate per sec
+            time.sleep(POST_PROCESS_DELAY_SECONDS)  # lower API request rate per sec
         except Exception as e:
             log.error(f"There is a problem with {pdf}. \n Error message: {e}\n")
             traceback.print_exc()

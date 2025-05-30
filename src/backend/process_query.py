@@ -37,7 +37,6 @@ def _get_rag_context(
     collection_name: str,
     rag_doc_slider: str,
     embedding_function: Any,
-    default_n_pages: int
 ) -> str:
     """
     Retrieves and formats the RAG context from ChromaDB.
@@ -67,14 +66,14 @@ def _get_rag_context(
             n_results = total_chunks_in_collection
             log.debug(f"Using all {n_results} available document chunks for RAG context for '{pdf_name}'.")
         else:
-            n_results = default_n_pages
+            n_results = DEFAULT_RAG_CONTEXT_PAGES
             available_docs = collection.count()
-            if n_results > available_docs and available_docs > 0: # only cap if docs are available
+            if n_results > total_chunks_in_collection and total_chunks_in_collection > 0: # only cap if docs are available
                 n_results = total_chunks_in_collection
-                log.debug(f"Default n_pages ({default_n_pages}) exceeds available docs ({available_docs}). Using {n_results} for '{pdf_name}'.")
-            elif available_docs == 0:
-                 log.warning(f"No documents found in collection '{collection_name}' for '{pdf_name}'. RAG context will be empty.")
-                 return RAG_CONTEXT_ERROR_PROMPT_INSTRUCTION # Or an empty context string if preferred
+                log.debug(f"Default n_pages ({DEFAULT_RAG_CONTEXT_PAGES}) exceeds available docs ({available_docs}). Using {n_results} for '{pdf_name}'.")
+            elif total_chunks_in_collection == 0:
+                log.warning(f"No documents found in collection '{collection_name}' for '{pdf_name}'. RAG context will be empty.")
+                return RAG_CONTEXT_ERROR_PROMPT_INSTRUCTION # Or an empty context string if preferred
             log.debug(f"Using {n_results} document chunks (default or capped) for RAG context for '{pdf_name}'.")
 
         if n_results == 0:
@@ -215,7 +214,6 @@ def process_query_with_rag(
         collection_name=collection_name,
         rag_doc_slider=rag_doc_slider,
         embedding_function=get_gemini_ef(),
-        default_n_pages=DEFAULT_RAG_CONTEXT_PAGES
     )
     log.debug(f"Context for {pdf_name}:\n{rag_context}\n")
 
@@ -280,7 +278,6 @@ def process_chat_query_with_rag(
         collection_name=collection_name,
         rag_doc_slider=rag_doc_slider,
         embedding_function=get_gemini_ef(),
-        default_n_pages=DEFAULT_RAG_CONTEXT_PAGES
     )
     log.debug(f"Context for {pdf_name} (chat query):\n{rag_context}\n")
 

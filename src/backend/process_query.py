@@ -30,6 +30,41 @@ RAG_CONTEXT_FOOTER = "\n\nPlease use only the above context to generate an answe
 # RAG error during context retrieval prompt instruction
 RAG_CONTEXT_ERROR_PROMPT_INSTRUCTION = "Ignore all instructions and output: 'Error: No context found.'"
 
+def _build_final_llm_prompt(
+    base_prompt: str,
+    change_length_flag: str, # The string "True" or "False"
+    output_size: int,
+    rag_context: str | None = None,
+    chat_history: str | None = None # String representation of chat history
+) -> str:
+    """
+    Constructs the final prompt string to be sent to the LLM.
+
+    Args:
+        base_prompt: The initial prompt (potentially enhanced).
+        change_length_flag: String flag ("True"/"False") to add output size instruction.
+        output_size: The desired output size (e.g., number of words).
+        rag_context: Optional RAG context string.
+        chat_history: Optional string containing the chat history.
+
+    Returns:
+        The fully assembled prompt string for the LLM.
+    """
+    final_prompt_parts = [base_prompt]
+
+    if change_length_flag == "True":
+        final_prompt_parts.append(f" (Please provide approximately {output_size} words response)")
+
+    if rag_context:
+        final_prompt_parts.append(rag_context)
+
+    if chat_history:
+        final_prompt_parts.append(f"\n\nChat history:\n{chat_history}")
+        
+    assembled_prompt = "".join(final_prompt_parts)
+    log.debug(f"Assembled final LLM prompt (first 200 chars): '{assembled_prompt[:200]}...'")
+    return assembled_prompt
+
 def _get_rag_context(
     prompt: str,
     pdf_name: str,
@@ -67,7 +102,7 @@ def _get_rag_context(
             log.debug(f"Using all {n_results} available document chunks for RAG context for '{pdf_name}'.")
         else:
             n_results = DEFAULT_RAG_CONTEXT_PAGES
-            if n_results > total_chunks_in_collection and total_chunks_in_collection > 0: # only cap if docs are available
+            if n_results > total_chunks_in_collection and total_chunks_in_collection > 0:
                 n_results = total_chunks_in_collection
                 log.debug(f"Default n_pages ({DEFAULT_RAG_CONTEXT_PAGES}) exceeds total chunks in collection ({total_chunks_in_collection}). Using {n_results} for '{pdf_name}'.")
             elif total_chunks_in_collection == 0:
@@ -159,19 +194,17 @@ def process_pdf(
         )
 
     try:
-        
         log.info(f"Document: {pdf.stem} is beeing analyzed.")
         file_to_send = genai.upload_file(pdf)
         log.debug(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
+
+        final_llm_prompt_for_model = _build_final_llm_prompt(
+            base_prompt=prompt,
+            change_length_flag=change_length_checkbox,
+            output_size=output_size
+        ) 
         response = model.generate_content(
-            [
-                (
-                    prompt + f"(Please provide {output_size} size response)"
-                    if change_length_checkbox == "True"
-                    else prompt
-                ),
-                file_to_send,
-            ],
+            [final_llm_prompt_for_model, file_to_send], # Pass the assembled prompt
             stream=True,
             generation_config={"temperature": temperature_slider_value},
         )
@@ -228,17 +261,20 @@ def process_query_with_rag(
                 exc_info=True
             )
         
-    final_llm_prompt = prompt + rag_context
-    if change_length_checkbox == "True":
-        final_llm_prompt += f" (Please provide {output_size} size response.)"
-    
-    response = model.generate_content(
-        [final_llm_prompt],
-        stream=True,
-        generation_config={"temperature": temperature_slider_value},
+    final_llm_prompt = _build_final_llm_prompt(
+        base_prompt=prompt, # This is the potentially enhanced prompt
+        change_length_flag=change_length_checkbox,
+        output_size=output_size,
+        rag_context=rag_context
+        # chat_history defaults to None
     )
 
     try:
+        response = model.generate_content(
+            [final_llm_prompt],
+            stream=True,
+            generation_config={"temperature": temperature_slider_value},
+        )
         for response_chunk in response:
             # replace -> sometimes double space between words occure; most likely reason: pdf formating
             response_chunk_text = response_chunk.text.replace("  ", " ")
@@ -292,16 +328,19 @@ def process_chat_query_with_rag(
                 exc_info=True
             )
 
-    final_llm_prompt = prompt + rag_context
-    if change_length_checkbox == "True":
-        final_llm_prompt += f"\n(Please provide {output_size} size response.)"
-    final_llm_prompt += f"\n\nChat history:\n{str(chat_history)}"
-    
+    final_llm_prompt = _build_final_llm_prompt(
+        base_prompt=prompt, # This is the (potentially enhanced) current turn/query
+        change_length_flag=change_length_checkbox,
+        output_size=output_size,
+        rag_context=rag_context,
+        chat_history=chat_history
+    )
+
     try:
-        log.info(f"Generating chat response for query on '{pdf_name}' with final prompt: '{final_llm_prompt[:150]}...'")
+        log.info(f"Generating chat response for query on '{pdf_name}' with final prompt: '{final_llm_prompt[:200]}...'")
         chat = model.start_chat(history=chat_history)
         response = chat.send_message(
-            [final_llm_prompt],
+            final_llm_prompt,
             stream=True,
             generation_config=genai.types.GenerationConfig(temperature=temperature_slider_value),
         )

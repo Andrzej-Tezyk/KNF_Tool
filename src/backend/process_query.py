@@ -69,7 +69,7 @@ def _get_rag_context(
             n_results = DEFAULT_RAG_CONTEXT_PAGES
             if n_results > total_chunks_in_collection and total_chunks_in_collection > 0: # only cap if docs are available
                 n_results = total_chunks_in_collection
-                log.debug(f"Default n_pages ({DEFAULT_RAG_CONTEXT_PAGES}) exceeds available docs ({available_docs}). Using {n_results} for '{pdf_name}'.")
+                log.debug(f"Default n_pages ({DEFAULT_RAG_CONTEXT_PAGES}) exceeds total chunks in collection ({total_chunks_in_collection}). Using {n_results} for '{pdf_name}'.")
             elif total_chunks_in_collection == 0:
                 log.warning(f"No documents found in collection '{collection_name}' for '{pdf_name}'. RAG context will be empty.")
                 return RAG_CONTEXT_ERROR_PROMPT_INSTRUCTION # Or an empty context string if preferred

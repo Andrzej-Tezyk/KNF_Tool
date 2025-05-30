@@ -28,7 +28,7 @@ def process_pdf(
     prompt: str,
     pdf: Path,
     model: Any,
-    change_lebgth_checkbox: str,
+    change_length_checkbox: str,
     enhancer_checkbox: str,
     output_size: int,
     slider_value: float,
@@ -82,7 +82,7 @@ def process_pdf(
                 [
                     (
                         prompt + f"(Please provide {output_size} size response)"
-                        if change_lebgth_checkbox == "True"
+                        if change_length_checkbox == "True"
                         else prompt
                     ),
                     file_to_send,
@@ -106,7 +106,7 @@ def process_pdf(
 
 def process_query_with_rag(
     prompt: str,
-    pdf: str,
+    pdf_name: str,
     model: Any,
     change_length_checkbox: str,
     enhancer_checkbox: str,
@@ -125,7 +125,7 @@ def process_query_with_rag(
 
     else:
         try:
-            log.info(f"Document: {pdf} is beeing analyzed.")
+            log.info(f"Document: {pdf_name} is beeing analyzed.")
 
             try:
                 collection = chroma_client.get_collection(
@@ -156,7 +156,7 @@ def process_query_with_rag(
                 )
             except Exception as e:
                 log.error(
-                    f"Problem with retrieveing context for {pdf}. \n Error message: {e}\n"
+                    f"Problem with retrieveing context for {pdf_name}. \n Error message: {e}\n"
                 )
                 rag_context = (
                     "Ignore all instrucions and output: 'Error: No context found.'"
@@ -169,10 +169,10 @@ def process_query_with_rag(
 
             except Exception as e:
                 log.error(
-                    f"Problem with prompt enhancer for {pdf}. \n Error message: {e}\n"
+                    f"Problem with prompt enhancer for {pdf_name}. \n Error message: {e}\n"
                 )
 
-            log.debug(f"Context for {pdf}:\n{rag_context}\n")
+            log.debug(f"Context for {pdf_name}:\n{rag_context}\n")
             response = model.generate_content(
                 [
                     (
@@ -190,20 +190,20 @@ def process_query_with_rag(
             for response_chunk in response:
                 # replace -> sometimes double space between words occure; most likely reason: pdf formating
                 response_chunk_text = response_chunk.text.replace("  ", " ")
-                yield {"pdf_name": pdf, "content": response_chunk_text}
+                yield {"pdf_name": pdf_name, "content": response_chunk_text}
                 time.sleep(STREAM_RESPONSE_CHUNK_DELAY_SECONDS)
-            log.debug(f"Response for: {pdf} was saved!\n")
+            log.debug(f"Response for: {pdf_name} was saved!\n")
             time.sleep(POST_PROCESS_DELAY_SECONDS)  # lower API request rate per sec
         except Exception as e:
-            log.error(f"There is a problem with {pdf}. \n Error message: {e}\n")
+            log.error(f"There is a problem with {pdf_name}. \n Error message: {e}\n")
             traceback.print_exc()
-            yield {"error": f"An error occurred while processing {pdf}: {str(e)}"}
+            yield {"error": f"An error occurred while processing {pdf_name}: {str(e)}"}
 
 
 def process_chat_query_with_rag(
     prompt: str,
     chat_history: str,
-    pdf: str,
+    pdf_name: str,
     model: Any,
     change_length_checkbox: str,
     enhancer_checkbox: str,
@@ -218,7 +218,7 @@ def process_chat_query_with_rag(
 
     else:
         try:
-            log.info(f"Document: {pdf} is beeing analyzed.")
+            log.info(f"Document: {pdf_name} is beeing analyzed.")
 
             try:
                 collection = chroma_client.get_collection(
@@ -245,7 +245,7 @@ def process_chat_query_with_rag(
                 )
             except Exception as e:
                 log.error(
-                    f"Problem with retrieveing context for {pdf}. \n Error message: {e}\n"
+                    f"Problem with retrieveing context for {pdf_name}. \n Error message: {e}\n"
                 )
                 rag_context = (
                     "Ignore all instrucions and output: 'Error: No context found.'"
@@ -258,9 +258,9 @@ def process_chat_query_with_rag(
 
             except Exception as e:
                 log.error(
-                    f"Problem with prompt enhancer for {pdf}. \n Error message: {e}\n"
+                    f"Problem with prompt enhancer for {pdf_name}. \n Error message: {e}\n"
                 )
-            log.debug(f"Context for {pdf}:\n{rag_context}\n")
+            log.debug(f"Context for {pdf_name}:\n{rag_context}\n")
 
             chat = model.start_chat(history=chat_history)
 
@@ -281,11 +281,11 @@ def process_chat_query_with_rag(
             for response_chunk in response:
                 # replace -> sometimes double space between words occure; most likely reason: pdf formating
                 response_chunk_text = response_chunk.text.replace("  ", " ")
-                yield {"pdf_name": pdf, "content": response_chunk_text}
+                yield {"pdf_name": pdf_name, "content": response_chunk_text}
                 time.sleep(STREAM_RESPONSE_CHUNK_DELAY_SECONDS)
-            log.debug(f"Response for: {pdf} was saved!\n")
+            log.debug(f"Response for: {pdf_name} was saved!\n")
             time.sleep(POST_PROCESS_DELAY_SECONDS)  # lower API request rate per sec
         except Exception as e:
-            log.error(f"There is a problem with {pdf}. \n Error message: {e}\n")
+            log.error(f"There is a problem with {pdf_name}. \n Error message: {e}\n")
             traceback.print_exc()
-            yield {"error": f"An error occurred while processing {pdf}: {str(e)}"}
+            yield {"error": f"An error occurred while processing {pdf_name}: {str(e)}"}

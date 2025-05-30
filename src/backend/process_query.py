@@ -143,20 +143,23 @@ def _get_rag_context(
             ):
                 n_results = total_chunks_in_collection
                 log.debug(
-                    f"Default n_pages ({DEFAULT_RAG_CONTEXT_PAGES}) exceeds total chunks in collection ({total_chunks_in_collection}). Using {n_results} for '{pdf_name}'."
+                    f"Default n_pages ({DEFAULT_RAG_CONTEXT_PAGES}) exceeds total "
+                    f"chunks in collection ({total_chunks_in_collection}). "
+                    f"Using {n_results} for '{pdf_name}'."
                 )
             elif total_chunks_in_collection == 0:
                 log.warning(
-                    f"No documents found in collection '{collection_name}' for '{pdf_name}'. RAG context will be empty."
+                    f"No documents found in collection '{collection_name}' for '{pdf_name}' "
+                    "RAG context will be empty."
                 )
                 return RAG_CONTEXT_ERROR_PROMPT_INSTRUCTION
             log.debug(
-                f"Using {n_results} document chunks (default or capped) for RAG context for '{pdf_name}'."
+                f"Using {n_results} document chunks for RAG context for '{pdf_name}'."
             )
 
         if n_results == 0:
             log.warning(
-                f"No document chunks to retrieve for RAG context for '{pdf_name}' (n_results is 0)."
+                f"No document chunks to retrieve from RAG for '{pdf_name}'"
             )
             return RAG_CONTEXT_ERROR_PROMPT_INSTRUCTION
 
@@ -170,7 +173,7 @@ def _get_rag_context(
 
         if not passages_with_pages:
             log.warning(
-                f"No relevant passages found by get_relevant_passage for '{pdf_name}'."
+                f"No relevant passages found for '{pdf_name}'."
             )
             # Depending on desired behavior, could return error or just empty context
             return RAG_CONTEXT_ERROR_PROMPT_INSTRUCTION
@@ -181,7 +184,7 @@ def _get_rag_context(
         context_parts.append(RAG_CONTEXT_FOOTER)
 
         rag_context = "".join(context_parts)
-        log.debug(f"Successfully retrieved and formatted RAG context for '{pdf_name}'.")
+        log.debug(f"Successfully retrieved RAG context for '{pdf_name}'.")
         return rag_context
 
     except Exception as e:
@@ -224,7 +227,6 @@ def process_pdf(
     Yields:
         dict: A dictionary for each chunk of the response or for an error.
               For content: `{"pdf_name": str, "content": str}`
-                           (where `pdf_name` is the PDF filename without extension).
               For error: `{"error": str}`.
     """
 
@@ -235,7 +237,9 @@ def process_pdf(
     try:
         log.info(f"Document: {pdf.stem} is beeing analyzed.")
         file_to_send = genai.upload_file(pdf)
-        log.debug(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
+        log.debug(
+            f"PDF uploaded successfully. File metadata: {file_to_send}\n"
+            )
 
         final_llm_prompt_for_model = _build_final_llm_prompt(
             base_prompt=prompt,
@@ -415,7 +419,8 @@ def process_chat_query_with_rag(
 
     try:
         log.info(
-            f"Generating chat response for query on '{pdf_name}' with final prompt: '{final_llm_prompt[:200]}...'"
+            f"Generating chat response for query on '{pdf_name}' with prompt: "
+            f"'{final_llm_prompt[:200]}...'"
         )
         chat = model.start_chat(history=chat_history)
         response = chat.send_message(

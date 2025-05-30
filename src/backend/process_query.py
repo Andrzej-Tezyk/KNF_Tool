@@ -3,6 +3,7 @@ import traceback
 from pathlib import Path
 from typing import Any
 from collections.abc import Generator
+from chromadb.api.client import Client as ChromaClient
 import logging
 
 import google.generativeai as genai
@@ -35,7 +36,7 @@ def _build_final_llm_prompt(
     change_length_flag: str,
     output_size: int,
     enhancer_flag: str,
-    model: Any,
+    model: genai,
     identifier: str,
     rag_context: str | None = None,
     chat_history: str | None = None
@@ -87,7 +88,7 @@ def _build_final_llm_prompt(
 def _get_rag_context(
     prompt: str,
     pdf_name: str,
-    chroma_client: Any,
+    chroma_client: ChromaClient,
     collection_name: str,
     rag_doc_slider: str,
     embedding_function: Any,
@@ -165,7 +166,7 @@ def _get_rag_context(
 def process_pdf(
     prompt: str,
     pdf: Path,
-    model: Any,
+    model: genai,
     change_length_checkbox: str,
     enhancer_checkbox: str,
     output_size: int,
@@ -237,12 +238,12 @@ def process_pdf(
 def process_query_with_rag(
     prompt: str,
     pdf_name: str,
-    model: Any,
+    model: genai,
     change_length_checkbox: str,
     enhancer_checkbox: str,
     output_size: int,
     temperature_slider_value: float,
-    chroma_client: Any,
+    chroma_client: ChromaClient,
     collection_name: str,
     rag_doc_slider: str,
 ) -> Generator:
@@ -294,12 +295,12 @@ def process_chat_query_with_rag(
     prompt: str,
     chat_history: str,
     pdf_name: str,
-    model: Any,
+    model: genai,
     change_length_checkbox: str,
     enhancer_checkbox: str,
     output_size: int,
     temperature_slider_value: float,
-    chroma_client: Any,
+    chroma_client: ChromaClient,
     collection_name: str,
     rag_doc_slider: str,
 ) -> Generator:

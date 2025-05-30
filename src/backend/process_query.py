@@ -158,9 +158,7 @@ def _get_rag_context(
             )
 
         if n_results == 0:
-            log.warning(
-                f"No document chunks to retrieve from RAG for '{pdf_name}'"
-            )
+            log.warning(f"No document chunks to retrieve from RAG for '{pdf_name}'")
             return RAG_CONTEXT_ERROR_PROMPT_INSTRUCTION
 
         passages_with_pages = get_relevant_passage(
@@ -172,9 +170,7 @@ def _get_rag_context(
         # no robust way to delete it without risk of losing data
 
         if not passages_with_pages:
-            log.warning(
-                f"No relevant passages found for '{pdf_name}'."
-            )
+            log.warning(f"No relevant passages found for '{pdf_name}'.")
             # Depending on desired behavior, could return error or just empty context
             return RAG_CONTEXT_ERROR_PROMPT_INSTRUCTION
 
@@ -237,9 +233,7 @@ def process_pdf(
     try:
         log.info(f"Document: {pdf.stem} is beeing analyzed.")
         file_to_send = genai.upload_file(pdf)
-        log.debug(
-            f"PDF uploaded successfully. File metadata: {file_to_send}\n"
-            )
+        log.debug(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
 
         final_llm_prompt_for_model = _build_final_llm_prompt(
             base_prompt=prompt,

@@ -158,35 +158,35 @@ def process_pdf(
             f"Problem with prompt enhancer for {pdf.stem}. \n Error message: {e}\n"
         )
 
-    else:
-        try:
-            log.info(f"Document: {pdf.stem} is beeing analyzed.")
-            file_to_send = genai.upload_file(pdf)
-            log.debug(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
-            response = model.generate_content(
-                [
-                    (
-                        prompt + f"(Please provide {output_size} size response)"
-                        if change_length_checkbox == "True"
-                        else prompt
-                    ),
-                    file_to_send,
-                ],
-                stream=True,
-                generation_config={"temperature": temperature_slider_value},
-            )
+    try:
+        
+        log.info(f"Document: {pdf.stem} is beeing analyzed.")
+        file_to_send = genai.upload_file(pdf)
+        log.debug(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
+        response = model.generate_content(
+            [
+                (
+                    prompt + f"(Please provide {output_size} size response)"
+                    if change_length_checkbox == "True"
+                    else prompt
+                ),
+                file_to_send,
+            ],
+            stream=True,
+            generation_config={"temperature": temperature_slider_value},
+        )
 
-            for response_chunk in response:
-                # replace -> sometimes double space between words occure; most likely reason: pdf formating
-                response_chunk_text = response_chunk.text.replace("  ", " ")
-                yield {"pdf_name": pdf, "content": response_chunk_text}
-                time.sleep(STREAM_RESPONSE_CHUNK_DELAY_SECONDS)
-            log.debug(f"Response for: {pdf} was saved!\n")
-            time.sleep(POST_PROCESS_DELAY_SECONDS)  # lower API request rate per sec
-        except Exception as e:
-            log.error(f"There is a problem with {pdf.stem}. \n Error message: {e}\n")
-            traceback.print_exc()
-            yield {"error": f"An error occurred while processing {pdf.stem}: {str(e)}"}
+        for response_chunk in response:
+            # replace -> sometimes double space between words occure; most likely reason: pdf formating
+            response_chunk_text = response_chunk.text.replace("  ", " ")
+            yield {"pdf_name": pdf, "content": response_chunk_text}
+            time.sleep(STREAM_RESPONSE_CHUNK_DELAY_SECONDS)
+        log.debug(f"Response for: {pdf} was saved!\n")
+        time.sleep(POST_PROCESS_DELAY_SECONDS)  # lower API request rate per sec
+    except Exception as e:
+        log.error(f"There is a problem with {pdf.stem}. \n Error message: {e}\n")
+        traceback.print_exc()
+        yield {"error": f"An error occurred while processing {pdf.stem}: {str(e)}"}
 
 
 def process_query_with_rag(

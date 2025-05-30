@@ -32,25 +32,44 @@ RAG_CONTEXT_ERROR_PROMPT_INSTRUCTION = "Ignore all instructions and output: 'Err
 
 def _build_final_llm_prompt(
     base_prompt: str,
-    change_length_flag: str, # The string "True" or "False"
+    change_length_flag: str,
     output_size: int,
+    enhancer_flag: str,
+    model: Any,
+    identifier: str,
     rag_context: str | None = None,
-    chat_history: str | None = None # String representation of chat history
+    chat_history: str | None = None
 ) -> str:
     """
-    Constructs the final prompt string to be sent to the LLM.
+    Enhances (optionally) and constructs the final prompt string for the LLM.
 
     Args:
-        base_prompt: The initial prompt (potentially enhanced).
+        base_prompt: The initial prompt.
         change_length_flag: String flag ("True"/"False") to add output size instruction.
         output_size: The desired output size (e.g., number of words).
+        enhancer_flag: String flag ("True"/"False") to enable prompt enhancement.
+        model: The generative model (passed to enhance_prompt).
+        identifier: A string identifier (like a PDF name/stem) for logging.
         rag_context: Optional RAG context string.
         chat_history: Optional string containing the chat history.
 
     Returns:
-        The fully assembled prompt string for the LLM.
+        The (potentially enhanced) and fully assembled prompt string for the LLM.
     """
-    final_prompt_parts = [base_prompt]
+    processed_prompt = base_prompt
+
+    if enhancer_flag == "True":
+        try:
+            log.debug(f"Original prompt for '{identifier}': '{processed_prompt[:100]}...'")
+            processed_prompt = enhance_prompt(processed_prompt, model) # enhance_prompt modifies the prompt
+            log.debug(f"Improved prompt for '{identifier}': '{processed_prompt[:100]}...'")
+        except Exception as e:
+            log.error(
+                f"Problem with prompt enhancer for '{identifier}'. Using original prompt. Error: {e}\n",
+                exc_info=True
+            )
+
+    final_prompt_parts = [processed_prompt]
 
     if change_length_flag == "True":
         final_prompt_parts.append(f" (Please provide approximately {output_size} words response)")
@@ -184,16 +203,6 @@ def process_pdf(
         return
 
     try:
-        if enhancer_checkbox == "True":
-            prompt = enhance_prompt(prompt, model)
-            log.debug(f"Improved prompt: {prompt}")
-
-    except Exception as e:
-        log.error(
-            f"Problem with prompt enhancer for {pdf.stem}. \n Error message: {e}\n"
-        )
-
-    try:
         log.info(f"Document: {pdf.stem} is beeing analyzed.")
         file_to_send = genai.upload_file(pdf)
         log.debug(f"PDF uploaded successfully. File metadata: {file_to_send}\n")
@@ -201,7 +210,10 @@ def process_pdf(
         final_llm_prompt_for_model = _build_final_llm_prompt(
             base_prompt=prompt,
             change_length_flag=change_length_checkbox,
-            output_size=output_size
+            output_size=output_size,
+            enhancer_flag=enhancer_checkbox,
+            model=model,
+            identifier=pdf.stem
         ) 
         response = model.generate_content(
             [final_llm_prompt_for_model, file_to_send], # Pass the assembled prompt
@@ -249,24 +261,14 @@ def process_query_with_rag(
     )
     log.debug(f"Context for {pdf_name}:\n{rag_context}\n")
 
-    if enhancer_checkbox == "True":
-        try:
-            log.debug(f"Original prompt for {pdf_name}: '{prompt}'")
-            prompt = enhance_prompt(prompt, model)
-            log.debug(f"Improved prompt: '{prompt}'")
-
-        except Exception as e:
-            log.error(
-                f"Problem with prompt enhancer for {pdf_name}. Using original prompt. Error: {e}\n",
-                exc_info=True
-            )
-        
     final_llm_prompt = _build_final_llm_prompt(
-        base_prompt=prompt, # This is the potentially enhanced prompt
+        base_prompt=prompt,
         change_length_flag=change_length_checkbox,
         output_size=output_size,
+        enhancer_flag=enhancer_checkbox,
+        model=model,
+        identifier=pdf_name,
         rag_context=rag_context
-        # chat_history defaults to None
     )
 
     try:
@@ -316,22 +318,13 @@ def process_chat_query_with_rag(
     )
     log.debug(f"Context for {pdf_name} (chat query):\n{rag_context}\n")
 
-    if enhancer_checkbox == "True":
-        try:
-            log.debug(f"Original prompt for {pdf_name}: '{prompt}'")
-            prompt = enhance_prompt(prompt, model)
-            log.debug(f"Improved prompt: '{prompt}'")
-
-        except Exception as e:
-            log.error(
-                f"Problem with query enhancer for {pdf_name}. Using original query. Error: {e}\n",
-                exc_info=True
-            )
-
     final_llm_prompt = _build_final_llm_prompt(
-        base_prompt=prompt, # This is the (potentially enhanced) current turn/query
+        base_prompt=prompt,
         change_length_flag=change_length_checkbox,
         output_size=output_size,
+        enhancer_flag=enhancer_checkbox,
+        model=model,
+        identifier=pdf_name,
         rag_context=rag_context,
         chat_history=chat_history
     )
@@ -340,7 +333,7 @@ def process_chat_query_with_rag(
         log.info(f"Generating chat response for query on '{pdf_name}' with final prompt: '{final_llm_prompt[:200]}...'")
         chat = model.start_chat(history=chat_history)
         response = chat.send_message(
-            final_llm_prompt,
+            [final_llm_prompt],
             stream=True,
             generation_config=genai.types.GenerationConfig(temperature=temperature_slider_value),
         )

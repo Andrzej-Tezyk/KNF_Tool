@@ -277,6 +277,12 @@ textarea:focus {
     filter: var(--icon-color);
 }
 
+.output-icon {
+    width: 20px;
+    height: 20px;
+    filter: var(--primary-color);
+}
+
 .output-content {
     background-color: #ffffff;
     /* border: 1px solid var(--border-color); */
@@ -321,6 +327,11 @@ textarea:focus {
 
 .output-button:hover {
     transform: none;
+}
+
+.copy-edit-contener {
+    display: flex;
+    margin-left: 1rem
 }
 
 .sidebar-header img {

@@ -199,7 +199,7 @@ def process_pdf(
     enhancer_checkbox: str,
     output_size: str,
     temperature_slider_value: float,
-) -> Generator:
+) -> Any:
     """
     Uploads a PDF, processes it with a generative model, and streams content.
 
@@ -272,7 +272,7 @@ def process_query_with_rag(
     chroma_client: ChromaClient,
     collection_name: str,
     rag_doc_slider: str,
-) -> Generator:
+) -> Any:
     """
     Processes a query using RAG, combining it with context from a document.
 
@@ -355,7 +355,7 @@ def process_chat_query_with_rag(
     chroma_client: ChromaClient,
     collection_name: str,
     rag_doc_slider: str,
-) -> Generator:
+) -> Any:
     """
     Processes a chat query using RAG, incorporating conversation history.
 

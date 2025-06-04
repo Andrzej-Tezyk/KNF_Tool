@@ -3,14 +3,13 @@ import traceback
 from pathlib import Path
 from typing import Any
 import logging
-from collections.abc import Generator
 from chromadb.api.client import Client as ChromaClient
 
-import google.generativeai as genai
+import google.generativeai as genai # type: ignore[unused-ignore]
 from dotenv import load_dotenv
-from backend.rag_chromadb import get_gemini_ef  # type: ignore[import-not-found]
-from backend.rag_use_chroma_collections import get_relevant_passage  # type: ignore[import-not-found]
-from backend.prompt_enhancer import enhance_prompt  # type: ignore[import-not-found]
+from backend.rag_chromadb import get_gemini_ef
+from backend.rag_use_chroma_collections import get_relevant_passage
+from backend.prompt_enhancer import enhance_prompt
 
 log = logging.getLogger("__name__")
 
@@ -39,7 +38,7 @@ def _build_final_llm_prompt(
     change_length_flag: str,
     output_size: str,
     enhancer_flag: str,
-    model: genai,
+    model: genai.GenerativeModel,
     identifier: str,
     rag_context: str | None = None,
     chat_history: str | None = None,
@@ -194,7 +193,7 @@ def _get_rag_context(
 def process_pdf(
     prompt: str,
     pdf: Path,
-    model: genai,
+    model: genai.GenerativeModel,
     change_length_checkbox: str,
     enhancer_checkbox: str,
     output_size: str,
@@ -264,7 +263,7 @@ def process_pdf(
 def process_query_with_rag(
     prompt: str,
     pdf_name: str,
-    model: genai,
+    model: genai.GenerativeModel,
     change_length_checkbox: str,
     enhancer_checkbox: str,
     output_size: str,
@@ -347,7 +346,7 @@ def process_chat_query_with_rag(
     prompt: str,
     chat_history: str,
     pdf_name: str,
-    model: genai,
+    model: genai.GenerativeModel,
     change_length_checkbox: str,
     enhancer_checkbox: str,
     output_size: str,
@@ -415,7 +414,7 @@ def process_chat_query_with_rag(
             f"Generating chat response for query on '{pdf_name}' with prompt: "
             f"'{final_llm_prompt[:200]}...'"
         )
-        chat = model.start_chat(history=chat_history)
+        chat = model.start_chat(history=chat_history) # type: ignore[arg-type]
         response = chat.send_message(
             [final_llm_prompt],
             stream=True,

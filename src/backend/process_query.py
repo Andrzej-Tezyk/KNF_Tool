@@ -5,7 +5,7 @@ from typing import Any
 import logging
 from chromadb.api.client import Client as ChromaClient
 
-import google.generativeai as genai # type: ignore[unused-ignore]
+import google.generativeai as genai  # type: ignore[unused-ignore]
 from dotenv import load_dotenv
 from backend.rag_chromadb import get_gemini_ef
 from backend.rag_use_chroma_collections import get_relevant_passage
@@ -414,7 +414,7 @@ def process_chat_query_with_rag(
             f"Generating chat response for query on '{pdf_name}' with prompt: "
             f"'{final_llm_prompt[:200]}...'"
         )
-        chat = model.start_chat(history=chat_history) # type: ignore[arg-type]
+        chat = model.start_chat(history=chat_history)  # type: ignore[arg-type]
         response = chat.send_message(
             [final_llm_prompt],
             stream=True,

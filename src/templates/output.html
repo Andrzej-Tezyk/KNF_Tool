@@ -9,4 +9,15 @@
     </div>
     <div class="markdown-body" id="{{ container_id }}">
     </div>
+    <div class="copy-edit-contener" id="under_chat_buttons-{{ container_id }}">
+        <button id="copy-button" class="button-round"> 
+            <img class="output-icon" src="{{ url_for('static', filename='images/copy-regular.svg') }}">
+        </button>
+        <button id="download-button" class="button-round"> 
+            <img class="output-icon" src="{{ url_for('static', filename='images/download-solid.svg') }}">
+        </button>
+        <button id="edit-button" type="button" class="button-round" data-tooltip="Edit"> 
+            <img class="output-icon" src="{{ url_for('static', filename='images/pen-to-square-regular.svg') }}">
+        </button>
+    </div>
 </div>

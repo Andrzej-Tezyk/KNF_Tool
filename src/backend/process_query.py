@@ -80,9 +80,7 @@ def _build_final_llm_prompt(
     final_prompt_parts = [processed_prompt]
 
     if change_length_flag == "True":
-        final_prompt_parts.append(
-            f" (Please provide approximately {output_size} words response)"
-        )
+        final_prompt_parts.append(f" (Please provide {output_size} response)")
 
     if rag_context:
         final_prompt_parts.append(rag_context)

@@ -199,7 +199,7 @@ def process_text(data: dict) -> None:
         choosen_model = str(
             data.get("choosen_model", "gemini-2.0-flash")
         )  # second arg = default model
-        change_length_checkbox = data.get("change_length_checkbox")
+        change_length_checkbox = str(data.get("change_length_checkbox"))
         enhancer_checkbox = str(data.get("prompt_enhancer"))
         slider_value = data.get("slider_value")
         rag_doc_slider = str(data.get("ragDocSlider"))

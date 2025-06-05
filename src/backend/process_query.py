@@ -7,11 +7,13 @@ import logging
 
 import google.generativeai as genai
 from dotenv import load_dotenv
-from backend.rag_chromadb import get_relevant_passage, get_gemini_ef  # type: ignore[import-not-found]
+from backend.rag_chromadb import get_gemini_ef  # type: ignore[import-not-found]
+from backend.rag_use_chroma_collections import get_relevant_passage  # type: ignore[import-not-found]
 from backend.prompt_enhancer import enhance_prompt  # type: ignore[import-not-found]
 
 log = logging.getLogger("__name__")
 
+PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 load_dotenv()
 
@@ -82,7 +84,7 @@ def process_pdf(
                 stream=True,
                 generation_config={"temperature": slider_value},
             )
-            # split its text into smaller sub-chunks
+
             for response_chunk in response:
                 # replace -> sometimes double space between words occure; most likely reason: pdf formating
                 response_chunk_text = response_chunk.text.replace("  ", " ")
@@ -134,6 +136,10 @@ def process_query_with_rag(
                 passages_with_pages = get_relevant_passage(
                     prompt, collection, n_results=n_pages
                 )  # TODO: experiment with different n_results values
+                # always have an additional page: RAG often pulls table of contents if
+                # avaliable in the document (which does not have any informational value)
+                # not all documents contain it and if so, it is placed on different pages
+                # no robust way to delete it without risk of losing data
 
                 rag_context = "\n\nRelevanat context from the document:\n"
                 for passage, page_number in passages_with_pages:
@@ -174,7 +180,7 @@ def process_query_with_rag(
                 stream=True,
                 generation_config={"temperature": slider_value},
             )
-            # split its text into smaller sub-chunks
+
             for response_chunk in response:
                 # replace -> sometimes double space between words occure; most likely reason: pdf formating
                 response_chunk_text = response_chunk.text.replace("  ", " ")
@@ -199,6 +205,7 @@ def process_chat_query_with_rag(
     slider_value: float,
     chroma_client: Any,
     collection_name: str,
+    rag_doc_slider: str,
 ) -> Generator:
     if not prompt:
         yield {"error": "No prompt provided"}
@@ -212,8 +219,15 @@ def process_chat_query_with_rag(
                     name=collection_name, embedding_function=get_gemini_ef()
                 )
 
+                if rag_doc_slider == "False":
+                    n_pages = 5
+                else:
+                    n_pages = len(collection.get()["ids"])
+
+                log.debug(f"Number of pages: {n_pages}")
+
                 passages_with_pages = get_relevant_passage(
-                    prompt, collection, n_results=5
+                    prompt, collection, n_results=n_pages
                 )  # TODO: experiment with different n_results values
 
                 rag_context = "\n\nRelevanat context from the document:\n"
@@ -257,7 +271,7 @@ def process_chat_query_with_rag(
                 stream=True,
                 generation_config={"temperature": slider_value},
             )
-            # split its text into smaller sub-chunks
+
             for response_chunk in response:
                 # replace -> sometimes double space between words occure; most likely reason: pdf formating
                 response_chunk_text = response_chunk.text.replace("  ", " ")

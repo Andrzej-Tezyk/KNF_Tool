@@ -11,12 +11,12 @@ from flask import Flask, render_template, request
 from flask_socketio import SocketIO
 from flask_caching import Cache
 import google.generativeai as genai
-from backend.process_query import process_query_with_rag, process_chat_query_with_rag  # type: ignore[import-not-found]
-from backend.knf_scraping import scrape_knf  # type: ignore[import-not-found]
-from backend.show_pages import show_pages  # type: ignore[import-not-found]
-from backend.custom_logger import CustomFormatter  # type: ignore[import-not-found]
-from backend.chroma_instance import get_chroma_client  # type: ignore[import-not-found]
-from backend.rag_vector_db_name_generation import replace_polish_chars  # type: ignore[import-not-found]
+from backend.process_query import process_query_with_rag, process_chat_query_with_rag
+from backend.knf_scraping import scrape_knf
+from backend.show_pages import show_pages
+from backend.custom_logger import CustomFormatter
+from backend.chroma_instance import get_chroma_client
+from backend.rag_vector_db_name_generation import replace_polish_chars
 
 
 # Get the project root directory

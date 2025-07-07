@@ -92,7 +92,7 @@ def scrape_knf(scraped_dir: Path, num_retries: int, user_agent_list: list) -> No
         datetime_atr = time_html_tag["datetime"]  # type: ignore[index]
 
         pdf_titles_links = {}
-        for link in soup.find_all("a", title=lambda x: x and "Rekomendacja" in x):
+        for link in soup.find_all("a", title=lambda x: x and "rekomendacja" in x.lower()):
             try:
                 href = link.get("href")
                 title = link.get_text(strip=True)

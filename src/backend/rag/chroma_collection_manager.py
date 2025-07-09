@@ -2,7 +2,7 @@ from typing import Any
 import logging
 
 import chromadb
-from backend.rag_embeddings import GeminiEmbeddingFunction
+from src.backend.rag.call_embeddings import GeminiEmbeddingFunction
 
 
 log = logging.getLogger("__name__")

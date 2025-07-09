@@ -13,7 +13,7 @@ from backend.chatbot.prompt_enhancer import enhance_prompt
 
 log = logging.getLogger("__name__")
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
+PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
 
 load_dotenv()
 

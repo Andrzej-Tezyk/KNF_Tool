@@ -907,6 +907,7 @@ textarea:focus {
     box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
     display: none;
     transition: opacity 0.3s ease-out;
+    z-index: 10;
 }
 
 .header-tutorial-flex-contanier {
@@ -1154,6 +1155,7 @@ input:checked + .rag-doc-slider:before {
     box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
     display: none;
     transition: opacity 0.3s ease-out;
+    z-index: 10;
 }
 
 .header-settings-flex-contanier {

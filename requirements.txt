@@ -1,4 +1,4 @@
-requests==2.32.3
+requests==2.32.4
 beautifulsoup4==4.12.3
 python-dotenv==1.1.1
 google-generativeai==0.8.5
@@ -8,7 +8,7 @@ mypy==1.15.0
 Flask==3.1.1
 markdown==3.8
 mkdocs==1.6.1
-mkdocstrings-python==1.16.10
+mkdocstrings-python==1.16.12
 mkdocs-material==9.6.15
 Flask-SocketIO==5.5.1
 Flask-Caching==2.3.1

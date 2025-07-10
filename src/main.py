@@ -1,6 +1,7 @@
 from pathlib import Path
 import traceback
 import os
+import uuid
 from typing import Any
 import json
 import logging
@@ -190,7 +191,9 @@ def process_text(data: dict) -> None:
         output_index += 1
         global streaming
         streaming = True
+        sid = request.sid
 
+        log.info(f"SID start_processing main page: {request.sid}")
         # get data
         prompt = data.get("input")
         selected_files = data.get("pdfFiles")
@@ -255,7 +258,8 @@ def process_text(data: dict) -> None:
                 if not streaming:
                     break
                 pdf_name_to_show = str(pdf.stem.split("_", 1)[1])
-                container_id = f"content-pdf{index}_{output_index}"  # Use current index
+                container_id = str(uuid.uuid4())
+                log.info(f"Generated unique container ID (UUID): {container_id}")
 
                 container_html = render_template(
                     "output.html",
@@ -313,9 +317,10 @@ def process_text(data: dict) -> None:
                         socketio.emit("error", {"message": "unexpected error"})
                         return
                 if streaming:
-                    chat_history = []
-                    chat_history.append({"role": "user", "parts": [prompt]})
-                    chat_history.append({"role": "model", "parts": [accumulated_text]})
+                    chat_history = [
+                        {"role": "user", "parts": [prompt]},
+                        {"role": "model", "parts": [accumulated_text]}
+                    ]
                     data_to_cache = {
                         "title": pdf_name_to_show,
                         "content": final_markdown_content,
@@ -323,11 +328,17 @@ def process_text(data: dict) -> None:
                     }
                     # Set a timeout (e.g., 1 hour = 3600 seconds)
                     cache.set(container_id, data_to_cache, timeout=600)
-                    log.info(f"Stored content for {container_id} in cache.")
+                    log.info(f"Stored content for unique key {container_id} in cache.")
                     log.info(
-                        f"Initial processing complete for {pdf_name_to_show} ({container_id})."
+                        f"Initial processing complete for container ID: {container_id}."
                         "Emitting completion signal."
                     )
+                    session_map_key = f"session_map_{sid}"
+                    session_content_ids = cache.get(session_map_key) or []
+                    if container_id not in session_content_ids:
+                        session_content_ids.append(container_id)
+                        cache.set(session_map_key, session_content_ids, timeout=600)
+                        log.info(f"Added {container_id} to session map for sid: {sid}")
                     # Emit a custom event indicating completion for THIS container
                     socketio.emit(
                         "processing_complete_for_container",
@@ -410,16 +421,24 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
         # get data
         prompt = data.get("input")
         content_id = data.get("contentId")
-        output_size = data.get("output_size")
-        show_pages_checkbox = str(data.get("show_pages_checkbox"))
+
         # get cached data
         cached_data = cache.get(content_id)
+        if not cached_data:
+            log.error(f"Validation Error: No cached data found for UUID: {content_id}.")
+            socketio.emit("error", {"message": f"Could not load data for chat session '{content_id}'. It may have expired."})
+            streaming = False
+            socketio.emit("stream_stopped")
+            return
+        
         pdf_name = cached_data.get("title") if cached_data else None
         chat_history = cached_data.get("chat_history", [])
         rag_doc_slider = str(data.get("ragDocSlider"))
         print("-" * 10, "CHAT HISTORY", "-" * 10)
         print(chat_history)
 
+        output_size = str(data.get("output_size"))
+        show_pages_checkbox = str(data.get("show_pages_checkbox"))
         choosen_model = str(
             data.get("choosen_model", "gemini-2.0-flash")
         )  # second arg = default model
@@ -448,22 +467,6 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
             socketio.emit("stream_stopped")
             return
 
-        if not cached_data:
-            log.error(
-                f"Validation Error: No cached data found for contentId: {content_id}."
-                "Cannot load document context or history."
-            )
-            socketio.emit(
-                "error",
-                {
-                    "message": f"Could not load data for chat session '{content_id}'. "
-                    "It may have expired or is invalid."
-                },
-            )
-            streaming = False
-            socketio.emit("stream_stopped")
-            return
-
         if not pdf_name:
             log.error(f"PDF name not found in cache for content ID: {content_id}")
             socketio.emit("error", {"message": "No pdf name provided"})
@@ -476,9 +479,6 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
                 f"Cached data for '{content_id}' contained 'chat_history' but it was not a list:"
                 f"(type: {type(chat_history)}). Initializing as empty list."
             )
-            chat_history = []  # Reset to a valid empty list
-
-        output_size = str(output_size)
 
         # debug logs for each document
         log.debug(f"Prompt: {prompt}")
@@ -555,7 +555,7 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
                 cached_data["chat_history"] = (
                     chat_history  # <-- Assign the updated list back into the dictionary
                 )
-                cache.set(content_id, cached_data, timeout=600)
+                cache.set(content_id, cached_data, timeout=3600)
                 log.info(f"Stored updated data for {content_id} in cache.")
 
             if not streaming:
@@ -599,6 +599,27 @@ def handle_stop() -> None:
     global streaming
     streaming = False
     log.info("Processing Stopped by User")
+
+@socketio.on("disconnect")
+def handle_disconnect() -> None:
+    """Handles cache cleanup for all UUIDs created by a client's session."""
+    sid = request.sid
+    session_map_key = f"session_map_{sid}"
+    
+    session_content_ids = cache.get(session_map_key)
+
+    if session_content_ids:
+        log.info(f"Disconnect event for sid: {sid}. Cleaning up cached entries.")
+        for container_id in session_content_ids:
+            if cache.delete(container_id):
+                log.info(f"Deleted cache for key: {container_id}")
+            else:
+                log.warning(f"Attempted to delete non-existent cache key: {container_id}")
+        
+        cache.delete(session_map_key)
+        log.info(f"Deleted session map for sid: {sid}")
+    else:
+        log.info(f"Disconnect event for sid: {sid}. No session map found, no cleanup needed.")
 
 
 @app.route("/documentChat")

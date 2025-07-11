@@ -623,7 +623,7 @@ def handle_disconnect() -> None:
 
 
 @app.route("/documentChat")
-def langchain_chat() -> Any:
+def document_chat() -> Any:
     """Serves the document chat page using cached content based on the provided content ID.
 
     Retrieves cached data (title and content) for a given contentId passed as a query parameter
@@ -652,10 +652,14 @@ def langchain_chat() -> Any:
     if cached_data:
         container_title_chat = cached_data.get("title", "Unknown Title")
         content_chat = cached_data.get("content", "<p>Content not found.</p>")
+        chat_history = cached_data.get("chat_history", [])
         log.info(f"Found content for {content_id} in cache.")
+        log.info(f"Found {len(chat_history)} messages in history for {content_id}.")
+
     else:
         container_title_chat = "Error"
         content_chat = f"<p>Could not find content for ID: {content_id}. Cache might be empty or ID is invalid.</p>"
+        chat_history = []
         log.warning(f"Content for {content_id} not found in cache.")
 
     return render_template(
@@ -663,6 +667,7 @@ def langchain_chat() -> Any:
         content_id=content_id,
         container_title_chat=container_title_chat,
         content_chat=content_chat,
+        chat_history=chat_history 
     )
 
 

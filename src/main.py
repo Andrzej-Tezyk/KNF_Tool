@@ -656,6 +656,11 @@ def document_chat() -> Any:
         log.info(f"Found content for {content_id} in cache.")
         log.info(f"Found {len(chat_history)} messages in history for {content_id}.")
 
+        for message in chat_history:
+            if message.get("role") == "model" and message.get("parts"):
+                # Convert the raw markdown in 'parts' to HTML
+                raw_markdown = message["parts"][0]
+                message["parts"][0] = markdown.markdown(raw_markdown)
     else:
         container_title_chat = "Error"
         content_chat = f"<p>Could not find content for ID: {content_id}. Cache might be empty or ID is invalid.</p>"

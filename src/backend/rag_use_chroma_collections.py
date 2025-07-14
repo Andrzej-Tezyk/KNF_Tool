@@ -60,6 +60,7 @@ def autocut_gemini(
         if score >= threshold
     ]
 
+
 def rerank_passages(
     query_embedding: list[float],
     passages_with_source: list[tuple[str, Any, str]],
@@ -71,7 +72,8 @@ def rerank_passages(
     Args:
         query_embedding: Precomputed embedding of the query
         passages_with_source: List of (text, page_number, source) tuples.
-        chroma_bias: Boost for Chroma-derived (keyword-matched) passages that helps to prefer precision over semantic similarity.
+        chroma_bias: Boost for Chroma-derived (keyword-matched) passages
+        that helps to prefer precision over semantic similarity.
 
     Returns:
         Reranked list of (passage_text, page_number) tuples.
@@ -174,13 +176,11 @@ def get_relevant_passage(query: str, db: Any, n_results: int = 1) -> list:
             combined_passages.append((passage, page, "gemini"))
             seen_passages.add(passage)
 
-    # Chroma-preferred reranking 
+    # Chroma-preferred reranking
     reranked_passages = rerank_passages(
         query_embedding=query_embedding,
         passages_with_source=combined_passages,
-        chroma_bias=0.05
+        chroma_bias=0.05,
     )
     log.debug("Hybrid passages with page numbers sent.")
     return reranked_passages[:n_results]
-
-    

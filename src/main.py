@@ -151,15 +151,36 @@ def handle_clear_cache() -> None:
             if cache.delete(container_id):
                 log.info(f"Deleted cache for key: {container_id}")
         
-        # Also delete the map itself
         cache.delete(session_map_key)
         log.info(f"Deleted session map for sid: {sid}")
     else:
         log.info(f"Clear event for sid: {sid}. No session map found to clear.")
 
-    # Reset the output index to restart container numbering
     output_index = -1
     log.info(f"Output index reset for sid: {sid}")
+
+@socketio.on("reset_chat_history")
+def handle_reset_chat_history(data: dict) -> None:
+    """
+    Finds a specific chat session by its UUID and resets its history,
+    keeping only the first two messages (initial prompt and response).
+    """
+    content_id = data.get("contentId")
+    if not content_id:
+        log.warning("Received reset_chat_history event without a contentId.")
+        return
+
+    log.info(f"Resetting chat history for UUID: {content_id}")
+
+    cached_data = cache.get(content_id)
+
+    if cached_data and "chat_history" in cached_data:
+        cached_data["chat_history"] = cached_data["chat_history"][:2]
+        cache.set(content_id, cached_data, timeout=3600)
+        log.info(f"Successfully reset history for UUID: {content_id}")
+        socketio.emit("history_reset_success", {"contentId": content_id})
+    else:
+        log.warning(f"Could not find data to reset for UUID: {content_id}")
 
 @socketio.on("start_processing")
 def process_text(data: dict) -> None:
@@ -354,7 +375,7 @@ def process_text(data: dict) -> None:
                         "chat_history": chat_history,
                     }
                     # Set a timeout (e.g., 1 hour = 3600 seconds)
-                    cache.set(container_id, data_to_cache, timeout=600)
+                    cache.set(container_id, data_to_cache, timeout=3600)
                     log.info(f"Stored content for unique key {container_id} in cache.")
                     log.info(
                         f"Initial processing complete for container ID: {container_id}."
@@ -364,7 +385,7 @@ def process_text(data: dict) -> None:
                     session_content_ids = cache.get(session_map_key) or []
                     if container_id not in session_content_ids:
                         session_content_ids.append(container_id)
-                        cache.set(session_map_key, session_content_ids, timeout=600)
+                        cache.set(session_map_key, session_content_ids, timeout=3600)
                         log.info(f"Added {container_id} to session map for sid: {sid}")
                     # Emit a custom event indicating completion for THIS container
                     socketio.emit(

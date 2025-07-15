@@ -141,7 +141,7 @@ def handle_clear_cache() -> None:
     Triggered by a button press on the main page.
     """
     global output_index
-    sid = request.sid
+    sid = request.sid  # type: ignore[attr-defined]
     session_map_key = f"session_map_{sid}"
     session_content_ids = cache.get(session_map_key)
 
@@ -184,7 +184,7 @@ def handle_reset_chat_history(data: dict) -> None:
 
 
 @socketio.on("start_processing")
-def process_text(data: dict) -> None:
+def process_text(data: dict) -> None:  # noqa: C901
     """Handles the initial processing of user input and selected PDFs using a generative model.
 
     This function is triggered via a Socket.IO event when a user initiates processing.
@@ -240,9 +240,9 @@ def process_text(data: dict) -> None:
         output_index += 1
         global streaming
         streaming = True
-        sid = request.sid
+        sid = request.sid  # type: ignore[attr-defined]
 
-        log.info(f"SID start_processing main page: {request.sid}")
+        log.info(f"SID start_processing main page: {request.sid}")  # type: ignore[attr-defined]
         # get data
         prompt = data.get("input")
         selected_files = data.get("pdfFiles")
@@ -658,7 +658,7 @@ def handle_stop() -> None:
 @socketio.on("disconnect")
 def handle_disconnect() -> None:
     """Handles cache cleanup for all UUIDs created by a client's session."""
-    sid = request.sid
+    sid = request.sid  # type: ignore[attr-defined]
     session_map_key = f"session_map_{sid}"
     session_content_ids = cache.get(session_map_key)
 

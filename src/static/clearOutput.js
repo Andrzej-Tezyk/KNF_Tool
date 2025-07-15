@@ -8,5 +8,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function clearOutput() {
         stopProcessing()
         outputDiv.innerHTML = ''; // clear previous output
+        socket.emit('clear_cache');
     }
 });

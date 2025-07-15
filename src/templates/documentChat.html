@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ container_title_langchain }}</title>
+    <title>{{ container_title_chat }}</title>
     <script 
         src="https://unpkg.com/htmx.org@2.0.3" 
         integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq" 
@@ -45,6 +45,9 @@
             </div>
 
             <div class="sidebar-bottom-buttons">
+                <button type="button" class="sidear-button-round" id="clean-button" data-tooltip="Clear Output">
+                    <img class="icon" src="{{ url_for('static', filename='images/trash-can-solid.svg') }}">
+                </button>
                 <button class="sidear-button-round" id="info-button" data-tooltip="How to prompt?">
                     <img class="sidebar-icon" src="{{ url_for('static', filename='images/circle-question-regular.svg') }}">
                 </button>
@@ -115,8 +118,8 @@
 
                     <!-- output section -->
                     <div class="output-section">
-                        <div id="output" class="markdown-body" data-content-id="{{ content_id }}"> 
-                        <!-- output retrieved from cache -->
+                        <div id="output" class="markdown-body" data-content-id="{{ content_id }}">
+                            <!-- output goes here -->
                             <div class="output-content" id="retrieved-content-section">
                                 <div class="output-header">
                                     {{ container_title_chat }}
@@ -125,8 +128,25 @@
                                     {{ content_chat | safe }}
                                 </div>
                             </div>
-                        <!-- output goes here -->
+
+                            {% for message in chat_history[2:] %} <!-- initial chat message printed above to achieve comprehensive output structure -->
+                                <div class="output-content {% if message.role == 'user' %}user-message{% elif message.role == 'model' %}ai-message{% endif %}">
+                                    <div class="output-header">
+                                        {% if message.role == 'user' %}
+                                            You
+                                        {% else %}
+                                            AI
+                                        {% endif %}
+                                    </div>
+                                    <div class="markdown-body">
+                                        {{ message.parts[0] | safe }}
+                                    </div>
+                                </div>
+                            {% endfor %}
                         </div>
+                    
+                        <!-- output goes here -->
+
                         <div class="input-form-container">
                             <div class="input-area-elements">
                                 <textarea id="input" name="input" placeholder="Type your query" required></textarea>
@@ -219,6 +239,8 @@
         var arrowUpIconUrl = "{{ url_for('static', filename='images/arrow-up-solid.svg') }}";
     </script>
     <script src="{{ url_for('static', filename='socketChat.js') }}"></script>
+    <script src="{{ url_for('static', filename='clearChat.js') }}"></script>
+    <script src="{{ url_for('static', filename='stopProcessing.js') }}"></script> 
     <script src="{{ url_for('static', filename='advancedOptions.js') }}"></script>
     <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
     <script src="{{ url_for('static', filename='popupTutorial.js') }}"></script>

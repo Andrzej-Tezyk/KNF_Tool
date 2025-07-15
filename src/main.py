@@ -133,6 +133,33 @@ def index() -> str:
     pdf_files = [pdf.name for pdf in pdf_dir.glob("*.pdf")] if pdf_dir.exists() else []
     return render_template("index.html", pdf_files=pdf_files)
 
+@socketio.on("clear_cache")
+def handle_clear_cache() -> None:
+    """
+    Clears all cached chat instances (UUIDs) created by the current client's session.
+    Triggered by a button press on the main page.
+    """
+    global output_index
+    sid = request.sid
+    session_map_key = f"session_map_{sid}"
+    
+    session_content_ids = cache.get(session_map_key)
+
+    if session_content_ids:
+        log.info(f"Clear event for sid: {sid}. Clearing session's cached entries.")
+        for container_id in session_content_ids:
+            if cache.delete(container_id):
+                log.info(f"Deleted cache for key: {container_id}")
+        
+        # Also delete the map itself
+        cache.delete(session_map_key)
+        log.info(f"Deleted session map for sid: {sid}")
+    else:
+        log.info(f"Clear event for sid: {sid}. No session map found to clear.")
+
+    # Reset the output index to restart container numbering
+    output_index = -1
+    log.info(f"Output index reset for sid: {sid}")
 
 @socketio.on("start_processing")
 def process_text(data: dict) -> None:

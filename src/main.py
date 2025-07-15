@@ -133,6 +133,7 @@ def index() -> str:
     pdf_files = [pdf.name for pdf in pdf_dir.glob("*.pdf")] if pdf_dir.exists() else []
     return render_template("index.html", pdf_files=pdf_files)
 
+
 @socketio.on("clear_cache")
 def handle_clear_cache() -> None:
     """
@@ -142,7 +143,6 @@ def handle_clear_cache() -> None:
     global output_index
     sid = request.sid
     session_map_key = f"session_map_{sid}"
-    
     session_content_ids = cache.get(session_map_key)
 
     if session_content_ids:
@@ -150,7 +150,6 @@ def handle_clear_cache() -> None:
         for container_id in session_content_ids:
             if cache.delete(container_id):
                 log.info(f"Deleted cache for key: {container_id}")
-        
         cache.delete(session_map_key)
         log.info(f"Deleted session map for sid: {sid}")
     else:
@@ -158,6 +157,7 @@ def handle_clear_cache() -> None:
 
     output_index = -1
     log.info(f"Output index reset for sid: {sid}")
+
 
 @socketio.on("reset_chat_history")
 def handle_reset_chat_history(data: dict) -> None:
@@ -181,6 +181,7 @@ def handle_reset_chat_history(data: dict) -> None:
         socketio.emit("history_reset_success", {"contentId": content_id})
     else:
         log.warning(f"Could not find data to reset for UUID: {content_id}")
+
 
 @socketio.on("start_processing")
 def process_text(data: dict) -> None:
@@ -367,7 +368,7 @@ def process_text(data: dict) -> None:
                 if streaming:
                     chat_history = [
                         {"role": "user", "parts": [prompt]},
-                        {"role": "model", "parts": [accumulated_text]}
+                        {"role": "model", "parts": [accumulated_text]},
                     ]
                     data_to_cache = {
                         "title": pdf_name_to_show,
@@ -474,11 +475,16 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
         cached_data = cache.get(content_id)
         if not cached_data:
             log.error(f"Validation Error: No cached data found for UUID: {content_id}.")
-            socketio.emit("error", {"message": f"Could not load data for chat session '{content_id}'. It may have expired."})
+            socketio.emit(
+                "error",
+                {
+                    "message": f"Could not load data for chat session '{content_id}'. It may have expired."
+                },
+            )
             streaming = False
             socketio.emit("stream_stopped")
             return
-        
+
         pdf_name = cached_data.get("title") if cached_data else None
         chat_history = cached_data.get("chat_history", [])
         rag_doc_slider = str(data.get("ragDocSlider"))
@@ -648,12 +654,12 @@ def handle_stop() -> None:
     streaming = False
     log.info("Processing Stopped by User")
 
+
 @socketio.on("disconnect")
 def handle_disconnect() -> None:
     """Handles cache cleanup for all UUIDs created by a client's session."""
     sid = request.sid
     session_map_key = f"session_map_{sid}"
-    
     session_content_ids = cache.get(session_map_key)
 
     if session_content_ids:
@@ -662,12 +668,16 @@ def handle_disconnect() -> None:
             if cache.delete(container_id):
                 log.info(f"Deleted cache for key: {container_id}")
             else:
-                log.warning(f"Attempted to delete non-existent cache key: {container_id}")
-        
+                log.warning(
+                    f"Attempted to delete non-existent cache key: {container_id}"
+                )
+
         cache.delete(session_map_key)
         log.info(f"Deleted session map for sid: {sid}")
     else:
-        log.info(f"Disconnect event for sid: {sid}. No session map found, no cleanup needed.")
+        log.info(
+            f"Disconnect event for sid: {sid}. No session map found, no cleanup needed."
+        )
 
 
 @app.route("/documentChat")
@@ -720,7 +730,7 @@ def document_chat() -> Any:
         content_id=content_id,
         container_title_chat=container_title_chat,
         content_chat=content_chat,
-        chat_history=chat_history 
+        chat_history=chat_history,
     )
 
 

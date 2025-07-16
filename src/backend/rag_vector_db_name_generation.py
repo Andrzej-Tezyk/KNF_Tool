@@ -61,7 +61,7 @@ def generate_vector_db_document_name(doc_path: Path, max_length=60) -> str:
     return name
 
 
-def extract_title_from_filename(filename):
+def extract_title_from_filename(filename: str) -> str:
     """
     Extracts document title for frontend display
     """

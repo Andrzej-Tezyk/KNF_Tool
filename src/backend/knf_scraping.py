@@ -117,6 +117,7 @@ def scrape_knf(scraped_dir: Path, num_retries: int, user_agent_list: list) -> No
                     safe_title = windows_safe_filename(title) if title else "unknown"
                     entry = get_or_assign_id(safe_title)
                     # adding datetime from KNF site to file name
+                    assert isinstance(datetime_atr, str)
                     date_str = datetime_atr[:10].replace("-", "")
                     unique_filename = f"{entry['id']}_{date_str}_{safe_title}.pdf"
                     pdf_path = scraped_dir / unique_filename

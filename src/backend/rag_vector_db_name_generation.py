@@ -47,7 +47,7 @@ def replace_polish_chars(text: str) -> str:
     return "".join(polish_to_ascii.get(c, c) for c in text)
 
 
-def generate_vector_db_document_name(doc_path: Path, max_length=60) -> str:
+def generate_vector_db_document_name(doc_path: Path, max_length: int = 60) -> str:
     """
     Generates name for a chromadb database.
     """

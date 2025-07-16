@@ -17,7 +17,8 @@ from backend.knf_scraping import scrape_knf
 from backend.show_pages import show_pages
 from backend.custom_logger import CustomFormatter
 from backend.chroma_instance import get_chroma_client
-from backend.rag_vector_db_name_generation import replace_polish_chars
+#from backend.rag_setup_db_async import CHROMADB_MAX_FILENAME_LENGTH
+from backend.rag_vector_db_name_generation import replace_polish_chars, generate_vector_db_document_name, extract_title_from_filename
 
 
 # Get the project root directory
@@ -34,6 +35,7 @@ CACHE_DIR = PROJECT_ROOT / "cache"
 
 # Chroma client path
 CHROMA_CLIENT_DIR = str(PROJECT_ROOT / "chroma_vector_db")
+CHROMADB_MAX_FILENAME_LENGTH = 60
 
 # Configure Flask-Caching
 CACHE_CONFIG = {
@@ -131,7 +133,9 @@ def index() -> str:
     log.info("App is up")
     pdf_dir = Path(SCRAPED_FILES_DIR)
     pdf_files = [pdf.name for pdf in pdf_dir.glob("*.pdf")] if pdf_dir.exists() else []
-    return render_template("index.html", pdf_files=pdf_files)
+    pdf_files = sorted(pdf_files, key=lambda x: extract_title_from_filename(x).lower())
+    pdf_titles = {pdf: extract_title_from_filename(pdf) for pdf in pdf_files}
+    return render_template("index.html", pdf_files=pdf_files, pdf_titles=pdf_titles)
 
 
 @socketio.on("clear_cache")
@@ -306,7 +310,14 @@ def process_text(data: dict) -> None:  # noqa: C901
             for index, pdf in enumerate(pdfs_to_scan):
                 if not streaming:
                     break
-                pdf_name_to_show = str(pdf.stem.split("_", 1)[1])
+                # document title extraction
+                pdf_parts = pdf.stem.split("_", 2)
+                if len(pdf_parts) == 3:
+                    doc_id, timestamp, title = pdf_parts
+                    pdf_name_to_show = title.lstrip("_").rstrip("_")
+                else:
+                    pdf_name_to_show = pdf.stem.lstrip("_").rstrip("_")  # fallback
+
                 container_id = str(uuid.uuid4())
                 log.info(f"Generated unique container ID (UUID): {container_id}")
 
@@ -319,11 +330,7 @@ def process_text(data: dict) -> None:  # noqa: C901
                 log.info(f"New container created for: {pdf_name_to_show}")
                 socketio.emit("new_container", {"html": container_html})
 
-                collection_name = pdf_name_to_show.replace(" ", "").lower()
-                collection_name = replace_polish_chars(
-                    collection_name
-                )  # TODO: better solution for database naming
-                collection_name = collection_name[:35]
+                collection_name = generate_vector_db_document_name(pdf.stem, max_length=CHROMADB_MAX_FILENAME_LENGTH)
                 print("-" * 10, "COLLECTION NAME", "-" * 10)
                 print(collection_name)
 
@@ -374,6 +381,7 @@ def process_text(data: dict) -> None:  # noqa: C901
                         "title": pdf_name_to_show,
                         "content": final_markdown_content,
                         "chat_history": chat_history,
+                        "collection_name": collection_name,
                     }
                     # Set a timeout (e.g., 1 hour = 3600 seconds)
                     cache.set(container_id, data_to_cache, timeout=3600)
@@ -561,11 +569,13 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
                 log.info("Stream stopped before file processing.")
             pdf_name_to_show = pdf_name
 
-            collection_name = pdf_name_to_show.replace(" ", "").lower()
-            collection_name = replace_polish_chars(
-                collection_name
-            )  # TODO: better solution for database naming
-            collection_name = collection_name[:35]
+            collection_name = cached_data.get("collection_name")
+            if not collection_name:
+                # fallback for old cache entries
+                collection_name = generate_vector_db_document_name(pdf_name, max_length=CHROMADB_MAX_FILENAME_LENGTH)
+            
+            # print("-" * 10, "COLLECTION NAME HANDLING CHAT MESSAGE", "-" * 10)
+            # print(collection_name)
 
             accumulated_text = ""
             for result_chunk in process_chat_query_with_rag(

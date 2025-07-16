@@ -3,6 +3,8 @@
 # TODO: come up with something better
 # will most likely require major code changes
 
+from pathlib import Path
+import re
 
 def replace_polish_chars(text: str) -> str:
     """
@@ -42,3 +44,32 @@ def replace_polish_chars(text: str) -> str:
     }
 
     return "".join(polish_to_ascii.get(c, c) for c in text)
+
+def generate_vector_db_document_name(doc_path: Path, max_length=60) -> str:
+    """
+    Generates name for a chromadb database.
+    """
+    name = str(doc_path).replace("(plik PDF)", "")
+    name = name.replace(" ", "_").lower()
+    name = name if len(str(name)) <= max_length else name[0:max_length]
+    name = name[0:-1] if name[-1]=="_" else name        # removing '_' from the ends
+    name = name[1:] if name[0]=="_" else name
+    name = replace_polish_chars(name)
+    name = re.sub(r'[^a-zA-Z0-9._-]', '', name)
+    return name
+
+def extract_title_from_filename(filename):
+    """
+    Extracts document title for frontend display
+    """
+    stem = filename[:-4] if filename.lower().endswith('.pdf') else filename
+    parts = stem.split('_', 2)
+    if len(parts) == 3:
+        title = parts[2]
+        title = title.replace("(plik PDF)", "")
+        title = title[0:-1] if title[-1]=="_" else title        # removing '_' from the ends
+        title = title[1:] if title[0]=="_" else title
+        title = title[0:-1] if title[-1]==" " else title        # removing ' ' from the ends
+        title = title[1:] if title[0]==" " else title
+        return title
+    return stem

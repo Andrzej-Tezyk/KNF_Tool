@@ -813,25 +813,7 @@ and renders a chat interface for continued conversation with the document.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/main.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">683</span>
-<span class="normal">684</span>
-<span class="normal">685</span>
-<span class="normal">686</span>
-<span class="normal">687</span>
-<span class="normal">688</span>
-<span class="normal">689</span>
-<span class="normal">690</span>
-<span class="normal">691</span>
-<span class="normal">692</span>
-<span class="normal">693</span>
-<span class="normal">694</span>
-<span class="normal">695</span>
-<span class="normal">696</span>
-<span class="normal">697</span>
-<span class="normal">698</span>
-<span class="normal">699</span>
-<span class="normal">700</span>
-<span class="normal">701</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">701</span>
 <span class="normal">702</span>
 <span class="normal">703</span>
 <span class="normal">704</span>
@@ -864,7 +846,25 @@ and renders a chat interface for continued conversation with the document.</p>
 <span class="normal">731</span>
 <span class="normal">732</span>
 <span class="normal">733</span>
-<span class="normal">734</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/documentChat&quot;</span><span class="p">)</span>
+<span class="normal">734</span>
+<span class="normal">735</span>
+<span class="normal">736</span>
+<span class="normal">737</span>
+<span class="normal">738</span>
+<span class="normal">739</span>
+<span class="normal">740</span>
+<span class="normal">741</span>
+<span class="normal">742</span>
+<span class="normal">743</span>
+<span class="normal">744</span>
+<span class="normal">745</span>
+<span class="normal">746</span>
+<span class="normal">747</span>
+<span class="normal">748</span>
+<span class="normal">749</span>
+<span class="normal">750</span>
+<span class="normal">751</span>
+<span class="normal">752</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/documentChat&quot;</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">document_chat</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Serves the document chat page using cached content based on the provided content ID.</span>
 
@@ -1019,21 +1019,7 @@ enabling continued conversation with memory of previous exchanges.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/main.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">422</span>
-<span class="normal">423</span>
-<span class="normal">424</span>
-<span class="normal">425</span>
-<span class="normal">426</span>
-<span class="normal">427</span>
-<span class="normal">428</span>
-<span class="normal">429</span>
-<span class="normal">430</span>
-<span class="normal">431</span>
-<span class="normal">432</span>
-<span class="normal">433</span>
-<span class="normal">434</span>
-<span class="normal">435</span>
-<span class="normal">436</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">436</span>
 <span class="normal">437</span>
 <span class="normal">438</span>
 <span class="normal">439</span>
@@ -1230,7 +1216,25 @@ enabling continued conversation with memory of previous exchanges.</p>
 <span class="normal">630</span>
 <span class="normal">631</span>
 <span class="normal">632</span>
-<span class="normal">633</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@socketio</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;send_chat_message&quot;</span><span class="p">)</span>
+<span class="normal">633</span>
+<span class="normal">634</span>
+<span class="normal">635</span>
+<span class="normal">636</span>
+<span class="normal">637</span>
+<span class="normal">638</span>
+<span class="normal">639</span>
+<span class="normal">640</span>
+<span class="normal">641</span>
+<span class="normal">642</span>
+<span class="normal">643</span>
+<span class="normal">644</span>
+<span class="normal">645</span>
+<span class="normal">646</span>
+<span class="normal">647</span>
+<span class="normal">648</span>
+<span class="normal">649</span>
+<span class="normal">650</span>
+<span class="normal">651</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@socketio</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;send_chat_message&quot;</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">handle_chat_message</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa: C901</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Handles incoming chat messages and generates a streamed response using cached document context.</span>
 
@@ -1372,11 +1376,15 @@ enabling continued conversation with memory of previous exchanges.</p>
                 <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Stream stopped before file processing.&quot;</span><span class="p">)</span>
             <span class="n">pdf_name_to_show</span> <span class="o">=</span> <span class="n">pdf_name</span>
 
-            <span class="n">collection_name</span> <span class="o">=</span> <span class="n">pdf_name_to_show</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-            <span class="n">collection_name</span> <span class="o">=</span> <span class="n">replace_polish_chars</span><span class="p">(</span>
-                <span class="n">collection_name</span>
-            <span class="p">)</span>  <span class="c1"># TODO: better solution for database naming</span>
-            <span class="n">collection_name</span> <span class="o">=</span> <span class="n">collection_name</span><span class="p">[:</span><span class="mi">35</span><span class="p">]</span>
+            <span class="n">collection_name</span> <span class="o">=</span> <span class="n">cached_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;collection_name&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">collection_name</span><span class="p">:</span>
+                <span class="c1"># fallback for old cache entries</span>
+                <span class="n">collection_name</span> <span class="o">=</span> <span class="n">generate_vector_db_document_name</span><span class="p">(</span>
+                    <span class="n">pdf_name</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="n">CHROMADB_MAX_FILENAME_LENGTH</span>
+                <span class="p">)</span>
+
+            <span class="c1"># print(&quot;-&quot; * 10, &quot;COLLECTION NAME HANDLING CHAT MESSAGE&quot;, &quot;-&quot; * 10)</span>
+            <span class="c1"># print(collection_name)</span>
 
             <span class="n">accumulated_text</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
             <span class="k">for</span> <span class="n">result_chunk</span> <span class="ow">in</span> <span class="n">process_chat_query_with_rag</span><span class="p">(</span>
@@ -1465,15 +1473,7 @@ Triggered by a button press on the main page.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/main.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">137</span>
-<span class="normal">138</span>
-<span class="normal">139</span>
-<span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span>
-<span class="normal">143</span>
-<span class="normal">144</span>
-<span class="normal">145</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">145</span>
 <span class="normal">146</span>
 <span class="normal">147</span>
 <span class="normal">148</span>
@@ -1487,7 +1487,15 @@ Triggered by a button press on the main page.</p>
 <span class="normal">156</span>
 <span class="normal">157</span>
 <span class="normal">158</span>
-<span class="normal">159</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@socketio</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;clear_cache&quot;</span><span class="p">)</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@socketio</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;clear_cache&quot;</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">handle_clear_cache</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Clears all cached chat instances (UUIDs) created by the current client&#39;s session.</span>
@@ -1532,29 +1540,29 @@ Triggered by a button press on the main page.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/main.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">658</span>
-<span class="normal">659</span>
-<span class="normal">660</span>
-<span class="normal">661</span>
-<span class="normal">662</span>
-<span class="normal">663</span>
-<span class="normal">664</span>
-<span class="normal">665</span>
-<span class="normal">666</span>
-<span class="normal">667</span>
-<span class="normal">668</span>
-<span class="normal">669</span>
-<span class="normal">670</span>
-<span class="normal">671</span>
-<span class="normal">672</span>
-<span class="normal">673</span>
-<span class="normal">674</span>
-<span class="normal">675</span>
-<span class="normal">676</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">676</span>
 <span class="normal">677</span>
 <span class="normal">678</span>
 <span class="normal">679</span>
-<span class="normal">680</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@socketio</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;disconnect&quot;</span><span class="p">)</span>
+<span class="normal">680</span>
+<span class="normal">681</span>
+<span class="normal">682</span>
+<span class="normal">683</span>
+<span class="normal">684</span>
+<span class="normal">685</span>
+<span class="normal">686</span>
+<span class="normal">687</span>
+<span class="normal">688</span>
+<span class="normal">689</span>
+<span class="normal">690</span>
+<span class="normal">691</span>
+<span class="normal">692</span>
+<span class="normal">693</span>
+<span class="normal">694</span>
+<span class="normal">695</span>
+<span class="normal">696</span>
+<span class="normal">697</span>
+<span class="normal">698</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@socketio</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;disconnect&quot;</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">handle_disconnect</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Handles cache cleanup for all UUIDs created by a client&#39;s session.&quot;&quot;&quot;</span>
     <span class="n">sid</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">sid</span>  <span class="c1"># type: ignore[attr-defined]</span>
@@ -1600,15 +1608,7 @@ keeping only the first two messages (initial prompt and response).</p>
 
             <details class="quote">
               <summary>Source code in <code>src/main.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span>
-<span class="normal">166</span>
-<span class="normal">167</span>
-<span class="normal">168</span>
-<span class="normal">169</span>
-<span class="normal">170</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">170</span>
 <span class="normal">171</span>
 <span class="normal">172</span>
 <span class="normal">173</span>
@@ -1621,7 +1621,15 @@ keeping only the first two messages (initial prompt and response).</p>
 <span class="normal">180</span>
 <span class="normal">181</span>
 <span class="normal">182</span>
-<span class="normal">183</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@socketio</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;reset_chat_history&quot;</span><span class="p">)</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@socketio</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;reset_chat_history&quot;</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">handle_reset_chat_history</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finds a specific chat session by its UUID and resets its history,</span>
@@ -1694,26 +1702,26 @@ any ongoing data generation or response processing.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/main.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">636</span>
-<span class="normal">637</span>
-<span class="normal">638</span>
-<span class="normal">639</span>
-<span class="normal">640</span>
-<span class="normal">641</span>
-<span class="normal">642</span>
-<span class="normal">643</span>
-<span class="normal">644</span>
-<span class="normal">645</span>
-<span class="normal">646</span>
-<span class="normal">647</span>
-<span class="normal">648</span>
-<span class="normal">649</span>
-<span class="normal">650</span>
-<span class="normal">651</span>
-<span class="normal">652</span>
-<span class="normal">653</span>
-<span class="normal">654</span>
-<span class="normal">655</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@socketio</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;stop_processing&quot;</span><span class="p">)</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">654</span>
+<span class="normal">655</span>
+<span class="normal">656</span>
+<span class="normal">657</span>
+<span class="normal">658</span>
+<span class="normal">659</span>
+<span class="normal">660</span>
+<span class="normal">661</span>
+<span class="normal">662</span>
+<span class="normal">663</span>
+<span class="normal">664</span>
+<span class="normal">665</span>
+<span class="normal">666</span>
+<span class="normal">667</span>
+<span class="normal">668</span>
+<span class="normal">669</span>
+<span class="normal">670</span>
+<span class="normal">671</span>
+<span class="normal">672</span>
+<span class="normal">673</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@socketio</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;stop_processing&quot;</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">handle_stop</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Stops the current processing stream when triggered by the client.</span>
 
@@ -1798,13 +1806,7 @@ and renders the homepage template with those files listed.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/main.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">116</span>
 <span class="normal">117</span>
 <span class="normal">118</span>
 <span class="normal">119</span>
@@ -1822,7 +1824,15 @@ and renders the homepage template with those files listed.</p>
 <span class="normal">131</span>
 <span class="normal">132</span>
 <span class="normal">133</span>
-<span class="normal">134</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Serves the main page of the application with a list of available PDF files.</span>
 
@@ -1846,7 +1856,9 @@ and renders the homepage template with those files listed.</p>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;App is up&quot;</span><span class="p">)</span>
     <span class="n">pdf_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">SCRAPED_FILES_DIR</span><span class="p">)</span>
     <span class="n">pdf_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">pdf</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">pdf</span> <span class="ow">in</span> <span class="n">pdf_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.pdf&quot;</span><span class="p">)]</span> <span class="k">if</span> <span class="n">pdf_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="p">[]</span>
-    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s2">&quot;index.html&quot;</span><span class="p">,</span> <span class="n">pdf_files</span><span class="o">=</span><span class="n">pdf_files</span><span class="p">)</span>
+    <span class="n">pdf_files</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">pdf_files</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">extract_title_from_filename</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+    <span class="n">pdf_titles</span> <span class="o">=</span> <span class="p">{</span><span class="n">pdf</span><span class="p">:</span> <span class="n">extract_title_from_filename</span><span class="p">(</span><span class="n">pdf</span><span class="p">)</span> <span class="k">for</span> <span class="n">pdf</span> <span class="ow">in</span> <span class="n">pdf_files</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s2">&quot;index.html&quot;</span><span class="p">,</span> <span class="n">pdf_files</span><span class="o">=</span><span class="n">pdf_files</span><span class="p">,</span> <span class="n">pdf_titles</span><span class="o">=</span><span class="n">pdf_titles</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -1958,15 +1970,7 @@ logged and sent to the client as error events.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/main.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">186</span>
-<span class="normal">187</span>
-<span class="normal">188</span>
-<span class="normal">189</span>
-<span class="normal">190</span>
-<span class="normal">191</span>
-<span class="normal">192</span>
-<span class="normal">193</span>
-<span class="normal">194</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">194</span>
 <span class="normal">195</span>
 <span class="normal">196</span>
 <span class="normal">197</span>
@@ -2190,7 +2194,21 @@ logged and sent to the client as error events.</p>
 <span class="normal">415</span>
 <span class="normal">416</span>
 <span class="normal">417</span>
-<span class="normal">418</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@socketio</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;start_processing&quot;</span><span class="p">)</span>
+<span class="normal">418</span>
+<span class="normal">419</span>
+<span class="normal">420</span>
+<span class="normal">421</span>
+<span class="normal">422</span>
+<span class="normal">423</span>
+<span class="normal">424</span>
+<span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@socketio</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s2">&quot;start_processing&quot;</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">process_text</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa: C901</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Handles the initial processing of user input and selected PDFs using a generative model.</span>
 
@@ -2313,7 +2331,14 @@ logged and sent to the client as error events.</p>
             <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">pdf</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pdfs_to_scan</span><span class="p">):</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">streaming</span><span class="p">:</span>
                     <span class="k">break</span>
-                <span class="n">pdf_name_to_show</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pdf</span><span class="o">.</span><span class="n">stem</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="c1"># document title extraction</span>
+                <span class="n">pdf_parts</span> <span class="o">=</span> <span class="n">pdf</span><span class="o">.</span><span class="n">stem</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pdf_parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">doc_id</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="n">pdf_parts</span>
+                    <span class="n">pdf_name_to_show</span> <span class="o">=</span> <span class="n">title</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">pdf_name_to_show</span> <span class="o">=</span> <span class="n">pdf</span><span class="o">.</span><span class="n">stem</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>  <span class="c1"># fallback</span>
+
                 <span class="n">container_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generated unique container ID (UUID): </span><span class="si">{</span><span class="n">container_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -2326,11 +2351,9 @@ logged and sent to the client as error events.</p>
                 <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;New container created for: </span><span class="si">{</span><span class="n">pdf_name_to_show</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;new_container&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;html&quot;</span><span class="p">:</span> <span class="n">container_html</span><span class="p">})</span>
 
-                <span class="n">collection_name</span> <span class="o">=</span> <span class="n">pdf_name_to_show</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-                <span class="n">collection_name</span> <span class="o">=</span> <span class="n">replace_polish_chars</span><span class="p">(</span>
-                    <span class="n">collection_name</span>
-                <span class="p">)</span>  <span class="c1"># TODO: better solution for database naming</span>
-                <span class="n">collection_name</span> <span class="o">=</span> <span class="n">collection_name</span><span class="p">[:</span><span class="mi">35</span><span class="p">]</span>
+                <span class="n">collection_name</span> <span class="o">=</span> <span class="n">generate_vector_db_document_name</span><span class="p">(</span>
+                    <span class="n">pdf</span><span class="o">.</span><span class="n">stem</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="n">CHROMADB_MAX_FILENAME_LENGTH</span>
+                <span class="p">)</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;COLLECTION NAME&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span>
                 <span class="nb">print</span><span class="p">(</span><span class="n">collection_name</span><span class="p">)</span>
 
@@ -2381,6 +2404,7 @@ logged and sent to the client as error events.</p>
                         <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">pdf_name_to_show</span><span class="p">,</span>
                         <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">final_markdown_content</span><span class="p">,</span>
                         <span class="s2">&quot;chat_history&quot;</span><span class="p">:</span> <span class="n">chat_history</span><span class="p">,</span>
+                        <span class="s2">&quot;collection_name&quot;</span><span class="p">:</span> <span class="n">collection_name</span><span class="p">,</span>
                     <span class="p">}</span>
                     <span class="c1"># Set a timeout (e.g., 1 hour = 3600 seconds)</span>
                     <span class="n">cache</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">container_id</span><span class="p">,</span> <span class="n">data_to_cache</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">3600</span><span class="p">)</span>
@@ -2696,7 +2720,7 @@ it logs the error and returns an empty string.</p>
         <p>Scrapes pdf files from KNF url.</p>
 <p>This function scrapes pdf files from a KNF url.
 For a certain number of tries it masks under an agent from given agent list
-and downloads the file into a directory. If an error occurs during scraping,
+and downloads the file into a directory. It adds a document ID If an error occurs during scraping,
 it logs the error message.</p>
 
 
@@ -2801,9 +2825,7 @@ it logs the error message.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/backend/knf_scraping.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 41</span>
-<span class="normal"> 42</span>
-<span class="normal"> 43</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 43</span>
 <span class="normal"> 44</span>
 <span class="normal"> 45</span>
 <span class="normal"> 46</span>
@@ -2885,12 +2907,18 @@ it logs the error message.</p>
 <span class="normal">122</span>
 <span class="normal">123</span>
 <span class="normal">124</span>
-<span class="normal">125</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">scrape_knf</span><span class="p">(</span><span class="n">scraped_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">num_retries</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">user_agent_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">scrape_knf</span><span class="p">(</span><span class="n">scraped_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">num_retries</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">user_agent_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Scrapes pdf files from KNF url.</span>
 
 <span class="sd">    This function scrapes pdf files from a KNF url.</span>
 <span class="sd">    For a certain number of tries it masks under an agent from given agent list</span>
-<span class="sd">    and downloads the file into a directory. If an error occurs during scraping,</span>
+<span class="sd">    and downloads the file into a directory. It adds a document ID If an error occurs during scraping,</span>
 <span class="sd">    it logs the error message.</span>
 
 <span class="sd">    Examples:</span>
@@ -2960,8 +2988,12 @@ it logs the error message.</p>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">pdf_response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
                     <span class="n">safe_title</span> <span class="o">=</span> <span class="n">windows_safe_filename</span><span class="p">(</span><span class="n">title</span><span class="p">)</span> <span class="k">if</span> <span class="n">title</span> <span class="k">else</span> <span class="s2">&quot;unknown&quot;</span>
+                    <span class="n">entry</span> <span class="o">=</span> <span class="n">get_or_assign_id</span><span class="p">(</span><span class="n">safe_title</span><span class="p">)</span>
                     <span class="c1"># adding datetime from KNF site to file name</span>
-                    <span class="n">pdf_path</span> <span class="o">=</span> <span class="n">scraped_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">datetime_atr</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">safe_title</span><span class="p">[:</span><span class="o">-</span><span class="mi">11</span><span class="p">]</span><span class="si">}</span><span class="s2">.pdf&quot;</span>
+                    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">datetime_atr</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+                    <span class="n">date_str</span> <span class="o">=</span> <span class="n">datetime_atr</span><span class="p">[:</span><span class="mi">10</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                    <span class="n">unique_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">date_str</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">safe_title</span><span class="si">}</span><span class="s2">.pdf&quot;</span>
+                    <span class="n">pdf_path</span> <span class="o">=</span> <span class="n">scraped_dir</span> <span class="o">/</span> <span class="n">unique_filename</span>
                     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pdf_path</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                         <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pdf_response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
                         <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Downloaded: </span><span class="si">{</span><span class="n">pdf_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -3010,9 +3042,7 @@ Raises:
 
             <details class="quote">
               <summary>Source code in <code>src/backend/knf_scraping.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">16</span>
 <span class="normal">17</span>
 <span class="normal">18</span>
 <span class="normal">19</span>
@@ -3034,7 +3064,9 @@ Raises:
 <span class="normal">35</span>
 <span class="normal">36</span>
 <span class="normal">37</span>
-<span class="normal">38</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">windows_safe_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">windows_safe_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Removes invalid characters from the file name.</span>
 
 <span class="sd">    This function removes any invalid character in Windows file name from the filename.</span>

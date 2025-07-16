@@ -7,6 +7,8 @@ import logging
 import requests
 from bs4 import BeautifulSoup
 
+from backend.document_id_manager import get_or_assign_id
+
 
 log = logging.getLogger("__name__")
 
@@ -43,7 +45,7 @@ def scrape_knf(scraped_dir: Path, num_retries: int, user_agent_list: list) -> No
 
     This function scrapes pdf files from a KNF url.
     For a certain number of tries it masks under an agent from given agent list
-    and downloads the file into a directory. If an error occurs during scraping,
+    and downloads the file into a directory. It adds a document ID If an error occurs during scraping,
     it logs the error message.
 
     Examples:
@@ -113,8 +115,12 @@ def scrape_knf(scraped_dir: Path, num_retries: int, user_agent_list: list) -> No
                 try:
                     pdf_response = requests.get(url, headers=headers)
                     safe_title = windows_safe_filename(title) if title else "unknown"
+                    entry = get_or_assign_id(safe_title)
                     # adding datetime from KNF site to file name
-                    pdf_path = scraped_dir / f"{datetime_atr}_{safe_title[:-11]}.pdf"
+                    assert isinstance(datetime_atr, str)
+                    date_str = datetime_atr[:10].replace("-", "")
+                    unique_filename = f"{entry['id']}_{date_str}_{safe_title}.pdf"
+                    pdf_path = scraped_dir / unique_filename
                     with open(pdf_path, "wb") as f:
                         f.write(pdf_response.content)
                         log.debug(f"Downloaded: {pdf_path}")

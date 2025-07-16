@@ -61,7 +61,19 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 
-// show shorten filenames under input textfield
+function extractShortTitle(filename) {
+    // Usuń rozszerzenie .pdf
+    let stem = filename.replace(/\.pdf$/i, "");
+    // Rozdziel tylko na 3 części: id, data, tytuł
+    let parts = stem.split("_", 3);
+    let title = (parts.length === 3) ? stem.substring(parts[0].length + parts[1].length + 2) : stem;
+    // Usuń podkreślniki z początku/końca
+    title = title.replace(/^_+|_+$/g, "");
+    // Wyciągnij dwa pierwsze słowa
+    let words = title.split(" ");
+    return words.slice(0, 2).join(" ");
+}
+
 function updateSelectedFilesDisplay() {
     const selectedFilesContainer = document.getElementById('selected-files');
 
@@ -70,9 +82,7 @@ function updateSelectedFilesDisplay() {
 
         document.querySelectorAll('.file-checkbox:checked').forEach((checkbox) => {
             let fullName = checkbox.value;
-            let shortName = fullName.length > 15 && fullName.includes('_') 
-                            ? fullName.slice(11, 25) 
-                            : fullName;
+            let shortName = extractShortTitle(fullName);
             selectedFiles.push(shortName);
         });
 

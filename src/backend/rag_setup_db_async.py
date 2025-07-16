@@ -46,6 +46,7 @@ async def replace_polish_chars(text: str) -> str:
 
     return "".join(polish_to_ascii.get(c, c) for c in text)
 
+
 async def generate_vector_db_document_name(doc_path: Path, max_length=60) -> str:
     """
     Generates name for a chromadb database.
@@ -53,19 +54,22 @@ async def generate_vector_db_document_name(doc_path: Path, max_length=60) -> str
     name = str(doc_path).replace("(plik PDF)", "")
     name = name.replace(" ", "_").lower()
     # first 14 characters are "scraped_files\"
-    name = name[14:-1] if len(name) <= max_length+14 else name[14:max_length+14]
-    name = name[0:-1] if name[-1]=="_" else name        # removing '_' from the ends
-    name = name[1:] if name[0]=="_" else name
+    name = name[14:-1] if len(name) <= max_length + 14 else name[14 : max_length + 14]
+    name = name[0:-1] if name[-1] == "_" else name  # removing '_' from the ends
+    name = name[1:] if name[0] == "_" else name
     name = await replace_polish_chars(name)
-    name = re.sub(r'[^a-zA-Z0-9._-]', '', name)
+    name = re.sub(r"[^a-zA-Z0-9._-]", "", name)
     return name
+
 
 async def process_pdf(doc_path: Path) -> None:
     """
     Process a single PDF file asynchronously
     """
     try:
-        name = await generate_vector_db_document_name(doc_path, max_length=CHROMADB_MAX_FILENAME_LENGTH)
+        name = await generate_vector_db_document_name(
+            doc_path, max_length=CHROMADB_MAX_FILENAME_LENGTH
+        )
 
         # Check if collection exists (this might be a blocking operation)
         existing_collections = await run_in_executor(client.list_collections)

@@ -17,8 +17,12 @@ from backend.knf_scraping import scrape_knf
 from backend.show_pages import show_pages
 from backend.custom_logger import CustomFormatter
 from backend.chroma_instance import get_chroma_client
-#from backend.rag_setup_db_async import CHROMADB_MAX_FILENAME_LENGTH
-from backend.rag_vector_db_name_generation import replace_polish_chars, generate_vector_db_document_name, extract_title_from_filename
+
+# from backend.rag_setup_db_async import CHROMADB_MAX_FILENAME_LENGTH
+from backend.rag_vector_db_name_generation import (
+    generate_vector_db_document_name,
+    extract_title_from_filename,
+)
 
 
 # Get the project root directory
@@ -330,7 +334,9 @@ def process_text(data: dict) -> None:  # noqa: C901
                 log.info(f"New container created for: {pdf_name_to_show}")
                 socketio.emit("new_container", {"html": container_html})
 
-                collection_name = generate_vector_db_document_name(pdf.stem, max_length=CHROMADB_MAX_FILENAME_LENGTH)
+                collection_name = generate_vector_db_document_name(
+                    pdf.stem, max_length=CHROMADB_MAX_FILENAME_LENGTH
+                )
                 print("-" * 10, "COLLECTION NAME", "-" * 10)
                 print(collection_name)
 
@@ -572,8 +578,10 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
             collection_name = cached_data.get("collection_name")
             if not collection_name:
                 # fallback for old cache entries
-                collection_name = generate_vector_db_document_name(pdf_name, max_length=CHROMADB_MAX_FILENAME_LENGTH)
-            
+                collection_name = generate_vector_db_document_name(
+                    pdf_name, max_length=CHROMADB_MAX_FILENAME_LENGTH
+                )
+
             # print("-" * 10, "COLLECTION NAME HANDLING CHAT MESSAGE", "-" * 10)
             # print(collection_name)
 

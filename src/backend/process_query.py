@@ -79,7 +79,14 @@ def _build_final_llm_prompt(
     final_prompt_parts = [processed_prompt]
 
     if change_length_flag == "True":
-        final_prompt_parts.append(f" (Please provide {output_size} response)")
+        output_size_map = {
+            "1_sentence": "a response in exactly 1 sentence (bullet-point list counts as one sentence)",
+            "2_5_sentences": "a response of 2 to 5 sentences (bullet-point list counts as one sentence)",
+            "5_10_sentences": "a response of 5 to 10 sentences (bullet-point list counts as one sentence)",
+            "10_plus_sentences": "a response longer than 10 sentences (bullet-point list counts as one sentence)",
+            }
+        output_size_instruction = output_size_map.get(output_size, "a concise response")
+        final_prompt_parts.append(f" (Please provide {output_size_instruction})")
 
     if rag_context:
         final_prompt_parts.append(rag_context)

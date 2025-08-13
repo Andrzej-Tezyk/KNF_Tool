@@ -158,7 +158,7 @@
                                         {% for pdf in pdf_files %}
                                         <div class="file-item">
                                             <input type="checkbox" class="file-checkbox" id="{{ pdf }}" name="selected_files" value="{{ pdf }}">
-                                            <label for="{{ pdf }}">{{ pdf[11:-4] }}</label>
+                                            <label for="{{ pdf }}">{{ pdf_titles[pdf] }}</label>
                                         </div>
                                         {% endfor %}
                                     </div>
@@ -176,6 +176,13 @@
                                 </button>
                             </div>
                             <div class="tutorial-text">
+                                 <div class="tutorial-text-paragraph">
+                                    <h4>How the Chatbot Works</h4>
+                                    <p>
+                                        LLM chatbot aims to generate accurate and contextually relevant answers to user queries by leveraging Retrieval-Augmented Generation (RAG). The system first retrieves relevant information from a knowledge base. The retrieved content is then passed along with the user’s query to a large language model (LLM), which synthesizes the information and generates a coherent, grounded response.
+                                    </p>
+                                </div>
+                                
                                 <div class="tutorial-text-paragraph">
                                     <h4>Understand the context</h4>
                                     <p>Financial regulations for banks can be complex. Before writing your prompt, ensure you understand:</p>

@@ -22,3 +22,7 @@ https://conventional-branch.github.io/
 - add description
 - after creating pr: on the left side of GitHub interface, use Development option to add a related kanban ticket
 - request and wait for review (can be done using GitHub interface -> also on the left)
+
+
+
+# [Documentation](https://andrzej-tezyk.github.io/KNF_Tool/)

@@ -40,11 +40,3 @@ def get_or_assign_id(title: str) -> Entry:
         mapping[title] = entry
         _save_mapping(mapping)
         return entry
-
-
-# def get_title_by_id(doc_id: str) -> None:
-#     mapping = _load_mapping()
-#     for entry in mapping.values():
-#         if entry["id"] == doc_id:
-#             return entry["title"]
-#     return None

@@ -1,6 +1,7 @@
 from pathlib import Path
 import traceback
 import os
+import uuid
 from typing import Any
 import json
 import logging
@@ -16,7 +17,12 @@ from backend.knf_scraping import scrape_knf
 from backend.show_pages import show_pages
 from backend.custom_logger import CustomFormatter
 from backend.chroma_instance import get_chroma_client
-from backend.rag_vector_db_name_generation import replace_polish_chars
+
+# from backend.rag_setup_db_async import CHROMADB_MAX_FILENAME_LENGTH
+from backend.rag_vector_db_name_generation import (
+    generate_vector_db_document_name,
+    extract_title_from_filename,
+)
 
 
 # Get the project root directory
@@ -33,6 +39,7 @@ CACHE_DIR = PROJECT_ROOT / "cache"
 
 # Chroma client path
 CHROMA_CLIENT_DIR = str(PROJECT_ROOT / "chroma_vector_db")
+CHROMADB_MAX_FILENAME_LENGTH = 60
 
 # Configure Flask-Caching
 CACHE_CONFIG = {
@@ -130,11 +137,62 @@ def index() -> str:
     log.info("App is up")
     pdf_dir = Path(SCRAPED_FILES_DIR)
     pdf_files = [pdf.name for pdf in pdf_dir.glob("*.pdf")] if pdf_dir.exists() else []
-    return render_template("index.html", pdf_files=pdf_files)
+    pdf_files = sorted(pdf_files, key=lambda x: extract_title_from_filename(x).lower())
+    pdf_titles = {pdf: extract_title_from_filename(pdf) for pdf in pdf_files}
+    return render_template("index.html", pdf_files=pdf_files, pdf_titles=pdf_titles)
+
+
+@socketio.on("clear_cache")
+def handle_clear_cache() -> None:
+    """
+    Clears all cached chat instances (UUIDs) created by the current client's session.
+    Triggered by a button press on the main page.
+    """
+    global output_index
+    sid = request.sid  # type: ignore[attr-defined]
+    session_map_key = f"session_map_{sid}"
+    session_content_ids = cache.get(session_map_key)
+
+    if session_content_ids:
+        log.info(f"Clear event for sid: {sid}. Clearing session's cached entries.")
+        for container_id in session_content_ids:
+            if cache.delete(container_id):
+                log.info(f"Deleted cache for key: {container_id}")
+        cache.delete(session_map_key)
+        log.info(f"Deleted session map for sid: {sid}")
+    else:
+        log.info(f"Clear event for sid: {sid}. No session map found to clear.")
+
+    output_index = -1
+    log.info(f"Output index reset for sid: {sid}")
+
+
+@socketio.on("reset_chat_history")
+def handle_reset_chat_history(data: dict) -> None:
+    """
+    Finds a specific chat session by its UUID and resets its history,
+    keeping only the first two messages (initial prompt and response).
+    """
+    content_id = data.get("contentId")
+    if not content_id:
+        log.warning("Received reset_chat_history event without a contentId.")
+        return
+
+    log.info(f"Resetting chat history for UUID: {content_id}")
+
+    cached_data = cache.get(content_id)
+
+    if cached_data and "chat_history" in cached_data:
+        cached_data["chat_history"] = cached_data["chat_history"][:2]
+        cache.set(content_id, cached_data, timeout=3600)
+        log.info(f"Successfully reset history for UUID: {content_id}")
+        socketio.emit("history_reset_success", {"contentId": content_id})
+    else:
+        log.warning(f"Could not find data to reset for UUID: {content_id}")
 
 
 @socketio.on("start_processing")
-def process_text(data: dict) -> None:
+def process_text(data: dict) -> None:  # noqa: C901
     """Handles the initial processing of user input and selected PDFs using a generative model.
 
     This function is triggered via a Socket.IO event when a user initiates processing.
@@ -190,7 +248,9 @@ def process_text(data: dict) -> None:
         output_index += 1
         global streaming
         streaming = True
+        sid = request.sid  # type: ignore[attr-defined]
 
+        log.info(f"SID start_processing main page: {request.sid}")  # type: ignore[attr-defined]
         # get data
         prompt = data.get("input")
         selected_files = data.get("pdfFiles")
@@ -254,8 +314,16 @@ def process_text(data: dict) -> None:
             for index, pdf in enumerate(pdfs_to_scan):
                 if not streaming:
                     break
-                pdf_name_to_show = str(pdf.stem.split("_", 1)[1])
-                container_id = f"content-pdf{index}_{output_index}"  # Use current index
+                # document title extraction
+                pdf_parts = pdf.stem.split("_", 2)
+                if len(pdf_parts) == 3:
+                    doc_id, timestamp, title = pdf_parts
+                    pdf_name_to_show = title.lstrip("_").rstrip("_")
+                else:
+                    pdf_name_to_show = pdf.stem.lstrip("_").rstrip("_")  # fallback
+
+                container_id = str(uuid.uuid4())
+                log.info(f"Generated unique container ID (UUID): {container_id}")
 
                 container_html = render_template(
                     "output.html",
@@ -266,11 +334,9 @@ def process_text(data: dict) -> None:
                 log.info(f"New container created for: {pdf_name_to_show}")
                 socketio.emit("new_container", {"html": container_html})
 
-                collection_name = pdf_name_to_show.replace(" ", "").lower()
-                collection_name = replace_polish_chars(
-                    collection_name
-                )  # TODO: better solution for database naming
-                collection_name = collection_name[:35]
+                collection_name = generate_vector_db_document_name(
+                    pdf.stem, max_length=CHROMADB_MAX_FILENAME_LENGTH
+                )
                 print("-" * 10, "COLLECTION NAME", "-" * 10)
                 print(collection_name)
 
@@ -313,21 +379,29 @@ def process_text(data: dict) -> None:
                         socketio.emit("error", {"message": "unexpected error"})
                         return
                 if streaming:
-                    chat_history = []
-                    chat_history.append({"role": "user", "parts": [prompt]})
-                    chat_history.append({"role": "model", "parts": [accumulated_text]})
+                    chat_history = [
+                        {"role": "user", "parts": [prompt]},
+                        {"role": "model", "parts": [accumulated_text]},
+                    ]
                     data_to_cache = {
                         "title": pdf_name_to_show,
                         "content": final_markdown_content,
                         "chat_history": chat_history,
+                        "collection_name": collection_name,
                     }
                     # Set a timeout (e.g., 1 hour = 3600 seconds)
-                    cache.set(container_id, data_to_cache, timeout=600)
-                    log.info(f"Stored content for {container_id} in cache.")
+                    cache.set(container_id, data_to_cache, timeout=3600)
+                    log.info(f"Stored content for unique key {container_id} in cache.")
                     log.info(
-                        f"Initial processing complete for {pdf_name_to_show} ({container_id})."
+                        f"Initial processing complete for container ID: {container_id}."
                         "Emitting completion signal."
                     )
+                    session_map_key = f"session_map_{sid}"
+                    session_content_ids = cache.get(session_map_key) or []
+                    if container_id not in session_content_ids:
+                        session_content_ids.append(container_id)
+                        cache.set(session_map_key, session_content_ids, timeout=3600)
+                        log.info(f"Added {container_id} to session map for sid: {sid}")
                     # Emit a custom event indicating completion for THIS container
                     socketio.emit(
                         "processing_complete_for_container",
@@ -410,16 +484,29 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
         # get data
         prompt = data.get("input")
         content_id = data.get("contentId")
-        output_size = data.get("output_size")
-        show_pages_checkbox = str(data.get("show_pages_checkbox"))
+
         # get cached data
         cached_data = cache.get(content_id)
+        if not cached_data:
+            log.error(f"Validation Error: No cached data found for UUID: {content_id}.")
+            socketio.emit(
+                "error",
+                {
+                    "message": f"Could not load data for chat session '{content_id}'. It may have expired."
+                },
+            )
+            streaming = False
+            socketio.emit("stream_stopped")
+            return
+
         pdf_name = cached_data.get("title") if cached_data else None
         chat_history = cached_data.get("chat_history", [])
         rag_doc_slider = str(data.get("ragDocSlider"))
         print("-" * 10, "CHAT HISTORY", "-" * 10)
         print(chat_history)
 
+        output_size = str(data.get("output_size"))
+        show_pages_checkbox = str(data.get("show_pages_checkbox"))
         choosen_model = str(
             data.get("choosen_model", "gemini-2.0-flash")
         )  # second arg = default model
@@ -448,22 +535,6 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
             socketio.emit("stream_stopped")
             return
 
-        if not cached_data:
-            log.error(
-                f"Validation Error: No cached data found for contentId: {content_id}."
-                "Cannot load document context or history."
-            )
-            socketio.emit(
-                "error",
-                {
-                    "message": f"Could not load data for chat session '{content_id}'. "
-                    "It may have expired or is invalid."
-                },
-            )
-            streaming = False
-            socketio.emit("stream_stopped")
-            return
-
         if not pdf_name:
             log.error(f"PDF name not found in cache for content ID: {content_id}")
             socketio.emit("error", {"message": "No pdf name provided"})
@@ -476,9 +547,6 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
                 f"Cached data for '{content_id}' contained 'chat_history' but it was not a list:"
                 f"(type: {type(chat_history)}). Initializing as empty list."
             )
-            chat_history = []  # Reset to a valid empty list
-
-        output_size = str(output_size)
 
         # debug logs for each document
         log.debug(f"Prompt: {prompt}")
@@ -507,11 +575,15 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
                 log.info("Stream stopped before file processing.")
             pdf_name_to_show = pdf_name
 
-            collection_name = pdf_name_to_show.replace(" ", "").lower()
-            collection_name = replace_polish_chars(
-                collection_name
-            )  # TODO: better solution for database naming
-            collection_name = collection_name[:35]
+            collection_name = cached_data.get("collection_name")
+            if not collection_name:
+                # fallback for old cache entries
+                collection_name = generate_vector_db_document_name(
+                    pdf_name, max_length=CHROMADB_MAX_FILENAME_LENGTH
+                )
+
+            # print("-" * 10, "COLLECTION NAME HANDLING CHAT MESSAGE", "-" * 10)
+            # print(collection_name)
 
             accumulated_text = ""
             for result_chunk in process_chat_query_with_rag(
@@ -555,7 +627,7 @@ def handle_chat_message(data: dict) -> None:  # noqa: C901
                 cached_data["chat_history"] = (
                     chat_history  # <-- Assign the updated list back into the dictionary
                 )
-                cache.set(content_id, cached_data, timeout=600)
+                cache.set(content_id, cached_data, timeout=3600)
                 log.info(f"Stored updated data for {content_id} in cache.")
 
             if not streaming:
@@ -601,8 +673,33 @@ def handle_stop() -> None:
     log.info("Processing Stopped by User")
 
 
+@socketio.on("disconnect")
+def handle_disconnect() -> None:
+    """Handles cache cleanup for all UUIDs created by a client's session."""
+    sid = request.sid  # type: ignore[attr-defined]
+    session_map_key = f"session_map_{sid}"
+    session_content_ids = cache.get(session_map_key)
+
+    if session_content_ids:
+        log.info(f"Disconnect event for sid: {sid}. Cleaning up cached entries.")
+        for container_id in session_content_ids:
+            if cache.delete(container_id):
+                log.info(f"Deleted cache for key: {container_id}")
+            else:
+                log.warning(
+                    f"Attempted to delete non-existent cache key: {container_id}"
+                )
+
+        cache.delete(session_map_key)
+        log.info(f"Deleted session map for sid: {sid}")
+    else:
+        log.info(
+            f"Disconnect event for sid: {sid}. No session map found, no cleanup needed."
+        )
+
+
 @app.route("/documentChat")
-def langchain_chat() -> Any:
+def document_chat() -> Any:
     """Serves the document chat page using cached content based on the provided content ID.
 
     Retrieves cached data (title and content) for a given contentId passed as a query parameter
@@ -631,10 +728,19 @@ def langchain_chat() -> Any:
     if cached_data:
         container_title_chat = cached_data.get("title", "Unknown Title")
         content_chat = cached_data.get("content", "<p>Content not found.</p>")
+        chat_history = cached_data.get("chat_history", [])
         log.info(f"Found content for {content_id} in cache.")
+        log.info(f"Found {len(chat_history)} messages in history for {content_id}.")
+
+        for message in chat_history:
+            if message.get("role") == "model" and message.get("parts"):
+                # Convert the raw markdown in 'parts' to HTML
+                raw_markdown = message["parts"][0]
+                message["parts"][0] = markdown.markdown(raw_markdown)
     else:
         container_title_chat = "Error"
         content_chat = f"<p>Could not find content for ID: {content_id}. Cache might be empty or ID is invalid.</p>"
+        chat_history = []
         log.warning(f"Content for {content_id} not found in cache.")
 
     return render_template(
@@ -642,6 +748,7 @@ def langchain_chat() -> Any:
         content_id=content_id,
         container_title_chat=container_title_chat,
         content_chat=content_chat,
+        chat_history=chat_history,
     )
 
 

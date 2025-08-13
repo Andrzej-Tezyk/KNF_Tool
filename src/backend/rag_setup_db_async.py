@@ -1,13 +1,13 @@
 import asyncio
 import logging
 import traceback
-import re
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 
 from chromadb import PersistentClient
 from rag_chromadb import create_chroma_db  # type: ignore[import-not-found]
 from extract_text import extract_text_from_pdf  # type: ignore[import-not-found]
+from rag_vector_db_name_generation import replace_polish_chars, generate_vector_db_document_name  # type: ignore[import-not-found]
 
 
 PDF_FILES = Path("scraped_files")
@@ -19,47 +19,20 @@ log = logging.getLogger("__name__")
 client = PersistentClient(path="chroma_vector_db")
 
 
-async def replace_polish_chars(text: str) -> str:
+async def replace_polish_chars_async(text: str) -> str:
     """
-    For documents names only.
+    async version of function replace_polish_chars()
     """
-    polish_to_ascii = {
-        "ą": "a",
-        "ć": "c",
-        "ę": "e",
-        "ł": "l",
-        "ń": "n",
-        "ó": "o",
-        "ś": "s",
-        "ż": "z",
-        "ź": "z",
-        "Ą": "A",
-        "Ć": "C",
-        "Ę": "E",
-        "Ł": "L",
-        "Ń": "N",
-        "Ó": "O",
-        "Ś": "S",
-        "Ż": "Z",
-        "Ź": "Z",
-    }
-
-    return "".join(polish_to_ascii.get(c, c) for c in text)
+    return await run_in_executor(replace_polish_chars, text=text)  # type: ignore[no-any-return]
 
 
-async def generate_vector_db_document_name(doc_path: Path, max_length: int = 60) -> str:
+async def generate_vector_db_document_name_async(
+    doc_path: Path, max_length: int = 60
+) -> str:
     """
-    Generates name for a chromadb database.
+    async version of function generate_vector_db_document_name
     """
-    name = str(doc_path).replace("(plik PDF)", "")
-    name = name.replace(" ", "_").lower()
-    # first 14 characters are "scraped_files\"
-    name = name[14:-1] if len(name) <= max_length + 14 else name[14 : max_length + 14]
-    name = name[0:-1] if name[-1] == "_" else name  # removing '_' from the ends
-    name = name[1:] if name[0] == "_" else name
-    name = await replace_polish_chars(name)
-    name = re.sub(r"[^a-zA-Z0-9._-]", "", name)
-    return name
+    return await run_in_executor(generate_vector_db_document_name, doc_path=doc_path, max_length=max_length)  # type: ignore[no-any-return]
 
 
 async def process_pdf(doc_path: Path) -> None:
@@ -67,7 +40,7 @@ async def process_pdf(doc_path: Path) -> None:
     Process a single PDF file asynchronously
     """
     try:
-        name = await generate_vector_db_document_name(
+        name = await generate_vector_db_document_name_async(
             doc_path, max_length=CHROMADB_MAX_FILENAME_LENGTH
         )
 

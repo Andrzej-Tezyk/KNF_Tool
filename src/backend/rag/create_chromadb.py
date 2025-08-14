@@ -3,10 +3,12 @@ import logging
 import os
 from typing import Any
 
+from dotenv import load_dotenv
 import chromadb
 import chromadb.utils.embedding_functions as embedding_functions
 
 
+load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     raise ValueError("GEMINI_API_KEY not found in environment variables")

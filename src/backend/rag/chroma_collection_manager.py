@@ -2,7 +2,7 @@ from typing import Any
 import logging
 
 import chromadb
-from src.backend.rag.call_embeddings import GeminiEmbeddingFunction
+from backend.rag.call_embeddings import GeminiEmbeddingFunction
 from dotenv import load_dotenv
 import google.generativeai as genai  # type: ignore[unused-ignore]
 from sklearn.metrics.pairwise import cosine_similarity  # type: ignore

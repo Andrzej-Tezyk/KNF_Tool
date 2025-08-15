@@ -7,7 +7,7 @@ import logging
 import requests
 from bs4 import BeautifulSoup
 
-from src.backend.document_id_manager import get_or_assign_id
+from backend.document_id_manager import get_or_assign_id
 
 
 log = logging.getLogger("__name__")

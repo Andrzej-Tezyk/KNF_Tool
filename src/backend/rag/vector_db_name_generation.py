@@ -1,10 +1,6 @@
-# current solution for database naming is garbage
-# will fail if name too short
-# TODO: come up with something better
-# will most likely require major code changes
-
 from pathlib import Path
 import re
+import os
 
 
 def replace_polish_chars(text: str) -> str:
@@ -51,7 +47,8 @@ def generate_vector_db_document_name(doc_path: Path, max_length: int = 60) -> st
     """
     Generates name for a chromadb database.
     """
-    name = str(doc_path).replace("(plik PDF)", "")
+    name = os.path.basename(doc_path)
+    name = str(name).replace("(plik PDF)", "")
     name = name.replace(" ", "_").lower()
     name = name if len(str(name)) <= max_length else name[0:max_length]
     name = name[0:-1] if name[-1] == "_" else name  # removing '_' from the ends

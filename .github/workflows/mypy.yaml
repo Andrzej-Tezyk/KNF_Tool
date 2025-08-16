@@ -18,12 +18,12 @@ jobs:
         with:
           python-version: '3.11.9'
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install mypy
-          pip install -r requirements.txt
+      - name: Install uv
+        run: pip install uv
+
+      - name: Sync dependencies
+        run: uv sync --frozen
+        # installs from pyproject.toml + uv.lock
 
       - name: Run mypy
-        run: |
-          mypy --install-types --non-interactive .
+        run: uv run mypy --install-types --non-interactive .

@@ -12,14 +12,15 @@ from flask import Flask, render_template, request
 from flask_socketio import SocketIO
 from flask_caching import Cache
 import google.generativeai as genai
-from backend.process_query import process_query_with_rag, process_chat_query_with_rag
-from backend.knf_scraping import scrape_knf
-from backend.show_pages import show_pages
-from backend.custom_logger import CustomFormatter
-from backend.chroma_instance import get_chroma_client
-
-# from backend.rag_setup_db_async import CHROMADB_MAX_FILENAME_LENGTH
-from backend.rag_vector_db_name_generation import (
+from backend.chatbot.process_query import (
+    process_query_with_rag,
+    process_chat_query_with_rag,
+)
+from backend.scraping.knf_scraping import scrape_knf
+from backend.chatbot.show_pages import show_pages
+from backend.utils.custom_logger import CustomFormatter
+from backend.rag.chroma_instance import get_chroma_client
+from backend.rag.vector_db_name_generation import (
     generate_vector_db_document_name,
     extract_title_from_filename,
 )

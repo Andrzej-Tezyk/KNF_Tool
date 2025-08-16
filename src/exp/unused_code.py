@@ -1,6 +1,7 @@
-from backend.document_id_manager import _load_mapping
 from pathlib import Path
 import chromadb
+
+from backend.document_id_manager import _load_mapping
 
 
 """

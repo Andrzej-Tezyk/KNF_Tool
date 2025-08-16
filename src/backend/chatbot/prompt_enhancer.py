@@ -5,7 +5,7 @@ from pathlib import Path
 
 log = logging.getLogger("__name__")
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 CONFIG_PATH = PROJECT_ROOT / "config" / "config.json"
 print(CONFIG_PATH)
 with open(CONFIG_PATH) as file:

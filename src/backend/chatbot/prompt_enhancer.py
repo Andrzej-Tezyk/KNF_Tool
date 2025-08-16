@@ -5,7 +5,7 @@ from pathlib import Path
 
 log = logging.getLogger("__name__")
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 CONFIG_PATH = PROJECT_ROOT / "config" / "config.json"
 print(CONFIG_PATH)
 with open(CONFIG_PATH) as file:
@@ -29,7 +29,8 @@ def enhance_prompt(prompt: str, model: Any) -> Any:
 
     instructions_and_prompt = f"{instructions}\n\nUser Prompt: {prompt}"
 
-    enchaced_prompt = model.generate_content(instructions_and_prompt)
+    enhanced_prompt = model.generate_content(instructions_and_prompt)
     log.debug("User prompt sent to enchancer.")
+    log.debug(f"Enhanced prompt: \n {enhanced_prompt}")
 
-    return enchaced_prompt.candidates[0].content.parts[0].text
+    return enhanced_prompt.candidates[0].content.parts[0].text

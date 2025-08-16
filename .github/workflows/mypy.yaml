@@ -23,9 +23,9 @@ jobs:
 
       - name: Sync dependencies
         run: uv sync --frozen
-        # installs from pyproject.toml + uv.lock
+
+      - name: Install pip into .venv (workaround)
+        run: uv pip install pip
 
       - name: Run mypy
-        run: |
-            source .venv/bin/activate
-            mypy --install-types --non-interactive .
+        run: uv run mypy --install-types --non-interactive .

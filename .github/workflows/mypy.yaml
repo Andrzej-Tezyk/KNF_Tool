@@ -26,4 +26,6 @@ jobs:
         # installs from pyproject.toml + uv.lock
 
       - name: Run mypy
-        run: mypy --install-types --non-interactive .
+        run: |
+            source .venv/bin/activate
+            mypy --install-types --non-interactive .

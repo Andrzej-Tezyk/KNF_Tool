@@ -1,0 +1,30 @@
+Metadata-Version: 2.4
+Name: knf-tool
+Version: 0.1.0
+Requires-Python: >=3.10
+Requires-Dist: beautifulsoup4==4.12.3
+Requires-Dist: black==25.1.0
+Requires-Dist: chromadb==1.0.10
+Requires-Dist: flask==3.1.1
+Requires-Dist: flask-caching==2.3.1
+Requires-Dist: flask-socketio==5.5.1
+Requires-Dist: google-generativeai==0.8.5
+Requires-Dist: langchain==0.3.27
+Requires-Dist: markdown==3.8.2
+Requires-Dist: mkdocs==1.6.1
+Requires-Dist: mkdocs-material==9.6.16
+Requires-Dist: mkdocstrings-python==1.16.12
+Requires-Dist: mkdocstrings[python]>=0.18
+Requires-Dist: mypy==1.15.0
+Requires-Dist: numpy==2.2.6
+Requires-Dist: pdfplumber==0.11.6
+Requires-Dist: python-dotenv==1.1.1
+Requires-Dist: requests==2.32.4
+Requires-Dist: ruff==0.12.8
+Requires-Dist: scikit-learn==1.7.0
+Provides-Extra: dev
+Requires-Dist: mypy; extra == "dev"
+Requires-Dist: types-requests; extra == "dev"
+Requires-Dist: types-beautifulsoup4; extra == "dev"
+Requires-Dist: types-Markdown; extra == "dev"
+Requires-Dist: types-Flask-SocketIO; extra == "dev"

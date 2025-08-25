@@ -7,8 +7,8 @@ import json
 import logging
 from dotenv import load_dotenv
 
-import markdown
-from flask import Flask, render_template, request, send_from_directory
+import markdown  # noqa:
+from flask import Flask, render_template, request, send_from_directory, Response
 from flask_socketio import SocketIO
 from flask_caching import Cache
 import google.generativeai as genai
@@ -100,7 +100,7 @@ if not SCRAPED_FILES_DIR.exists() or next(SCRAPED_FILES_DIR.iterdir(), None) is 
 
 # flask
 app = Flask(__name__, template_folder="templates", static_folder="static")
-app.config['PDF_DIRECTORY'] = SCRAPED_FILES_DIR
+app.config["PDF_DIRECTORY"] = SCRAPED_FILES_DIR
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 chroma_client = get_chroma_client(CHROMA_CLIENT_DIR)
@@ -145,10 +145,12 @@ def index() -> str:
     print("\n\n PDF titles:", pdf_titles)
     return render_template("index.html", pdf_files=pdf_files, pdf_titles=pdf_titles)
 
-@app.route('/files/<path:filename>')
-def serve_file(filename):
+
+@app.route("/files/<path:filename>")
+def serve_file(filename: str) -> Response:
     """Serves a file from the upload folder."""
-    return send_from_directory(app.config['PDF_DIRECTORY'], filename)
+    return send_from_directory(app.config["PDF_DIRECTORY"], filename)
+
 
 @socketio.on("clear_cache")
 def handle_clear_cache() -> None:

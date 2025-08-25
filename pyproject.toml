@@ -27,6 +27,14 @@ dependencies = [
 ]
 requires-python = ">=3.10"
 
+[project.optional-dependencies]
+dev = [
+  "mypy",
+  "types-requests",
+  "types-beautifulsoup4",
+  "types-Markdown",
+  "types-Flask-SocketIO",
+]
 
 
 [tool.ruff]

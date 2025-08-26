@@ -1185,4 +1185,30 @@ input:checked + .rag-doc-slider:before {
     margin: 0 0 0 0.5rem;
     padding: 0.5rem;
 }
+
+.open-pdf-button {
+    position: relative;
+    cursor: pointer;
+    margin-right: 0.5rem;
+    /* Add other button styles here if needed */
+}
+
+.open-pdf-button:hover::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 2rem;
+    top: 0.8rem;
+    color: var(--tooltip-font-color);
+    font-size: small;
+    background-color: var(--tooltip-background);
+    margin: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 10px;
+    width: max-content;
+    border: solid var(--border-color);
+    border-width: 0.2px;
+    box-shadow: 0.25px 2px 4px 1.5px rgba(128, 127, 127, 0.2);
+    z-index: 9999 !important;
+}
+
 /* end of settings panel styles */

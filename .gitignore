@@ -11,4 +11,4 @@ ms_colours.txt
 .ruff_cache
 cache
 chroma_vector_db
-knf_tool.egg-info
+*.egg-info

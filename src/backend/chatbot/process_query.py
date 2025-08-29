@@ -7,7 +7,7 @@ from chromadb.api.client import Client as ChromaClient
 
 import google.generativeai as genai  # type: ignore[unused-ignore]
 from dotenv import load_dotenv
-from backend.rag.create_chromadb import get_gemini_ef
+from backend.rag.llm_embedding_function import get_gemini_ef
 from backend.rag.chroma_collection_manager import get_relevant_passage
 from backend.chatbot.prompt_enhancer import enhance_prompt
 

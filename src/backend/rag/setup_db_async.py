@@ -6,9 +6,12 @@ from concurrent.futures import ThreadPoolExecutor
 
 from chromadb import PersistentClient
 
-from src.backend.rag.create_chromadb import create_chroma_db  # type: ignore[import-not-found]
-from src.backend.utils.extract_text import extract_text_from_pdf  # type: ignore[import-not-found]
-from src.backend.rag.vector_db_name_generation import replace_polish_chars, generate_vector_db_document_name  # type: ignore[import-not-found]
+from backend.rag.create_chromadb import create_chroma_db
+from backend.utils.extract_text import extract_text_from_pdf
+from backend.rag.vector_db_name_generation import (
+    replace_polish_chars,
+    generate_vector_db_document_name,
+)
 
 
 PDF_FILES = Path("scraped_files")

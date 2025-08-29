@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const inputText = document.getElementById('input');
       const img = button.querySelector('img');
       const isEmpty = inputText.value.trim() === '';
-      const isArrowUpIcon = img && img.src.includes('arrow-up-solid.svg');
+      const isArrowUpIcon = img && img.includes('arrow-up-solid.svg');
 
       const shouldDisable = isEmpty && isArrowUpIcon;
 

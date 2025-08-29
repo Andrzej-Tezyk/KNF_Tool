@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function checkButtonState() {
         const isEmpty = inputText.value.trim() === '';
-        const isArrowUpIcon = img && img.src.includes('arrow-up-solid.svg');
+        const isArrowUpIcon = img && img.src && img.src.includes('arrow-up-solid.svg');
 
         const shouldDisable = isEmpty && isArrowUpIcon;
 

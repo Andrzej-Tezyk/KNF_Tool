@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  # Development service with hot reload
+  app-dev:
+    build:
+      context: .
+      target: development
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - /app/.venv  # Exclude virtual environment from volume mount
+      - pdf-documents:/app/scraped_files
+      - vector-db:/app/chroma_vector_db
+      - app-cache:/app/cache
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - PYTHONPATH=/app/src
+    env_file:
+      - .env
+    command: ["uv", "run", "python", "src/main.py"]
+    profiles:
+      - dev
+    stdin_open: true
+    tty: true
+
+  # Production service
+  app-prod:
+    build:
+      context: .
+      target: production
+    ports:
+      - "8000:8000"
+    volumes:
+      - pdf-documents:/app/scraped_files
+      - vector-db:/app/chroma_vector_db
+      - app-cache:/app/cache
+    environment:
+      - FLASK_ENV=production
+      - PYTHONPATH=/app/src
+    env_file:
+      - .env
+    restart: unless-stopped
+    profiles:
+      - prod
+
+volumes:
+  pdf-documents:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/data/pdf_documents
+
+  vector-db:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/data/vector_db
+
+  app-cache:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/data/cache
+
+
+networks:
+  default:
+    name: knf-tool-network

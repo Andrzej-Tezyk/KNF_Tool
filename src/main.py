@@ -757,4 +757,4 @@ if __name__ == "__main__":
     cache_dir = app.config.get("CACHE_DIR")
     if cache_dir:
         Path(cache_dir).mkdir(parents=True, exist_ok=True)
-    socketio.run(app, debug=True, allow_unsafe_werkzeug=True)
+    socketio.run(app, debug=True, allow_unsafe_werkzeug=True, host="0.0.0.0", port=5000)

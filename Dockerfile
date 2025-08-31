@@ -4,6 +4,7 @@ FROM python:${PYTHON_VERSION}-slim as base
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app/src
+ENV HOME=/home/appuser
 
 # Install system dependencies; for installing python packages which require low level like pandas
 RUN apt-get update && apt-get install -y \
@@ -39,9 +40,11 @@ RUN uv sync --frozen --no-dev
 FROM base as development
 RUN uv sync --frozen
 COPY . .
+# adds a home directory for volumes
 RUN mkdir -p scraped_files cache chroma_vector_db
 # Set ownership
 RUN chown -R appuser:appuser /app
+RUN mkdir -p /home/appuser/.cache && chown -R appuser:appuser /home/appuser/.cache
 # Switch to non-privileged user
 USER appuser
 EXPOSE 8000
@@ -57,6 +60,7 @@ RUN uv sync --frozen --no-dev
 COPY . .
 RUN mkdir -p scraped_files cache chroma_vector_db
 RUN chown -R appuser:appuser /app
+RUN mkdir -p /home/appuser/.cache && chown -R appuser:appuser /home/appuser/.cache
 USER appuser
 EXPOSE 8000
 

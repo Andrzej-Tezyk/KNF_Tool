@@ -1,5 +1,6 @@
 .venv
 /scraped_files
+uploaded_files/*
 .env
 .idea
 /output

@@ -148,6 +148,10 @@
                                     <div class="bottom-panel-checkbox-buttons">
                                         <button id="selectAllBtn" type="button" class="bottom-panel-button">Select All</button>
                                         <button id="uncheckAllBtn" type="button" class="bottom-panel-button">Uncheck All</button>
+                                        <button id="uploadFileButton" type="button" class="bottom-panel-button">
+                                            Upload File
+                                            <img src="{{ url_for('static', filename='images/upload-file.svg') }}" alt="" width="16" height="16">
+                                        </button>
                                     </div>
                                     <button id="hidePanel-button" class="sidear-button-round" type="button" data-tooltip="Or press Escape">
                                         <img class="icon" src="{{ url_for('static', filename='images/circle-xmark-regular.svg') }}">
@@ -275,5 +279,6 @@
     <script src="{{ url_for('static', filename='settingsPanel.js') }}"></script>
     <script src="{{ url_for('static', filename='initialChatMessage.js') }}"></script>
     <script src="{{ url_for('static', filename='openPdfNewTab.js') }}"></script>
+    <script src="{{ url_for('static', filename='uploadHandler.js') }}"></script>
 </body>
 </html>

@@ -11,6 +11,7 @@ import markdown  # noqa:
 from flask import Flask, render_template, request, send_from_directory, Response
 from flask_socketio import SocketIO
 from flask_caching import Cache
+from werkzeug.utils import secure_filename
 import google.generativeai as genai
 from backend.chatbot.process_query import (
     process_query_with_rag,
@@ -34,6 +35,9 @@ CONFIG_PATH = PROJECT_ROOT / "config" / "config.json"
 
 # Directory with pdf files
 SCRAPED_FILES_DIR = PROJECT_ROOT / "scraped_files"
+
+# Directory with uploaed pdf files
+UPLOADED_FILES_DIR = PROJECT_ROOT / "uploaded_files_directory"
 
 # Cache directory
 CACHE_DIR = PROJECT_ROOT / "cache"
@@ -86,6 +90,9 @@ USER_AGENT_LIST = [
 
 SYSTEM_PROMPT = config["system_prompt"]
 
+# Allowed file extensions for upload
+ALLOWED_EXTENSIONS = {"pdf"}
+
 
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -100,7 +107,7 @@ if not SCRAPED_FILES_DIR.exists() or next(SCRAPED_FILES_DIR.iterdir(), None) is 
 
 # flask
 app = Flask(__name__, template_folder="templates", static_folder="static")
-app.config["PDF_DIRECTORY"] = SCRAPED_FILES_DIR
+app.config["UPLOAD_DIRECTORY"] = UPLOADED_FILES_DIR
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 chroma_client = get_chroma_client(CHROMA_CLIENT_DIR)
@@ -149,7 +156,42 @@ def index() -> str:
 @app.route("/files/<path:filename>")
 def serve_file(filename: str) -> Response:
     """Serves a file from the upload folder."""
-    return send_from_directory(app.config["PDF_DIRECTORY"], filename)
+    return send_from_directory(app.config["UPLOAD_DIRECTORY"], filename)
+
+
+def allowed_file(filename: str) -> bool:
+    """Checks if file is of the required format."""
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@app.route("/upload", methods=["POST"])
+def upload_file() -> tuple[dict[str, str], int]:
+    """Gets and saves uploaded file."""
+    if "file" not in request.files:
+        log.error("Upload request failed: 'file' part not found.")
+        return {"error": "No file part in the request"}, 400
+
+    file = request.files["file"]
+
+    if not file or not file.filename or file.filename == "":
+        log.error("Upload request failed: No file selected.")
+        return {"error": "No selected file"}, 400
+
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        save_path = os.path.join(app.config["UPLOAD_DIRECTORY"], filename)
+
+        try:
+            file.save(save_path)
+            log.info(f"File '{filename}' uploaded successfully.")
+            return {"status": "success", "filename": filename}, 200
+        except Exception as e:
+            log.error(f"Failed to save file '{filename}'. Error: {e}")
+            return {"error": "Failed to save file on the server."}, 500
+
+    else:
+        log.warning(f"Upload of invalid file type attempted: {file.filename}")
+        return {"error": "Invalid file type. Only PDF files are allowed."}, 400
 
 
 @socketio.on("clear_cache")

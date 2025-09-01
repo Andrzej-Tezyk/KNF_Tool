@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Check if the button currently triggers sendMessage before calling
                 // This prevents sending a new message while processing is ongoing (button is stop)
                 // A simpler check is if the button is NOT disabled and shows the arrow icon
-                if (actionButton && img && img.includes(arrowUpIconUrl)) {
+                if (actionButton && img && img.src.includes(arrowUpIconUrl)) {
                      console.log("Keypress: Calling sendMessage."); 
                      sendMessage();
                 } else {
@@ -300,7 +300,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function checkButtonState() {
         const isEmpty = inputText.value.trim() === '';
-        const isArrowUpIcon = img && img.includes('arrow-up-solid.svg');
+        const isArrowUpIcon = img && img.src.includes('arrow-up-solid.svg');
 
         const shouldDisable = isEmpty && isArrowUpIcon;
 

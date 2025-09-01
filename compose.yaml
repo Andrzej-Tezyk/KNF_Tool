@@ -16,6 +16,11 @@ services:
       - FLASK_ENV=development
       - FLASK_DEBUG=1
       - PYTHONPATH=/app/src
+      - CHROMA_TELEMETRY_ENABLED=false
+      - LANGCHAIN_TRACING_V2=false
+      - LANGCHAIN_ENDPOINT=""
+      - LANGCHAIN_API_KEY=""
+      - LANGCHAIN_PROJECT=""
     env_file:
       - .env
     command: ["uv", "run", "python", "src/main.py"]
@@ -36,8 +41,14 @@ services:
       - vector-db:/app/chroma_vector_db
       - app-cache:/app/cache
     environment:
-      - FLASK_ENV=production
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
       - PYTHONPATH=/app/src
+      - CHROMA_TELEMETRY_ENABLED=false
+      - LANGCHAIN_TRACING_V2=false
+      - LANGCHAIN_ENDPOINT=""
+      - LANGCHAIN_API_KEY=""
+      - LANGCHAIN_PROJECT=""
     env_file:
       - .env
     restart: unless-stopped

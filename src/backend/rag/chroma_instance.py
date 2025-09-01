@@ -1,9 +1,12 @@
 import logging
+import os
 from typing import Any
 
 import chromadb
 
 log = logging.getLogger("__name__")
+
+os.environ["CHROMA_TELEMETRY_ENABLED"] = "false"
 
 
 def get_chroma_client(path: str) -> Any:
@@ -15,4 +18,7 @@ def get_chroma_client(path: str) -> Any:
     Returns:
         chromadb.PersistentClient: An instance of the ChromaDB client.
     """
-    return chromadb.PersistentClient(path=path)
+    settings = chromadb.config.Settings()
+    settings.anonymized_telemetry = False
+
+    return chromadb.PersistentClient(path=path, settings=settings)

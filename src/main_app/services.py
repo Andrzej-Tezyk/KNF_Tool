@@ -1,10 +1,9 @@
-import google.generativeai as genai
 import markdown
 import uuid
 import traceback
 from collections.abc import Iterator
-
 from flask import render_template, current_app
+import google.generativeai as genai
 
 from . import chroma_client, cache, log
 from backend.chatbot.show_pages import show_pages

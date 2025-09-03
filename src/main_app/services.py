@@ -2,11 +2,11 @@ import google.generativeai as genai
 import markdown
 import uuid
 import traceback
-from typing import Iterator
+from collections.abc import Iterator
 
 from flask import render_template, current_app
 
-from . import chroma_client, cache, log, socketio
+from . import chroma_client, cache, log
 from backend.chatbot.show_pages import show_pages
 from backend.chatbot.process_query import (
     process_query_with_rag,

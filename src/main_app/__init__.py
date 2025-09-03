@@ -3,7 +3,6 @@ from flask import Flask
 from flask_socketio import SocketIO
 from flask_caching import Cache
 from pathlib import Path
-from typing import Type
 
 from backend.utils.custom_logger import CustomFormatter
 from backend.rag.chroma_instance import get_chroma_client
@@ -23,7 +22,7 @@ ch.setFormatter(CustomFormatter())
 log.addHandler(ch)
 
 
-def create_app(config_class: Type[Config] = Config) -> Flask:
+def create_app(config_class: type[Config] = Config) -> Flask:
     """Creates and configures the Flask application."""
     app = Flask(__name__, template_folder="../templates", static_folder="../static")
     app.config.from_object(config_class)

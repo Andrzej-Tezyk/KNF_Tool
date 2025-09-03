@@ -1,8 +1,9 @@
 import logging
+from pathlib import Path
+
 from flask import Flask
 from flask_socketio import SocketIO
 from flask_caching import Cache
-from pathlib import Path
 
 from backend.utils.custom_logger import CustomFormatter
 from backend.rag.chroma_instance import get_chroma_client

@@ -1,6 +1,7 @@
+from pathlib import Path
+
 import markdown
 from flask import Blueprint, render_template, request, send_from_directory, current_app
-from pathlib import Path
 from werkzeug.wrappers import Response
 
 from backend.rag.vector_db_name_generation import extract_title_from_filename

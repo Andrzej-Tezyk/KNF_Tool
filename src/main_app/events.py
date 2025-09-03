@@ -9,33 +9,34 @@ from .services import process_document_query, process_chat_query
 session_state = {}
 
 
-@socketio.on('connect')
-def handle_connect():
+@socketio.on("connect")
+def handle_connect() -> None:
     """
     Initializes state for a new client connection.
     This function is called automatically whenever a new user connects.
     """
-    sid = request.sid
-    session_state[sid] = {'streaming': False}
+    sid = request.sid  # type: ignore [attr-defined]
+    session_state[sid] = {"streaming": False}
     log.info(f"Client connected: {sid}. Initialized session state.")
 
 
-@socketio.on('stop_processing')
-def handle_stop():
+@socketio.on("stop_processing")
+def handle_stop() -> None:
     """
     Stops the stream for the current user's session by setting their streaming flag to False.
     """
-    sid = request.sid
+    sid = request.sid  # type: ignore [attr-defined]
     if sid in session_state:
-        session_state[sid]['streaming'] = False
+        session_state[sid]["streaming"] = False
         log.info(f"Processing stopped by user: {sid}")
 
+
 @socketio.on("clear_cache")
-def handle_clear_cache():
+def handle_clear_cache() -> None:
     """
     Clears all cached chat instances (UUIDs) created by the current client's session.
     """
-    sid = request.sid
+    sid = request.sid  # type: ignore [attr-defined]
     session_map_key = f"session_map_{sid}"
     session_content_ids = cache.get(session_map_key)
 
@@ -49,9 +50,10 @@ def handle_clear_cache():
     else:
         log.info(f"Clear event for sid: {sid}. No session map found to clear.")
 
+
 # UNUSED - keep for handling clearing chat history in future if needed
 @socketio.on("reset_chat_history")
-def handle_reset_chat_history(data: dict):
+def handle_reset_chat_history(data: dict) -> None:
     """
     Finds a specific chat session by its UUID and resets its history.
     """
@@ -73,25 +75,25 @@ def handle_reset_chat_history(data: dict):
 
 
 @socketio.on("start_processing")
-def handle_start_processing(data: dict):
+def handle_start_processing(data: dict) -> None:
     """
     Handles the initial query for documents. It delegates the core logic
     to the service layer and streams the results back to the client.
     """
-    sid = request.sid
+    sid = request.sid  # type: ignore [attr-defined]
     if sid not in session_state:
         handle_connect()
 
-    session_state[sid]['streaming'] = True
+    session_state[sid]["streaming"] = True
     print("session state: ", session_state)
     log.info(f"Started processing for SID: {sid}")
 
     try:
         for result in process_document_query(data, sid):
-            if not session_state.get(sid, {}).get('streaming', False):
+            if not session_state.get(sid, {}).get("streaming", False):
                 log.info(f"Stream manually stopped for SID: {sid}")
                 break
-            
+
             event = result.get("event")
             payload = result.get("payload")
             if event and payload is not None:
@@ -103,31 +105,31 @@ def handle_start_processing(data: dict):
         emit("error", {"message": f"An unexpected error occurred: {str(e)}"})
     finally:
         if sid in session_state:
-            session_state[sid]['streaming'] = False
+            session_state[sid]["streaming"] = False
         emit("stream_stopped")
         log.info(f"Processing finished for SID: {sid}")
 
 
 @socketio.on("send_chat_message")
-def handle_chat_message(data: dict):
+def handle_chat_message(data: dict) -> None:
     """
     Handles a follow-up chat message. It delegates the core logic
     to the service layer and streams the results back to the client.
     """
-    sid = request.sid
+    sid = request.sid  # type: ignore [attr-defined]
     if sid not in session_state:
         handle_connect()
 
     print("SID: ", sid)
-    session_state[sid]['streaming'] = True
+    session_state[sid]["streaming"] = True
     print("Session state: ", session_state)
     log.info(f"Chat message received from SID: {sid}")
     try:
         for result in process_chat_query(data, sid):
-            if not session_state.get(sid, {}).get('streaming', False):
+            if not session_state.get(sid, {}).get("streaming", False):
                 log.info(f"Chat stream manually stopped for SID: {sid}")
                 break
-            
+
             event = result.get("event")
             payload = result.get("payload")
             if event and payload is not None:
@@ -139,24 +141,24 @@ def handle_chat_message(data: dict):
         emit("error", {"message": f"An unexpected error occurred: {str(e)}"})
     finally:
         if sid in session_state:
-            session_state[sid]['streaming'] = False
+            session_state[sid]["streaming"] = False
         emit("stream_stopped")
         log.info(f"Chat response finished for SID: {sid}")
 
 
-@socketio.on('disconnect')
-def handle_disconnect():
+@socketio.on("disconnect")
+def handle_disconnect() -> None:
     """
     Cleans up session state and the user's cached data when they disconnect.
     """
-    sid = request.sid
+    sid = request.sid  # type: ignore [attr-defined]
     log.info(f"Client disconnected: {sid}. Cleaning up...")
 
     session_state.pop(sid, None)
-    
+
     session_map_key = f"session_map_{sid}"
     session_content_ids = cache.get(session_map_key)
-    
+
     if session_content_ids:
         log.info(f"Cleaning up cached entries for disconnected SID: {sid}")
         for container_id in session_content_ids:

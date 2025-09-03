@@ -3,6 +3,7 @@ from flask import Flask
 from flask_socketio import SocketIO
 from flask_caching import Cache
 from pathlib import Path
+from typing import Type
 
 from backend.utils.custom_logger import CustomFormatter
 from backend.rag.chroma_instance import get_chroma_client
@@ -21,7 +22,8 @@ ch.setLevel(logging.DEBUG)
 ch.setFormatter(CustomFormatter())
 log.addHandler(ch)
 
-def create_app(config_class=Config):
+
+def create_app(config_class: Type[Config] = Config) -> Flask:
     """Creates and configures the Flask application."""
     app = Flask(__name__, template_folder="../templates", static_folder="../static")
     app.config.from_object(config_class)
@@ -32,11 +34,12 @@ def create_app(config_class=Config):
     # Initialize extensions with the app
     socketio.init_app(app)
     cache.init_app(app)
-    
+
     log.info("Vector DB initialized")
 
     # Register Blueprints
     from . import routes
+
     app.register_blueprint(routes.main_bp)
 
     # Import SocketIO events to register them

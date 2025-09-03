@@ -2,6 +2,7 @@ import google.generativeai as genai
 import markdown
 import uuid
 import traceback
+from typing import Iterator
 
 from flask import render_template, current_app
 
@@ -16,23 +17,22 @@ from backend.rag.vector_db_name_generation import (
     extract_title_from_filename,
 )
 
+
 def _get_model(data: dict) -> genai.GenerativeModel:
     """Helper function to configure and return a GenerativeAI model."""
     choosen_model = str(data.get("choosen_model", "gemini-2.0-flash"))
     show_pages_checkbox = str(data.get("show_pages_checkbox"))
-    
-    genai.configure(api_key=current_app.config['GEMINI_API_KEY'])
-    
+
+    genai.configure(api_key=current_app.config["GEMINI_API_KEY"])
+
     system_instruction = show_pages(
-        current_app.config['SYSTEM_PROMPT'], show_pages_checkbox
-    )
-    
-    return genai.GenerativeModel(
-        choosen_model, system_instruction=system_instruction
+        current_app.config["SYSTEM_PROMPT"], show_pages_checkbox
     )
 
+    return genai.GenerativeModel(choosen_model, system_instruction=system_instruction)
 
-def process_document_query(data: dict, sid: str):
+
+def process_document_query(data: dict, sid: str) -> Iterator[dict]:
     """
     Generator function that processes a query against multiple documents and yields results.
     Handles the initial processing of user input and selected PDFs using a generative model.
@@ -96,8 +96,10 @@ def process_document_query(data: dict, sid: str):
             pdf_path = pdf_dir / pdf_filename
             pdf_name_to_show = extract_title_from_filename(pdf_filename)
             container_id = str(uuid.uuid4())
-            
-            log.info(f"Processing '{pdf_name_to_show}' for SID {sid} with container ID {container_id}")
+
+            log.info(
+                f"Processing '{pdf_name_to_show}' for SID {sid} with container ID {container_id}"
+            )
 
             container_html = render_template(
                 "output.html",
@@ -108,9 +110,10 @@ def process_document_query(data: dict, sid: str):
 
             accumulated_text = ""
             final_markdown_content = ""
-            
+
             collection_name = generate_vector_db_document_name(
-                pdf_path.stem, max_length=current_app.config["CHROMADB_MAX_FILENAME_LENGTH"]
+                pdf_path.stem,
+                max_length=current_app.config["CHROMADB_MAX_FILENAME_LENGTH"],
             )
 
             rag_args = {
@@ -120,25 +123,30 @@ def process_document_query(data: dict, sid: str):
                 "change_length_checkbox": str(data.get("change_length_checkbox")),
                 "enhancer_checkbox": str(data.get("prompt_enhancer")),
                 "output_size": str(data.get("output_size")),
-                "temperature_slider_value": float(data.get("temperature_slider_value", 0.0)),
+                "temperature_slider_value": float(
+                    data.get("temperature_slider_value", 0.0)
+                ),
                 "chroma_client": chroma_client,
                 "collection_name": collection_name,
                 "rag_doc_slider": str(data.get("ragDocSlider")),
             }
-            
+
             for chunk in process_query_with_rag(**rag_args):
                 if "content" in chunk:
                     accumulated_text += chunk["content"]
                     final_markdown_content = markdown.markdown(accumulated_text)
                     yield {
                         "event": "update_content",
-                        "payload": {"container_id": container_id, "html": final_markdown_content}
+                        "payload": {
+                            "container_id": container_id,
+                            "html": final_markdown_content,
+                        },
                     }
                 elif "error" in chunk:
                     log.error(f"Error chunk received for SID {sid}: {chunk['error']}")
                     yield {"event": "error", "payload": {"message": chunk["error"]}}
-                    break 
-            
+                    break
+
             chat_history = [
                 {"role": "user", "parts": [prompt]},
                 {"role": "model", "parts": [accumulated_text]},
@@ -150,7 +158,7 @@ def process_document_query(data: dict, sid: str):
                 "collection_name": collection_name,
             }
             cache.set(container_id, data_to_cache, timeout=3600)
-            
+
             session_map_key = f"session_map_{sid}"
             session_ids = cache.get(session_map_key) or []
             if container_id not in session_ids:
@@ -159,7 +167,7 @@ def process_document_query(data: dict, sid: str):
 
             yield {
                 "event": "processing_complete_for_container",
-                "payload": {"container_id": container_id}
+                "payload": {"container_id": container_id},
             }
 
     except Exception as e:
@@ -168,7 +176,7 @@ def process_document_query(data: dict, sid: str):
         yield {"event": "error", "payload": {"message": str(e)}}
 
 
-def process_chat_query(data: dict, sid: str):
+def process_chat_query(data: dict, sid: str) -> Iterator[dict]:
     """
     Generator function that processes a follow-up chat message and yields results.
     Handles incoming chat messages and generates a streamed response using cached document context.
@@ -216,10 +224,12 @@ def process_chat_query(data: dict, sid: str):
         cached_data = cache.get(content_id)
 
         if not all([content_id, prompt, cached_data]):
-            raise ValueError(f"Missing data for chat: contentId, prompt, or cache miss for SID {sid}")
-        
+            raise ValueError(
+                f"Missing data for chat: contentId, prompt, or cache miss for SID {sid}"
+            )
+
         model = _get_model(data)
-        
+
         chat_history = cached_data.get("chat_history", [])
         pdf_name = cached_data.get("title")
         collection_name = cached_data.get("collection_name")
@@ -232,7 +242,9 @@ def process_chat_query(data: dict, sid: str):
             "change_length_checkbox": str(data.get("change_length_checkbox")),
             "enhancer_checkbox": str(data.get("prompt_enhancer")),
             "output_size": str(data.get("output_size")),
-            "temperature_slider_value": float(data.get("temperature_slider_value", 0.0)),
+            "temperature_slider_value": float(
+                data.get("temperature_slider_value", 0.0)
+            ),
             "chroma_client": chroma_client,
             "collection_name": collection_name,
             "rag_doc_slider": str(data.get("ragDocSlider")),
@@ -241,13 +253,18 @@ def process_chat_query(data: dict, sid: str):
         accumulated_text = ""
         for chunk in process_chat_query_with_rag(**rag_args):
             if "content" in chunk:
-                yield {"event": "receive_chat_message", "payload": {"message": chunk["content"]}}
+                yield {
+                    "event": "receive_chat_message",
+                    "payload": {"message": chunk["content"]},
+                }
                 accumulated_text += chunk["content"]
             elif "error" in chunk:
-                log.error(f"Error chunk received in chat for SID {sid}: {chunk['error']}")
+                log.error(
+                    f"Error chunk received in chat for SID {sid}: {chunk['error']}"
+                )
                 yield {"event": "error", "payload": {"message": chunk["error"]}}
                 return
-        
+
         chat_history.append({"role": "user", "parts": [prompt]})
         chat_history.append({"role": "model", "parts": [accumulated_text]})
         cached_data["chat_history"] = chat_history

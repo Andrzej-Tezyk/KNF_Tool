@@ -12,6 +12,7 @@ CACHE_DIR = PROJECT_ROOT / "cache"
 CHROMA_CLIENT_DIR = str(PROJECT_ROOT / "chroma_vector_db")
 SCRAPED_FILES_DIR = PROJECT_ROOT / "scraped_files"
 
+
 # --- Application Settings ---
 class Config:
     with open(CONFIG_PATH) as f:
@@ -22,9 +23,9 @@ class Config:
         GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
     except KeyError:
         raise ValueError("GEMINI_API_KEY not found in environment variables.")
-    
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'a_default_secret_key')
-    PDF_DIRECTORY = SCRAPED_FILES_DIR    
+
+    SECRET_KEY = os.environ.get("SECRET_KEY", "a_default_secret_key")
+    PDF_DIRECTORY = SCRAPED_FILES_DIR
     SYSTEM_PROMPT = _config_json["system_prompt"]
     ALLOWED_EXTENSIONS = {"pdf"}
     NUM_RETRIES = 5
@@ -58,4 +59,3 @@ class Config:
             + "(KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.18363"
         ),
     ]
-

@@ -47,7 +47,6 @@ def document_chat():
     content_id = request.args.get("contentId")  # Get ID from URL query ?contentId=...
     log.info(f"Langchain chat request for contentId: {content_id}")
 
-    # Retrieve data from cache
     cached_data = cache.get(content_id)
     log.debug(f"Cache lookup for {content_id} returned: {type(cached_data)}")
 
@@ -60,7 +59,6 @@ def document_chat():
 
         for message in chat_history:
             if message.get("role") == "model" and message.get("parts"):
-                # Convert the raw markdown in 'parts' to HTML
                 raw_markdown = message["parts"][0]
                 message["parts"][0] = markdown.markdown(raw_markdown)
     else:

@@ -6,8 +6,6 @@ import traceback
 from . import socketio, cache, log
 from .services import process_document_query, process_chat_query
 
-# A dictionary to hold session-specific state, replacing the old 'global streaming' variable.
-# This ensures that each user's state is managed independently.
 session_state = {}
 
 
@@ -32,7 +30,6 @@ def handle_stop():
         session_state[sid]['streaming'] = False
         log.info(f"Processing stopped by user: {sid}")
 
-
 @socketio.on("clear_cache")
 def handle_clear_cache():
     """
@@ -52,7 +49,7 @@ def handle_clear_cache():
     else:
         log.info(f"Clear event for sid: {sid}. No session map found to clear.")
 
-
+# UNUSED - keep for handling clearing chat history in future if needed
 @socketio.on("reset_chat_history")
 def handle_reset_chat_history(data: dict):
     """
@@ -67,7 +64,6 @@ def handle_reset_chat_history(data: dict):
     cached_data = cache.get(content_id)
 
     if cached_data and "chat_history" in cached_data:
-        # Keep only the first two messages (initial prompt and response)
         cached_data["chat_history"] = cached_data["chat_history"][:2]
         cache.set(content_id, cached_data, timeout=3600)
         log.info(f"Successfully reset history for UUID: {content_id}")
@@ -87,12 +83,11 @@ def handle_start_processing(data: dict):
         handle_connect()
 
     session_state[sid]['streaming'] = True
+    print("session state: ", session_state)
     log.info(f"Started processing for SID: {sid}")
 
     try:
-        # The service function is a generator that yields results for streaming
         for result in process_document_query(data, sid):
-            # Check if the user has requested to stop the stream
             if not session_state.get(sid, {}).get('streaming', False):
                 log.info(f"Stream manually stopped for SID: {sid}")
                 break
@@ -107,7 +102,6 @@ def handle_start_processing(data: dict):
         traceback.print_exc()
         emit("error", {"message": f"An unexpected error occurred: {str(e)}"})
     finally:
-        # Ensure the stream is marked as stopped for this session
         if sid in session_state:
             session_state[sid]['streaming'] = False
         emit("stream_stopped")
@@ -144,7 +138,6 @@ def handle_chat_message(data: dict):
         traceback.print_exc()
         emit("error", {"message": f"An unexpected error occurred: {str(e)}"})
     finally:
-        # Ensure the stream is marked as stopped for this session
         if sid in session_state:
             session_state[sid]['streaming'] = False
         emit("stream_stopped")
@@ -159,10 +152,8 @@ def handle_disconnect():
     sid = request.sid
     log.info(f"Client disconnected: {sid}. Cleaning up...")
 
-    # Remove the session state to prevent memory leaks
     session_state.pop(sid, None)
     
-    # Clean up any cached content associated with this user's session
     session_map_key = f"session_map_{sid}"
     session_content_ids = cache.get(session_map_key)
     

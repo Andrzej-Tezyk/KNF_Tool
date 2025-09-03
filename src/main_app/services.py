@@ -151,7 +151,6 @@ def process_document_query(data: dict, sid: str):
             }
             cache.set(container_id, data_to_cache, timeout=3600)
             
-            # Use the 'sid' passed into this function
             session_map_key = f"session_map_{sid}"
             session_ids = cache.get(session_map_key) or []
             if container_id not in session_ids:
@@ -242,7 +241,6 @@ def process_chat_query(data: dict, sid: str):
         accumulated_text = ""
         for chunk in process_chat_query_with_rag(**rag_args):
             if "content" in chunk:
-                # For chat, we yield raw text chunks directly
                 yield {"event": "receive_chat_message", "payload": {"message": chunk["content"]}}
                 accumulated_text += chunk["content"]
             elif "error" in chunk:
@@ -250,7 +248,6 @@ def process_chat_query(data: dict, sid: str):
                 yield {"event": "error", "payload": {"message": chunk["error"]}}
                 return
         
-        # After streaming is complete, update the history in the cache
         chat_history.append({"role": "user", "parts": [prompt]})
         chat_history.append({"role": "model", "parts": [accumulated_text]})
         cached_data["chat_history"] = chat_history

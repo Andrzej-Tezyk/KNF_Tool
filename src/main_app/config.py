@@ -24,7 +24,6 @@ class Config:
     except KeyError:
         raise ValueError("GEMINI_API_KEY not found in environment variables.")
 
-    SECRET_KEY = os.environ.get("SECRET_KEY", "a_default_secret_key")
     PDF_DIRECTORY = SCRAPED_FILES_DIR
     SYSTEM_PROMPT = _config_json["system_prompt"]
     ALLOWED_EXTENSIONS = {"pdf"}

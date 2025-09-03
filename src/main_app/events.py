@@ -1,7 +1,8 @@
 # main_app/events.py
+import traceback
+
 from flask import request
 from flask_socketio import emit
-import traceback
 
 from . import socketio, cache, log
 from .services import process_document_query, process_chat_query

@@ -1,7 +1,8 @@
-import markdown
-import uuid
 import traceback
 from collections.abc import Iterator
+
+import markdown
+import uuid
 from flask import render_template, current_app
 import google.generativeai as genai
 

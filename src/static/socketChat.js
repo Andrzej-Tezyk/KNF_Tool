@@ -32,19 +32,18 @@ document.addEventListener('DOMContentLoaded', function() {
         const formData = getChatFormData();
 
         if (!formData.input || !formData.contentId) {
-            console.error("Cannot send message: Input or ContentID is missing.");
-            socket.emit('stream_stopped'); // Reset UI
-            return;
+            console.warn("Cannot send message: Input is empty or ContentID is missing.");
+            return false;
         }
 
-        // Display user's message immediately for better UX
         displayMessage('You', formData.input, true);
 
         socket.emit('send_chat_message', formData);
 
-        // Clear input after sending
         document.getElementById('input').value = '';
         document.getElementById('input').dispatchEvent(new Event('input'));
+        
+        return true;
     }
 
     // Helper to render a complete message (user or non-streamed error)

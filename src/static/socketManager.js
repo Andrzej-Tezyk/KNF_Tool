@@ -135,9 +135,11 @@ function stopProcessing() {
  */
 function handleSend() {
     if (sendFunction) {
-        sendFunction();
-        // After sending, the button becomes a 'stop' button
-        switchToStopMode();
+        const wasSuccessful = sendFunction();
+        
+        if (wasSuccessful) {
+            switchToStopMode();
+        }
     }
 }
 

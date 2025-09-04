@@ -29,8 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (formData.pdfFiles.length === 0) {
             alert("Please select at least one file.");
-            socket.emit('stream_stopped'); 
-            return;
+            return false;
         }
 
         socket.emit('start_processing', formData);
@@ -38,6 +37,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Clear input after sending
         document.getElementById('input').value = '';
         document.getElementById('input').dispatchEvent(new Event('input'));
+
+        return true;
     }
 
     // Define page-specific socket event handlers1

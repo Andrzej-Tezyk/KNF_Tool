@@ -40,16 +40,20 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('input').dispatchEvent(new Event('input'));
     }
 
-    // Define page-specific socket event handlers
+    // Define page-specific socket event handlers1
     const eventHandlers = {
         'new_container': (data) => {
             const newContainerElement = createOutputContainer(data);
             outputDiv.appendChild(newContainerElement);
         },
-        'update_content': function(data) {
-            const container = document.getElementById(data.container_id);
-            if (container) {
-                container.innerHTML = data.html;
+        'update_content': (data) => {
+            const containerBody = document.getElementById(data.container_id);
+            if (containerBody) {
+                if (typeof containerBody.dataset.rawMarkdown === 'undefined') {
+                    containerBody.dataset.rawMarkdown = '';
+                }
+                containerBody.dataset.rawMarkdown += data.chunk;
+                containerBody.innerHTML = marked.parse(containerBody.dataset.rawMarkdown);
             }
         },
         'processing_complete_for_container': function(data) {

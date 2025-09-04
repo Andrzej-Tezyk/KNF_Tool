@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/logo.ico') }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
     <div class="flex-container">
@@ -266,7 +266,6 @@
         var arrowUpIconUrl = "{{ url_for('static', filename='images/arrow-up-solid.svg') }}";
     </script>
     <script type="module" src="{{ url_for('static', filename='socket.js') }}"></script>
-    <script src="{{ url_for('static', filename='stopProcessing.js') }}"></script> 
     <script src="{{ url_for('static', filename='clearOutput.js') }}"></script>
     <script src="{{ url_for('static', filename='advancedOptions.js') }}"></script>
     <script src="{{ url_for('static', filename='bottomPanel.js') }}"></script>

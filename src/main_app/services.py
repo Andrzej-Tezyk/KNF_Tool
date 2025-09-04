@@ -135,18 +135,13 @@ def process_document_query(data: dict, sid: str) -> Iterator[dict]:
             for chunk in process_query_with_rag(**rag_args):
                 if "content" in chunk:
                     accumulated_text += chunk["content"]
-                    final_markdown_content = markdown.markdown(accumulated_text)
                     yield {
                         "event": "update_content",
                         "payload": {
                             "container_id": container_id,
-                            "html": final_markdown_content,
+                            "chunk": chunk["content"],
                         },
                     }
-                elif "error" in chunk:
-                    log.error(f"Error chunk received for SID {sid}: {chunk['error']}")
-                    yield {"event": "error", "payload": {"message": chunk["error"]}}
-                    break
 
             chat_history = [
                 {"role": "user", "parts": [prompt]},
@@ -154,8 +149,11 @@ def process_document_query(data: dict, sid: str) -> Iterator[dict]:
             ]
             data_to_cache = {
                 "title": pdf_name_to_show,
-                "content": final_markdown_content,
-                "chat_history": chat_history,
+                "content": markdown.markdown(accumulated_text),
+                "chat_history": [
+                    {"role": "user", "parts": [prompt]},
+                    {"role": "model", "parts": [accumulated_text]},
+                ],
                 "collection_name": collection_name,
             }
             cache.set(container_id, data_to_cache, timeout=3600)

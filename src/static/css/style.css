@@ -1140,6 +1140,25 @@ input:checked + .rag-doc-slider:before {
     color: var(--primary-color) !important;
 }
 
+.icon.arrow-disabled {
+    filter: none;
+}
+
+/* Style for the arrow icon when processing is stopped or failed */
+.output-button .icon.arrow-disabled {
+    /* Reset all spinner properties, just like .arrow-ready */
+    text-indent: 0;
+    overflow: visible;
+    animation: none;
+    border: none;
+    content: '➤';
+    font-size: 1em;
+
+    /* These are the key "disabled" styles */
+    color: #cccccc !important; /* A light grey color */
+    cursor: not-allowed;     /* Shows a "not allowed" cursor on hover */
+}
+
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }

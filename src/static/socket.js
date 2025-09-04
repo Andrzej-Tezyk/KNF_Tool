@@ -22,6 +22,7 @@ function getFormData() {
  */
 document.addEventListener('DOMContentLoaded', function() {
     const outputDiv = document.getElementById('output'); 
+    let activeContainerId = null;
 
     // Define the page-specific "send" function
     function startProcessing() {
@@ -46,6 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
         'new_container': (data) => {
             const newContainerElement = createOutputContainer(data);
             outputDiv.appendChild(newContainerElement);
+            activeContainerId = data.id;
         },
         'update_content': (data) => {
             const containerBody = document.getElementById(data.container_id);
@@ -71,8 +73,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 chatButton.disabled = false;
                 console.log('Chat button enabled for container:', containerId);
-            } else {
-                console.warn('Could not find chat button with ID:', buttonId);
+            }
+            if (activeContainerId === containerId) {
+                activeContainerId = null;
+            }
+        },
+        'stream_stopped': () => {
+            if (activeContainerId) {
+                const buttonId = `chat-button-${activeContainerId}`;
+                const chatButton = document.getElementById(buttonId);
+                if (chatButton) {
+                    const iconSpan = chatButton.querySelector('.icon');
+                    if (iconSpan) {
+                        iconSpan.classList.remove('loading-spinner');
+                        iconSpan.classList.add('arrow-disabled');
+                        iconSpan.textContent = '➤';
+                    }
+                }
+                activeContainerId = null;
             }
         }
     };

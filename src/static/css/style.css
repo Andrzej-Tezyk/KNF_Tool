@@ -537,7 +537,7 @@ textarea:focus {
 
 .output-header { /* can not be <h> because of markdown import*/
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     background-color: #ffffff;
     color: var(--primary-color);
@@ -1113,23 +1113,43 @@ input:checked + .rag-doc-slider:before {
     filter: none;
 }
 
-/* Style for the loading spinner icon */
-.output-button .icon.loading-spinner {
-    border: 4px solid #f3f3f3; 
-    border-top: 4px solid var(--primary-color) !important;
+.icon.loading-spinner {
+    display: inline-block;
+    vertical-align: middle;
+    border-style: solid;
+    border-color: #f3f3f3;
+    border-top-color: var(--primary-color) !important;
     color: var(--primary-color) !important;
-    border-radius: 50%; 
-    animation: spin 1s linear infinite; 
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
     text-indent: -9999px;
     overflow: hidden;
-    content: ''; 
+    content: '';
+    opacity: 1 !important; /* Prevents fading out */
+}
+
+.output-button .icon.loading-spinner {
+    width: 24px;
+    height: 24px;
+    border-width: 4px;
+}
+
+.output-header .icon.loading-spinner {
+    width: 16px;
+    height: 16px;
+    border-width: 3px;
+    margin-left: 10px;
+}
+
+button[disabled] .icon.loading-spinner {
+    border-top-color: var(--primary-color) !important;
+    opacity: 1 !important;
 }
 
 .icon.arrow-ready {
     filter: none;
 }
 
-/* Style for the arrow icon when processing is complete */
 .output-button .icon.arrow-ready {
     text-indent: 0;
     overflow: visible; 
@@ -1144,19 +1164,15 @@ input:checked + .rag-doc-slider:before {
     filter: none;
 }
 
-/* Style for the arrow icon when processing is stopped or failed */
 .output-button .icon.arrow-disabled {
-    /* Reset all spinner properties, just like .arrow-ready */
     text-indent: 0;
     overflow: visible;
     animation: none;
     border: none;
     content: '➤';
     font-size: 1em;
-
-    /* These are the key "disabled" styles */
-    color: #cccccc !important; /* A light grey color */
-    cursor: not-allowed;     /* Shows a "not allowed" cursor on hover */
+    color: #cccccc !important;
+    cursor: not-allowed;
 }
 
 @keyframes spin {

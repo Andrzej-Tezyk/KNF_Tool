@@ -37,12 +37,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         displayMessage('You', formData.input, true);
+        createSpinnerPlaceholder();
 
         socket.emit('send_chat_message', formData);
 
         document.getElementById('input').value = '';
         document.getElementById('input').dispatchEvent(new Event('input'));
-        
+
         return true;
     }
 
@@ -61,34 +62,50 @@ document.addEventListener('DOMContentLoaded', function() {
         outputDiv.scrollTop = outputDiv.scrollHeight;
     }
 
+    function createSpinnerPlaceholder() {
+        const messageWrapper = document.createElement('div');
+        messageWrapper.className = 'output-content ai-message';
+        messageWrapper.id = 'ai-message-streaming'; // Temporary ID to find it later
+        
+        const header = document.createElement('div');
+        header.className = 'output-header';
+        header.textContent = 'AI';
+
+        const spinnerDiv = document.createElement('div');
+        spinnerDiv.className = 'icon loading-spinner';
+        header.appendChild(spinnerDiv);
+
+        const body = document.createElement('div');
+        body.className = 'markdown-body';
+        messageWrapper.append(header, body);
+        outputDiv.appendChild(messageWrapper);
+        outputDiv.scrollTop = outputDiv.scrollHeight;
+        currentAIMessageDiv = body;
+    }
     // Define page-specific socket event handlers
     const eventHandlers = {
         'receive_chat_message': (data) => {
-            // This is the start of a new AI message stream
-            if (!currentAIMessageDiv) {
-                rawAIMessageText = '';
-                const messageWrapper = document.createElement('div');
-                messageWrapper.className = 'output-content ai-message';
-                const header = document.createElement('div');
-                header.className = 'output-header';
-                header.textContent = 'AI';
-                currentAIMessageDiv = document.createElement('div');
-                currentAIMessageDiv.className = 'markdown-body';
-                messageWrapper.append(header, currentAIMessageDiv);
-                outputDiv.appendChild(messageWrapper);
+            if (currentAIMessageDiv) {
+                if (typeof currentAIMessageDiv.dataset.rawMarkdown === 'undefined') {
+                    currentAIMessageDiv.dataset.rawMarkdown = '';
+                }
+                currentAIMessageDiv.dataset.rawMarkdown += data.message;
+                currentAIMessageDiv.innerHTML = marked.parse(currentAIMessageDiv.dataset.rawMarkdown);
+                outputDiv.scrollTop = outputDiv.scrollHeight;
             }
-
-            // Append chunk and re-render markdown
-            rawAIMessageText += data.message;
-            currentAIMessageDiv.innerHTML = marked.parse(rawAIMessageText);
-            outputDiv.scrollTop = outputDiv.scrollHeight;
         },
         'stream_stopped': () => {
+            const streamingMessage = document.getElementById('ai-message-streaming');
+            if (streamingMessage) {
+                const spinner = streamingMessage.querySelector('.loading-spinner');
+                if (spinner) {
+                    spinner.remove();
+                }
+                streamingMessage.id = '';
+            }
             currentAIMessageDiv = null;
-            rawAIMessageText = '';
         }
     };
-    
 
     // Initialize the socket manager
     initSocketManager({

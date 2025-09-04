@@ -67,9 +67,9 @@ document.addEventListener('DOMContentLoaded', function() {
             if (chatButton) {
                 const iconSpan = chatButton.querySelector('.icon');
                 if (iconSpan) {
-                    iconSpan.classList.remove('loading-spinner');
-                    iconSpan.classList.add('arrow-ready');
-                    iconSpan.textContent = '➤';
+                    // iconSpan.classList.remove('loading-spinner');
+                    // iconSpan.classList.add('arrow-ready');
+                    // iconSpan.textContent = '➤';
                 }
                 chatButton.disabled = false;
                 console.log('Chat button enabled for container:', containerId);

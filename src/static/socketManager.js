@@ -5,6 +5,56 @@ let inputText;
 let buttonIcon;
 let sendFunction; 
 
+// --- Rendering functions for output containers ---
+/**
+ * Navigates the user to the chat view for a specific container.
+ * @param {string} containerId - The unique ID of the conversation.
+ */
+function openChatView(containerId) {
+    const url = `/documentChat?contentId=${containerId}`;
+    console.log("Navigating to chat view for container ID:", containerId, "URL:", url);
+    window.open(url, '_blank');
+}
+
+/**
+ * Creates and returns a complete HTML element for an output container.
+ * This is our reusable JavaScript template function.
+ * @param {object} data - The data for the container.
+ * @param {string} data.id - The unique ID for the container.
+ * @param {string} data.title - The title to display in the header.
+ * @returns {HTMLElement} The constructed container element.
+ */
+export function createOutputContainer({ id, title }) {
+    console.log("Creating output container with ID:", id, "and title:", title);
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = `
+        <div class="output-content">
+            <div class="output-header">
+                ${title}
+                <button class="output-button" id="chat-button-${id}" disabled>
+                    <span class="icon loading-spinner"></span>
+                </button>
+            </div>
+            <div class="markdown-body" id="${id}"></div>
+            <div class="copy-edit-contener" id="under_chat_buttons-${id}">
+                <button class="button-round"> 
+                    <img class="output-icon" src="/static/images/copy-regular.svg">
+                </button>
+                <button class="button-round"> 
+                    <img class="output-icon" src="/static/images/download-solid.svg">
+                </button>
+                <button type="button" class="button-round" data-tooltip="Edit"> 
+                    <img class="output-icon" src="/static/images/pen-to-square-regular.svg">
+                </button>
+            </div>
+        </div>`;
+
+    const newContainer = tempDiv.firstElementChild;
+    newContainer.querySelector(`#chat-button-${id}`).addEventListener('click', () => openChatView(id));
+
+    return newContainer;
+}
+
 // --- Core Functions ---
 
 /**

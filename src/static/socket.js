@@ -1,4 +1,4 @@
-import { initSocketManager, socket } from './socketManager.js';
+import { initSocketManager, socket, createOutputContainer } from './socketManager.js';
 
 function getFormData() {
     const getElementValue = (id, property = 'value') => document.getElementById(id)?.[property];
@@ -42,8 +42,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Define page-specific socket event handlers
     const eventHandlers = {
-        'new_container': function(data) {
-            outputDiv.insertAdjacentHTML('beforeend', data.html);
+        'new_container': (data) => {
+            const newContainerElement = createOutputContainer(data);
+            outputDiv.appendChild(newContainerElement);
         },
         'update_content': function(data) {
             const container = document.getElementById(data.container_id);

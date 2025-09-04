@@ -101,12 +101,13 @@ def process_document_query(data: dict, sid: str) -> Iterator[dict]:
                 f"Processing '{pdf_name_to_show}' for SID {sid} with container ID {container_id}"
             )
 
-            container_html = render_template(
-                "output.html",
-                container_title=pdf_name_to_show,
-                container_id=container_id,
-            )
-            yield {"event": "new_container", "payload": {"html": container_html}}
+            yield {
+                "event": "new_container",
+                "payload": {
+                    "id": container_id,
+                    "title": pdf_name_to_show,
+                },
+            }
 
             accumulated_text = ""
             final_markdown_content = ""

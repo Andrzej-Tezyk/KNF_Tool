@@ -1,322 +1,99 @@
+import { initSocketManager, socket } from './socketManager.js';
+
+// Helper function to get form data (similar to the one in socket.js)
+function getChatFormData() {
+    const getElementValue = (id, property = 'value') => document.getElementById(id)?.[property];
+    const isChecked = (id) => getElementValue(id, 'checked') ?? false;
+    const contentId = document.getElementById('output')?.dataset.contentId;
+
+    return {
+        input: getElementValue('input') || '',
+        contentId: contentId,
+        output_size: getElementValue('words-sentence-select') || 'medium',
+        show_pages_checkbox: isChecked('show-pages'),
+        choosen_model: getElementValue('model-select') || 'gemini-2.0-flash',
+        change_length_checkbox: isChecked('change_length'),
+        slider_value: getElementValue('myRange') || 0.8,
+        ragDocSlider: isChecked('rag-doc-slider-checkbox'),
+        prompt_enhancer: isChecked('prompt-enhancer')
+    };
+}
+
+/**
+ * Gathers all form data from the chat page DOM.
+ */
 document.addEventListener('DOMContentLoaded', function() {
-
-    console.log("DOM fully loaded and parsed. socketChat.js running."); 
-
-    // variables, listeners
-    const socketUrl = window.location.origin.replace(/^http/, 'ws');
-    window.socket = io(socketUrl, {
-        reconnectionAttempts: 5,  // Retry up to 5 times
-        timeout: 5000,            // 5 seconds timeout
-        transports: ['websocket'] // Enforce WebSocket for better performance
-    });
-
-    console.log("Socket connection initiated.");
-
     const outputDiv = document.getElementById('output');
-    const inputText = document.getElementById('input');
-    const actionButton = document.getElementById('action-button');
-    const img = actionButton ? actionButton.querySelector('img') : null;
-
-    inputText.addEventListener('input', checkButtonState);
-    checkButtonState();
-
-    console.log("Elements obtained: outputDiv:", outputDiv, "inputText:", inputText, "actionButton:", actionButton); 
-
-    const contentId = outputDiv ? outputDiv.dataset.contentId : null;
-    console.log("Content ID:", contentId); 
-
-    // Content div holder of the current AI message streamed into
-    let currentAIMessageContentDiv = null;
-    // Holder for RAW text chunks as they arrive
+    let currentAIMessageDiv = null;
     let rawAIMessageText = '';
 
-    // Function to create and display a message (either user or error that are not streamed)
-    function displayMessage(sender, message, isUser) {
-        console.log(`Attempting to display message from ${sender}`); 
-        if (!outputDiv) {
-            console.error("Output div not found in displayMessage.");
+    // Define the page-specific "send" function
+    function sendChatMessage() {
+        const formData = getChatFormData();
+
+        if (!formData.input || !formData.contentId) {
+            console.error("Cannot send message: Input or ContentID is missing.");
+            socket.emit('stream_stopped'); // Reset UI
             return;
         }
-        const messageElement = document.createElement('div');
-        messageElement.classList.add('output-content');
-        if (isUser) {
-            messageElement.classList.add('user-message');
-        } else {
-            messageElement.classList.add('ai-message');
-        }
-        
-        const headerElement = document.createElement('div');
-        headerElement.classList.add('output-header');
-        headerElement.textContent = sender;
 
-        const formattedMessageContent = document.createElement('div');
-        formattedMessageContent.classList.add('markdown-body');
-        try {
-            // Ensure 'marked' is available from the script include
-            if (typeof marked.parse === 'function') {
-                formattedMessageContent.innerHTML = marked.parse(message);
-            } else {
-                console.error("Marked.js not loaded correctly.");
-                formattedMessageContent.textContent = message; 
-            }
-       } catch (e) {
-            console.error("Error rendering markdown for complete message:", e);
-            formattedMessageContent.textContent = message; 
-       }
+        // Display user's message immediately for better UX
+        displayMessage('You', formData.input, true);
 
-        messageElement.appendChild(headerElement);
-        messageElement.appendChild(formattedMessageContent);
+        socket.emit('send_chat_message', formData);
 
-        outputDiv.appendChild(messageElement);
+        // Clear input after sending
+        document.getElementById('input').value = '';
+        document.getElementById('input').dispatchEvent(new Event('input'));
+    }
+
+    // Helper to render a complete message (user or non-streamed error)
+    function displayMessage(sender, message, isUser) {
+        const messageWrapper = document.createElement('div');
+        messageWrapper.className = `output-content ${isUser ? 'user-message' : 'ai-message'}`;
+        const header = document.createElement('div');
+        header.className = 'output-header';
+        header.textContent = sender;
+        const body = document.createElement('div');
+        body.className = 'markdown-body';
+        body.innerHTML = marked.parse(message); // Using marked.js library
+        messageWrapper.append(header, body);
+        outputDiv.appendChild(messageWrapper);
         outputDiv.scrollTop = outputDiv.scrollHeight;
-        console.log("Message displayed and scrolled."); 
     }
 
-    // Function to handle sending messages
-    function sendMessage() {
-        console.log("sendMessage function called.");
-        const input = inputText ? inputText.value.trim() : '';
-        console.log("Message obtained from input:", input); 
-
-        const DEFAULT_OPTIONS = {
-            show_pages_checkbox: false,
-            choosen_model: 'gemini-2.0-flash',
-            change_length_checkbox: false,
-            slider_value: 0.8,
-            ragDocSlider: false,
-            prompt_enhancer: true
-        };
-
-        // Get advanced options data
-        const output_size = document.getElementById('words-sentence-select').value;
-        const show_pages_checkbox = document.getElementById('show-pages') ? document.getElementById('show-pages').checked : DEFAULT_OPTIONS.show_pages_checkbox;
-        const choosen_model = document.getElementById('model-select') ? document.getElementById('model-select').value : DEFAULT_OPTIONS.choosen_model;
-        const change_length_checkbox = document.getElementById('change_length') ? document.getElementById('change_length').checked : DEFAULT_OPTIONS.change_length_checkbox;
-        const slider_value = document.getElementById('myRange') ? document.getElementById('myRange').value : DEFAULT_OPTIONS.slider_value;
-        const ragDocSlider = document.getElementById('rag-doc-slider-checkbox') ? document.getElementById('rag-doc-slider-checkbox').checked : DEFAULT_OPTIONS.ragDocSlider;
-        const prompt_enhancer = document.getElementById('prompt-enhancer') ? document.getElementById('prompt-enhancer').checked : DEFAULT_OPTIONS.prompt_enhancer;
-
-        if (input && contentId) { 
-            console.log("Message and ContentId are valid. Proceeding to display and emit."); 
-
-            // Immediately display the user's message on the frontend
-            displayMessage('You', input, true); 
-
-            // Emit the message to the backend with the document contentId
-            socket.emit('send_chat_message', {
-                input: input,
-                contentId: contentId,
-                output_size: output_size, 
-                show_pages_checkbox: show_pages_checkbox, 
-                choosen_model: choosen_model,
-                change_length_checkbox: change_length_checkbox,
-                slider_value: slider_value,
-                ragDocSlider: ragDocSlider,
-                prompt_enhancer: prompt_enhancer
-            });
-            console.log("Emitted 'send_chat_message'."); 
-
-            // Clear the input field after sending
-            if (inputText) {
-               inputText.value = '';
-               inputText.dispatchEvent(new Event('input'));
-            }
-            if (actionButton) {
-                console.log("sendMessage: Removing sendMessage listener, adding stopProcessing listener."); 
-                actionButton.removeEventListener('click', sendMessage); 
-                actionButton.addEventListener('click', stopProcessing); 
-                console.log("sendMessage: Listener swapped to stopProcessing."); 
-            }
-            if (img) {
-                 console.log("Changing icon to stop.");
-                 img.src = stopIconUrl; // Use the variable from documentChat.html
-                 checkButtonState();
-            }
-           rawAIMessageText = ''; // Ensure this is clear for the new stream
-           currentAIMessageContentDiv = null; // Ensure this is null for the new stream
-
-        } else {
-            console.log("sendMessage condition not met. message:", message, "contentId:", contentId);
-             if (!input) {
-                 console.log("Reason: message is empty.");
-             }
-             if (!contentId) {
-                 console.log("Reason: contentId is missing.");
-             }
-        }
-
-        checkButtonState();
-
-    }
-        // --- Function to handle stopping processing ---
-        // Simmilar function in stopProcessing.js file due to DOM scopes.
-        // Need to change implementation in refactor.
-        function stopProcessing() {
-            socket.emit('stop_processing');
-            checkButtonState();
-        }
-
-    // --- Event Listeners (for sending messages) ---
-    if (actionButton) {
-        console.log("Attaching click listener to actionButton.");
-        actionButton.addEventListener('click', sendMessage);
-        checkButtonState();
-    } else {
-        console.error("Send button (#action-button) not found. Cannot attach click listener."); // Added log
-    }
-
-
-    if (inputText) {
-        console.log("Attaching keypress listener to inputText.");
-        document.addEventListener('keypress', function(event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                console.log("Enter key pressed.");
-                event.preventDefault();
-                // Check if the button currently triggers sendMessage before calling
-                // This prevents sending a new message while processing is ongoing (button is stop)
-                // A simpler check is if the button is NOT disabled and shows the arrow icon
-                if (actionButton && img && img.src.includes(arrowUpIconUrl)) {
-                     console.log("Keypress: Calling sendMessage."); 
-                     sendMessage();
-                } else {
-                     console.log("Keypress: Button not in send state or disabled. Not calling sendMessage.");
-                }
-            }
-        });
-    } else {
-         console.error("Input textarea (#input) not found. Cannot attach keypress listener.");
-    }
-
-
-    // --- Socket.IO Event Listeners (for receiving messages) ---
-    socket.on('receive_chat_message', function(data) {
-        console.log("Received 'receive_chat_message'. Data:", data);
-
-        if (data.message !== undefined && data.message !== null) {
-            const chunkText = data.message;
-            console.log("Processing message chunk. Chunk text:", chunkText);
-
-            console.log("Before if/else: currentAIMessageContentDiv is", currentAIMessageContentDiv ? "set" : "null");
-
-
-            if (!currentAIMessageContentDiv) {
-                // This is the FIRST chunk of a new AI message
-
-                console.log("First AI chunk received. Creating new message element.");
-                const messageElement = document.createElement('div');
-                messageElement.classList.add('output-content', 'ai-message');
-
-                const headerElement = document.createElement('div');
-                headerElement.classList.add('output-header');
-                headerElement.textContent = 'AI';
-
-                const contentDiv = document.createElement('div');
-                contentDiv.classList.add('markdown-body'); // Use markdown-body for styling
-
-                messageElement.appendChild(headerElement);
-                messageElement.appendChild(contentDiv); // Append content div to message element
-                outputDiv.appendChild(messageElement); // Append the main message element to output area
-
-                // Store reference to the content div for appending subsequent chunks
-                currentAIMessageContentDiv = contentDiv;
-
-                // Initialize raw text for this new message
-                rawAIMessageText = chunkText;
-                console.log("Initialized rawAIMessageText:", rawAIMessageText);
-
-            } else {
-                // Subsequent chunk of the current AI message - append to the raw text acumulator
-                console.log("Subsequent AI chunk processing. Appending to raw text.");
-                rawAIMessageText += chunkText; // Append the chunk to the accumulated text
-                console.log("Appended chunk. Current rawAIMessageText length:", rawAIMessageText.length);
+    // Define page-specific socket event handlers
+    const eventHandlers = {
+        'receive_chat_message': (data) => {
+            // This is the start of a new AI message stream
+            if (!currentAIMessageDiv) {
+                rawAIMessageText = '';
+                const messageWrapper = document.createElement('div');
+                messageWrapper.className = 'output-content ai-message';
+                const header = document.createElement('div');
+                header.className = 'output-header';
+                header.textContent = 'AI';
+                currentAIMessageDiv = document.createElement('div');
+                currentAIMessageDiv.className = 'markdown-body';
+                messageWrapper.append(header, currentAIMessageDiv);
+                outputDiv.appendChild(messageWrapper);
             }
 
-            // --- Re-render the entire accumulated text with each chunk ---
-            if (currentAIMessageContentDiv) {
-                console.log("Re-rendering markdown for accumulated text.");
-                console.log("Raw text BEFORE rendering (length:", rawAIMessageText.length, "):", rawAIMessageText);                
-                try {
-                    if (typeof marked.parse === 'function') {
-                       const renderedHTML = marked.parse(rawAIMessageText);
-                       currentAIMessageContentDiv.innerHTML = renderedHTML; // Update the DOM
-                       console.log("innerHTML updated.");
-                    } else {
-                        console.error("Marked.js not loaded correctly. Cannot render markdown.");
-                        // Fallback to showing raw text
-                        currentAIMessageContentDiv.textContent = rawAIMessageText;
-                    }
-
-
-                } catch (e) {
-                    console.error("Error during markdown rendering:", e);
-                    // Fallback: if rendering fails, show the raw text
-                    currentAIMessageContentDiv.textContent = rawAIMessageText;
-                }
-
-                // Always scroll to the bottom after appending/rendering
-                outputDiv.scrollTop = outputDiv.scrollHeight;
-                console.log("Scrolled to bottom.");
-            } else {
-                console.error("Re-rendering block skipped because currentAIMessageContentDiv is null.");
-            }
-             console.log("--- Finished processing receive_chat_message chunk ---");
-
-        } else if (data.error) {
-            // --- Handle Error Messages from Backend ---
-            console.error("Error from backend:", data.error);
-            displayMessage('System Error', data.error, false);
-
-            // Reset state variables as the stream is likely stopped due to error
+            // Append chunk and re-render markdown
+            rawAIMessageText += data.message;
+            currentAIMessageDiv.innerHTML = marked.parse(rawAIMessageText);
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+        },
+        'stream_stopped': () => {
+            currentAIMessageDiv = null;
             rawAIMessageText = '';
-            currentAIMessageContentDiv = null;
-            console.log("Error received, stream state reset.");
-            console.log("--- Finished processing receive_chat_message chunk ---");
         }
+    };
+    
+
+    // Initialize the socket manager
+    initSocketManager({
+        sendHandler: sendChatMessage,
+        eventHandlers: eventHandlers
     });
-
-    socket.on('stream_stopped', function(data) {
-        console.log("Received 'stream_stopped'.");
-
-        if (actionButton) {
-            console.log("stream_stopped: Removing stopProcessing listener, adding sendMessage listener.");
-            actionButton.removeEventListener('click', stopProcessing); // Remove stop listener
-            actionButton.addEventListener('click', sendMessage); // Add send listener back
-            console.log("stream_stopped: Listener swapped back to sendMessage. Button re-enabled.");
-        }
-        if (img) {
-            console.log("Changing icon back to arrow.");
-            img.src = arrowUpIconUrl;
-        }
-
-        checkButtonState();
-
-        // Reset state variables
-        rawAIMessageText = ''; // Should be empty if processing finished correctly
-        currentAIMessageContentDiv = null; // Should be null if processing finished correctly
-
-        console.log("Input and button re-enabled. Icon changed to arrow. Listener swapped back to send. Stream state reset.");
-        console.log("--- Finished processing stream_stopped ---");
-    });
-
-    function checkButtonState() {
-        const isEmpty = inputText.value.trim() === '';
-        const isArrowUpIcon = img && img.src.includes('arrow-up-solid.svg');
-
-        const shouldDisable = isEmpty && isArrowUpIcon;
-
-        actionButton.disabled = shouldDisable;
-
-        if (shouldDisable) {
-            actionButton.classList.add('disabled');
-        } else {
-            actionButton.classList.remove('disabled');
-        }
-    }
-
-    // Add general socket event listeners for debugging
-    socket.on('connect', () => console.log('Socket connected.'));
-    socket.on('disconnect', () => console.log('Socket disconnected.'));
-    socket.on('error', (err) => console.error('Socket error:', err));
-   
-   
 });

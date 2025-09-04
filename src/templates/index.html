@@ -265,7 +265,7 @@
         var stopIconUrl = "{{ url_for('static', filename='images/stop-solid.svg') }}";
         var arrowUpIconUrl = "{{ url_for('static', filename='images/arrow-up-solid.svg') }}";
     </script>
-    <script src="{{ url_for('static', filename='socket.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='socket.js') }}"></script>
     <script src="{{ url_for('static', filename='stopProcessing.js') }}"></script> 
     <script src="{{ url_for('static', filename='clearOutput.js') }}"></script>
     <script src="{{ url_for('static', filename='advancedOptions.js') }}"></script>

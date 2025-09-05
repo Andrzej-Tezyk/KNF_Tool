@@ -146,6 +146,31 @@ def handle_chat_message(data: dict) -> None:
         emit("stream_stopped")
         log.info(f"Chat response finished for SID: {sid}")
 
+@socketio.on("load_chat_history")
+def handle_load_chat_history(data: dict) -> None:
+    """
+    Loads chat history from the cache and sends it to the client.
+    """
+    content_id = data.get("contentId")
+    if not content_id:
+        log.warning("Received load_chat_history event without a contentId.")
+        return
+
+    log.info(f"Loading chat history for contentId: {content_id}")
+    cached_data = cache.get(content_id)
+
+    if cached_data:
+        # Send the raw data (title and history) back to the client
+        emit(
+            "chat_history_loaded",
+            {
+                "title": cached_data.get("title", "Unknown Title"),
+                "chat_history": cached_data.get("chat_history", []),
+            },
+        )
+    else:
+        log.warning(f"No cache found for contentId: {content_id}")
+        emit("error", {"message": f"Could not load chat history for ID: {content_id}"})
 
 @socketio.on("disconnect")
 def handle_disconnect() -> None:

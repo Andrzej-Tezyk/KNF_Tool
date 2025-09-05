@@ -118,35 +118,8 @@
 
                     <!-- output section -->
                     <div class="output-section">
-                        <div id="output" class="markdown-body" data-content-id="{{ content_id }}">
-                            <!-- output goes here -->
-                            <div class="output-content" id="retrieved-content-section">
-                                <div class="output-header">
-                                    {{ container_title_chat }}
-                                </div>
-                                <div class="markdown-body">
-                                    {{ content_chat | safe }}
-                                </div>
-                            </div>
-
-                            {% for message in chat_history[2:] %} <!-- initial chat message printed above to achieve comprehensive output structure -->
-                                <div class="output-content {% if message.role == 'user' %}user-message{% elif message.role == 'model' %}ai-message{% endif %}">
-                                    <div class="output-header">
-                                        {% if message.role == 'user' %}
-                                            You
-                                        {% else %}
-                                            AI
-                                        {% endif %}
-                                    </div>
-                                    <div class="markdown-body">
-                                        {{ message.parts[0] | safe }}
-                                    </div>
-                                </div>
-                            {% endfor %}
+                    <div id="output" class="markdown-body" data-content-id="{{ content_id }}">
                         </div>
-                    
-                        <!-- output goes here -->
-
                         <div class="input-form-container">
                             <div class="input-area-elements">
                                 <textarea id="input" name="input" placeholder="Type your query" required></textarea>

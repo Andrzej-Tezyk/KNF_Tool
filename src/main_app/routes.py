@@ -29,51 +29,6 @@ def serve_file(filename: str) -> Response:
 
 @main_bp.route("/documentChat")
 def document_chat() -> str:
-    """Serves the document chat page using cached content based on the provided content ID.
-
-    Retrieves cached data (title and content) for a given contentId passed as a query parameter
-    and renders a chat interface for continued conversation with the document.
-
-    Examples:
-        None
-
-    Returns:
-        Rendered HTML page (documentChat.html) with:
-        - content_id: The ID of the requested content.
-        - container_title_chat: The title of the document.
-        - content_chat: The previously generated content or an error message.
-
-    Raises:
-        None
-    """
-
-    content_id = request.args.get("contentId")  # Get ID from URL query ?contentId=...
-    log.info(f"Langchain chat request for contentId: {content_id}")
-
-    cached_data = cache.get(content_id)
-    log.debug(f"Cache lookup for {content_id} returned: {type(cached_data)}")
-
-    if cached_data:
-        container_title_chat = cached_data.get("title", "Unknown Title")
-        content_chat = cached_data.get("content", "<p>Content not found.</p>")
-        chat_history = cached_data.get("chat_history", [])
-        log.info(f"Found content for {content_id} in cache.")
-        log.info(f"Found {len(chat_history)} messages in history for {content_id}.")
-
-        for message in chat_history:
-            if message.get("role") == "model" and message.get("parts"):
-                raw_markdown = message["parts"][0]
-                message["parts"][0] = markdown.markdown(raw_markdown)
-    else:
-        container_title_chat = "Error"
-        content_chat = f"<p>Could not find content for ID: {content_id}. Cache might be empty or ID is invalid.</p>"
-        chat_history = []
-        log.warning(f"Content for {content_id} not found in cache.")
-
-    return render_template(
-        "documentChat.html",
-        content_id=content_id,
-        container_title_chat=container_title_chat,
-        content_chat=content_chat,
-        chat_history=chat_history,
-    )
+    """Serves the base HTML for the document chat view."""
+    content_id = request.args.get("contentId")
+    return render_template("documentChat.html", content_id=content_id)

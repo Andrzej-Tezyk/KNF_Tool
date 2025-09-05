@@ -1,3 +1,5 @@
+console.log('--- LOADING LATEST VERSION OF socketChat.js ---');
+
 import { initSocketManager, socket } from './socketManager.js';
 
 // Helper function to get form data (similar to the one in socket.js)
@@ -39,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const userMessageElement = displayMessage('You', formData.input, true);
 
         if (userMessageElement) {
-            userMessageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            userMessageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         createSpinnerPlaceholder();
@@ -51,6 +53,22 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Helper to render a complete message (user or non-streamed error)
+    function displayInitialSummary(title, content) {
+        const summaryWrapper = document.createElement('div');
+        summaryWrapper.className = 'output-content';
+        summaryWrapper.id = 'retrieved-content-section';
+
+        const header = document.createElement('div');
+        header.className = 'output-header';
+        header.textContent = title;
+
+        const body = document.createElement('div');
+        body.className = 'markdown-body';
+        body.innerHTML = marked.parse(content);
+
+        summaryWrapper.append(header, body);
+        outputDiv.appendChild(summaryWrapper);
+    }
     function displayMessage(sender, message, isUser) {
         const messageWrapper = document.createElement('div');
         messageWrapper.className = `output-content ${isUser ? 'user-message' : 'ai-message'}`;
@@ -59,7 +77,8 @@ document.addEventListener('DOMContentLoaded', function() {
         header.textContent = sender;
         const body = document.createElement('div');
         body.className = 'markdown-body';
-        body.innerHTML = marked.parse(message); // Using marked.js library
+        body.dataset.rawMarkdown = message;
+        body.innerHTML = marked.parse(message);
         messageWrapper.append(header, body);
         outputDiv.appendChild(messageWrapper);
         return messageWrapper;
@@ -82,11 +101,35 @@ document.addEventListener('DOMContentLoaded', function() {
         body.className = 'markdown-body';
         messageWrapper.append(header, body);
         outputDiv.appendChild(messageWrapper);
-        outputDiv.scrollTop = outputDiv.scrollHeight;
+        // outputDiv.scrollTop = outputDiv.scrollHeight;
         currentAIMessageDiv = body;
     }
     // Define page-specific socket event handlers
     const eventHandlers = {
+        'chat_history_loaded': (data) => {
+            outputDiv.innerHTML = '';
+            
+            if (data.chat_history && data.chat_history.length >= 2) {
+                const title = data.title;
+                const initialAIResponseContent = data.chat_history[1].parts[0];
+                displayInitialSummary(title, initialAIResponseContent);
+            }
+
+            const remainingHistory = data.chat_history.slice(2);
+            for (const message of remainingHistory) {
+                const role = message.role;
+                const content = message.parts[0];
+                const isUser = role === 'user';
+                const sender = isUser ? 'You' : 'AI';
+                displayMessage(sender, content, isUser);
+            }
+
+            const allUserMessages = document.querySelectorAll('.user-message');
+            if (allUserMessages.length > 0) {
+                const lastUserMessage = allUserMessages[allUserMessages.length - 1];
+                lastUserMessage.scrollIntoView({ block: 'start' });
+            }
+        },
         'receive_chat_message': (data) => {
             if (currentAIMessageDiv) {
                 if (typeof currentAIMessageDiv.dataset.rawMarkdown === 'undefined') {
@@ -94,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 currentAIMessageDiv.dataset.rawMarkdown += data.message;
                 currentAIMessageDiv.innerHTML = marked.parse(currentAIMessageDiv.dataset.rawMarkdown);
-                outputDiv.scrollTop = outputDiv.scrollHeight;
+                // outputDiv.scrollTop = outputDiv.scrollHeight;
             }
         },
         'stream_stopped': () => {
@@ -115,6 +158,14 @@ document.addEventListener('DOMContentLoaded', function() {
         sendHandler: sendChatMessage,
         eventHandlers: eventHandlers
     });
+    const finalOutputDiv = document.getElementById('output');
+    const contentId = finalOutputDiv ? finalOutputDiv.dataset.contentId : null;
+
+    if (contentId) {
+        socket.emit('load_chat_history', { contentId: contentId });
+    } else {
+        console.error("CRITICAL ERROR: Could not find the contentId on the page.");
+    }
 
     const allUserMessages = document.querySelectorAll('.user-message');
     if (allUserMessages.length > 0) {

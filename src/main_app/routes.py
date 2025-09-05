@@ -1,11 +1,10 @@
 from pathlib import Path
 
-import markdown
 from flask import Blueprint, render_template, request, send_from_directory, current_app
 from werkzeug.wrappers import Response
 
 from backend.rag.vector_db_name_generation import extract_title_from_filename
-from . import cache, log
+from . import log
 
 main_bp = Blueprint("main", __name__)
 

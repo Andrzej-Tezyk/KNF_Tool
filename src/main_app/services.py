@@ -3,7 +3,7 @@ from collections.abc import Iterator
 
 import markdown
 import uuid
-from flask import render_template, current_app
+from flask import current_app
 import google.generativeai as genai
 
 from . import chroma_client, cache, log
@@ -110,7 +110,6 @@ def process_document_query(data: dict, sid: str) -> Iterator[dict]:
             }
 
             accumulated_text = ""
-            final_markdown_content = ""
 
             collection_name = generate_vector_db_document_name(
                 pdf_path.stem,
@@ -143,10 +142,6 @@ def process_document_query(data: dict, sid: str) -> Iterator[dict]:
                         },
                     }
 
-            chat_history = [
-                {"role": "user", "parts": [prompt]},
-                {"role": "model", "parts": [accumulated_text]},
-            ]
             data_to_cache = {
                 "title": pdf_name_to_show,
                 "content": markdown.markdown(accumulated_text),

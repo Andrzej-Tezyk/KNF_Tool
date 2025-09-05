@@ -146,6 +146,7 @@ def handle_chat_message(data: dict) -> None:
         emit("stream_stopped")
         log.info(f"Chat response finished for SID: {sid}")
 
+
 @socketio.on("load_chat_history")
 def handle_load_chat_history(data: dict) -> None:
     """
@@ -171,6 +172,7 @@ def handle_load_chat_history(data: dict) -> None:
     else:
         log.warning(f"No cache found for contentId: {content_id}")
         emit("error", {"message": f"Could not load chat history for ID: {content_id}"})
+
 
 @socketio.on("disconnect")
 def handle_disconnect() -> None:

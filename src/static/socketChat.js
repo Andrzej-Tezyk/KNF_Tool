@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function createSpinnerPlaceholder() {
         const messageWrapper = document.createElement('div');
         messageWrapper.className = 'output-content ai-message';
-        messageWrapper.id = 'ai-message-streaming'; // Temporary ID to find it later
+        messageWrapper.id = 'ai-message-streaming';
         
         const header = document.createElement('div');
         header.className = 'output-header';
@@ -104,15 +104,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function autoscroll() {
     const outputDiv = document.getElementById('output');
+
     if (!outputDiv) return;
-
-    // A threshold in pixels. If the user is within this distance from the bottom, we scroll.
     const scrollThreshold = 100; 
-
-    // Calculate the user's distance from the bottom
     const distanceFromBottom = outputDiv.scrollHeight - outputDiv.scrollTop - outputDiv.clientHeight;
 
-    // If the user is close to the bottom, scroll them down smoothly.
     if (distanceFromBottom <= scrollThreshold) {
         outputDiv.scrollTo({
             top: outputDiv.scrollHeight,

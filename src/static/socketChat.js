@@ -1,5 +1,3 @@
-console.log('--- LOADING LATEST VERSION OF socketChat.js ---');
-
 import { initSocketManager, socket } from './socketManager.js';
 
 // Helper function to get form data (similar to the one in socket.js)
@@ -27,7 +25,6 @@ function getChatFormData() {
 document.addEventListener('DOMContentLoaded', function() {
     const outputDiv = document.getElementById('output');
     let currentAIMessageDiv = null;
-    let rawAIMessageText = '';
 
     // Define the page-specific "send" function
     function sendChatMessage() {
@@ -101,9 +98,29 @@ document.addEventListener('DOMContentLoaded', function() {
         body.className = 'markdown-body';
         messageWrapper.append(header, body);
         outputDiv.appendChild(messageWrapper);
-        // outputDiv.scrollTop = outputDiv.scrollHeight;
+        messageWrapper.scrollIntoView({ behavior: 'smooth', block: 'end' });
         currentAIMessageDiv = body;
     }
+
+    function autoscroll() {
+    const outputDiv = document.getElementById('output');
+    if (!outputDiv) return;
+
+    // A threshold in pixels. If the user is within this distance from the bottom, we scroll.
+    const scrollThreshold = 100; 
+
+    // Calculate the user's distance from the bottom
+    const distanceFromBottom = outputDiv.scrollHeight - outputDiv.scrollTop - outputDiv.clientHeight;
+
+    // If the user is close to the bottom, scroll them down smoothly.
+    if (distanceFromBottom <= scrollThreshold) {
+        outputDiv.scrollTo({
+            top: outputDiv.scrollHeight,
+            behavior: 'smooth'
+        });
+    }
+}
+
     // Define page-specific socket event handlers
     const eventHandlers = {
         'chat_history_loaded': (data) => {
@@ -127,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const allUserMessages = document.querySelectorAll('.user-message');
             if (allUserMessages.length > 0) {
                 const lastUserMessage = allUserMessages[allUserMessages.length - 1];
-                lastUserMessage.scrollIntoView({ block: 'start' });
+                lastUserMessage.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         },
         'receive_chat_message': (data) => {
@@ -137,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 currentAIMessageDiv.dataset.rawMarkdown += data.message;
                 currentAIMessageDiv.innerHTML = marked.parse(currentAIMessageDiv.dataset.rawMarkdown);
-                // outputDiv.scrollTop = outputDiv.scrollHeight;
+                autoscroll(); 
             }
         },
         'stream_stopped': () => {
@@ -170,6 +187,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const allUserMessages = document.querySelectorAll('.user-message');
     if (allUserMessages.length > 0) {
         const lastUserMessage = allUserMessages[allUserMessages.length - 1];
-        lastUserMessage.scrollIntoView({ behavior: 'smooth', block: 'end'}); // Jumps instantly to the element
+        lastUserMessage.scrollIntoView({ behavior: 'smooth', block: 'end'});
     }
 });

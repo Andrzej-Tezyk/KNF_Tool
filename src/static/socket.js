@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return true;
     }
 
-    // Define page-specific socket event handlers1
+    // Define page-specific socket event handlers
     const eventHandlers = {
         'new_container': (data) => {
             const newContainerElement = createOutputContainer(data);
@@ -67,9 +67,9 @@ document.addEventListener('DOMContentLoaded', function() {
             if (chatButton) {
                 const iconSpan = chatButton.querySelector('.icon');
                 if (iconSpan) {
-                    // iconSpan.classList.remove('loading-spinner');
-                    // iconSpan.classList.add('arrow-ready');
-                    // iconSpan.textContent = '➤';
+                    iconSpan.classList.remove('loading-spinner');
+                    iconSpan.classList.add('arrow-ready');
+                    iconSpan.textContent = '➤';
                 }
                 chatButton.disabled = false;
                 console.log('Chat button enabled for container:', containerId);
@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    // Initialize the socket manager with our specific configurations
+    // Initialize the socket manager with specific configurations
     initSocketManager({
         sendHandler: startProcessing,
         eventHandlers: eventHandlers

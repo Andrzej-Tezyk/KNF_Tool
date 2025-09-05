@@ -36,11 +36,14 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }
 
-        displayMessage('You', formData.input, true);
+        const userMessageElement = displayMessage('You', formData.input, true);
+
+        if (userMessageElement) {
+            userMessageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+
         createSpinnerPlaceholder();
-
         socket.emit('send_chat_message', formData);
-
         document.getElementById('input').value = '';
         document.getElementById('input').dispatchEvent(new Event('input'));
 
@@ -59,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
         body.innerHTML = marked.parse(message); // Using marked.js library
         messageWrapper.append(header, body);
         outputDiv.appendChild(messageWrapper);
-        outputDiv.scrollTop = outputDiv.scrollHeight;
+        return messageWrapper;
     }
 
     function createSpinnerPlaceholder() {
@@ -112,4 +115,10 @@ document.addEventListener('DOMContentLoaded', function() {
         sendHandler: sendChatMessage,
         eventHandlers: eventHandlers
     });
+
+    const allUserMessages = document.querySelectorAll('.user-message');
+    if (allUserMessages.length > 0) {
+        const lastUserMessage = allUserMessages[allUserMessages.length - 1];
+        lastUserMessage.scrollIntoView({ behavior: 'smooth', block: 'end'}); // Jumps instantly to the element
+    }
 });

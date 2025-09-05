@@ -62,15 +62,11 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 function extractShortTitle(filename) {
-    // Usuń rozszerzenie .pdf
-    let stem = filename.replace(/\.pdf$/i, "");
-    // Rozdziel tylko na 3 części: id, data, tytuł
-    let parts = stem.split("_", 3);
+    let stem = filename.replace(/\.pdf$/i, "");     // deletes .pdf extension
+    let parts = stem.split("_", 3);                 // splitting into 3 parts
     let title = (parts.length === 3) ? stem.substring(parts[0].length + parts[1].length + 2) : stem;
-    // Usuń podkreślniki z początku/końca
-    title = title.replace(/^_+|_+$/g, "");
-    // Wyciągnij dwa pierwsze słowa
-    let words = title.split(" ");
+    title = title.replace(/^_+|_+$/g, "");          // stripping from underscores
+    let words = title.split(" ");                   // extracting first two words
     return words.slice(0, 2).join(" ");
 }
 

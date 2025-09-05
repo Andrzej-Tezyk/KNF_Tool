@@ -7,13 +7,13 @@ from chromadb.api.client import Client as ChromaClient
 
 import google.generativeai as genai  # type: ignore[unused-ignore]
 from dotenv import load_dotenv
-from backend.rag_chromadb import get_gemini_ef
-from backend.rag_use_chroma_collections import get_relevant_passage
-from backend.prompt_enhancer import enhance_prompt
+from backend.rag.llm_embedding_function import get_gemini_ef
+from backend.rag.chroma_collection_manager import get_relevant_passage
+from backend.chatbot.prompt_enhancer import enhance_prompt
 
 log = logging.getLogger("__name__")
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
+PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
 
 load_dotenv()
 

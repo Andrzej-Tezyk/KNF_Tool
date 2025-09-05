@@ -159,6 +159,11 @@
                                         {% for pdf in pdf_files %}
                                         <div class="file-item">
                                             <input type="checkbox" class="file-checkbox" id="{{ pdf }}" name="selected_files" value="{{ pdf }}">
+                                            <button class="open-pdf-button" 
+                                                    data-tooltip="View PDF"
+                                                    onclick="openPdfNewTab('{{ pdf }}'); event.stopPropagation();">
+                                                <img class="sidebar-icon" src="/static/images/open-pdf-in-browser.svg" alt="View PDF">
+                                            </button>
                                             <label for="{{ pdf }}">{{ pdf_titles[pdf] }}</label>
                                         </div>
                                         {% endfor %}
@@ -261,7 +266,7 @@
         var stopIconUrl = "{{ url_for('static', filename='images/stop-solid.svg') }}";
         var arrowUpIconUrl = "{{ url_for('static', filename='images/arrow-up-solid.svg') }}";
     </script>
-    <script src="{{ url_for('static', filename='socket.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='socket.js') }}"></script>
     <script src="{{ url_for('static', filename='stopProcessing.js') }}"></script> 
     <script src="{{ url_for('static', filename='clearOutput.js') }}"></script>
     <script src="{{ url_for('static', filename='advancedOptions.js') }}"></script>
@@ -270,5 +275,6 @@
     <script src="{{ url_for('static', filename='popupTutorial.js') }}"></script>
     <script src="{{ url_for('static', filename='settingsPanel.js') }}"></script>
     <script src="{{ url_for('static', filename='initialChatMessage.js') }}"></script>
+    <script src="{{ url_for('static', filename='openPdfNewTab.js') }}"></script>
 </body>
 </html>

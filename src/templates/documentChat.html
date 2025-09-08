@@ -10,7 +10,6 @@
         crossorigin="anonymous">
     </script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/logo.ico') }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>   
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -118,35 +117,8 @@
 
                     <!-- output section -->
                     <div class="output-section">
-                        <div id="output" class="markdown-body" data-content-id="{{ content_id }}">
-                            <!-- output goes here -->
-                            <div class="output-content" id="retrieved-content-section">
-                                <div class="output-header">
-                                    {{ container_title_chat }}
-                                </div>
-                                <div class="markdown-body">
-                                    {{ content_chat | safe }}
-                                </div>
-                            </div>
-
-                            {% for message in chat_history[2:] %} <!-- initial chat message printed above to achieve comprehensive output structure -->
-                                <div class="output-content {% if message.role == 'user' %}user-message{% elif message.role == 'model' %}ai-message{% endif %}">
-                                    <div class="output-header">
-                                        {% if message.role == 'user' %}
-                                            You
-                                        {% else %}
-                                            AI
-                                        {% endif %}
-                                    </div>
-                                    <div class="markdown-body">
-                                        {{ message.parts[0] | safe }}
-                                    </div>
-                                </div>
-                            {% endfor %}
+                    <div id="output" class="markdown-body" data-content-id="{{ content_id }}">
                         </div>
-                    
-                        <!-- output goes here -->
-
                         <div class="input-form-container">
                             <div class="input-area-elements">
                                 <textarea id="input" name="input" placeholder="Type your query" required></textarea>
@@ -248,10 +220,8 @@
     </script>
     <script type="module" src="{{ url_for('static', filename='socketChat.js') }}"></script>
     <script src="{{ url_for('static', filename='clearChat.js') }}"></script>
-    <script src="{{ url_for('static', filename='stopProcessing.js') }}"></script> 
     <script src="{{ url_for('static', filename='advancedOptions.js') }}"></script>
     <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
     <script src="{{ url_for('static', filename='popupTutorial.js') }}"></script>
-    <script src="{{ url_for('static', filename='initialChatMessage.js') }}"></script>
 </body>
 </html>

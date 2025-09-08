@@ -1,5 +1,5 @@
 import pandas as pd
-from bert_score import score
+from bert_score import score # type: ignore
 
 df = pd.read_excel(
     "https://raw.githubusercontent.com/Andrzej-Tezyk/KNF_Tool/main/src/Q_A_total_completed.xlsx"

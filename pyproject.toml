@@ -39,6 +39,8 @@ dev = [
   "types-beautifulsoup4",
   "types-Markdown",
   "types-Flask-SocketIO",
+  "types-regex",
+  "pandas-stubs",
 ]
 
 

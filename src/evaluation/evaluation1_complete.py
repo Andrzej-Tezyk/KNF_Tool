@@ -4,6 +4,7 @@ from backend.chatbot.process_query import process_query_with_rag
 from backend.rag.vector_db_name_generation import generate_vector_db_document_name
 
 import google.generativeai as genai
+from pathlib import Path
 
 import pandas as pd
 import regex as re
@@ -43,10 +44,9 @@ for idx, row in df.iterrows():
         else:
             continue  # Skip if unknown
     collection_name = generate_vector_db_document_name(
-        pdf_name, max_length=Config.CHROMADB_MAX_FILENAME_LENGTH
+        Path(pdf_name), max_length=Config.CHROMADB_MAX_FILENAME_LENGTH
     )
     try:
-        print(f"Processing Q{idx+1}: {prompt}")
         chunks = process_query_with_rag(
             prompt,
             pdf_name,
@@ -68,10 +68,10 @@ for idx, row in df.iterrows():
                 full_answer = f"[Error]: {chunk['error']}"
                 break
         print("Answer:", full_answer[:300])
-        df.at[idx, "A_tool"] = full_answer
+        df.loc[idx, "A_tool"] = full_answer # type: ignore[index]
         time.sleep(15)
     except Exception as e:
-        df.at[idx, "A_tool"] = f"[Exception]: {str(e)}"
+        df.loc[idx, "A_tool"] = f"[Exception]: {str(e)}" # type: ignore[index]
 
 
 def clean_markdown(text: str) -> str:

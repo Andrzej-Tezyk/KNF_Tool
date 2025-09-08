@@ -34,7 +34,10 @@ for idx, row in df.iterrows():
         prompt = row["Q"]
         recommendation_type = row.get("Recommendation", "").strip().upper()
         if recommendation_type == "A":
-            pdf_name = "2025-01-17_Rekomendacja A - dotycząca zarządzania przez banki ryzykiem związanym z działalnością na instrumentach pochodnych"
+            pdf_name = (
+                "2025-01-17_Rekomendacja A - dotycząca zarządzania przez banki "
+                "ryzykiem związanym z działalnością na instrumentach pochodnych"
+            )
         elif recommendation_type == "B":
             pdf_name = "2025-01-17_Rekomendacja B - dotycząca ograniczania ryzyka inwestycji finansowych banków"
         else:

@@ -68,10 +68,10 @@ for idx, row in df.iterrows():
                 full_answer = f"[Error]: {chunk['error']}"
                 break
         print("Answer:", full_answer[:300])
-        df.loc[idx, "A_tool"] = full_answer # type: ignore[index]
+        df.loc[idx, "A_tool"] = full_answer  # type: ignore[index]
         time.sleep(15)
     except Exception as e:
-        df.loc[idx, "A_tool"] = f"[Exception]: {str(e)}" # type: ignore[index]
+        df.loc[idx, "A_tool"] = f"[Exception]: {str(e)}"  # type: ignore[index]
 
 
 def clean_markdown(text: str) -> str:

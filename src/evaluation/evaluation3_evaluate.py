@@ -6,7 +6,7 @@ from phoenix.evals import (
 )
 import pandas as pd
 import time
-import nest_asyncio # type: ignore
+import nest_asyncio  # type: ignore
 
 nest_asyncio.apply()
 

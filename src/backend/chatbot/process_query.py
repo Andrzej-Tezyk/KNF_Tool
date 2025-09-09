@@ -49,7 +49,7 @@ def _build_final_llm_prompt(
     Args:
         base_prompt: The initial prompt.
         change_length_flag: String flag ("True"/"False") to add output size instruction.
-        output_size: The desired output size (e.g., number of words).
+        output_size: The desired output size (e.g., number of sentences).
         enhancer_flag: String flag ("True"/"False") to enable prompt enhancement.
         model: The generative model (passed to enhance_prompt).
         identifier: A string identifier (like a PDF name/stem) for logging.
@@ -79,7 +79,14 @@ def _build_final_llm_prompt(
     final_prompt_parts = [processed_prompt]
 
     if change_length_flag == "True":
-        final_prompt_parts.append(f" (Please provide {output_size} response)")
+        output_size_map = {
+            "1_sentence": "a response in exactly 1 sentence (bullet-point list counts as one sentence)",
+            "2_5_sentences": "a response of 2 to 5 sentences (bullet-point list counts as one sentence)",
+            "5_10_sentences": "a response of 5 to 10 sentences (bullet-point list counts as one sentence)",
+            "10_plus_sentences": "a response longer than 10 sentences (bullet-point list counts as one sentence)",
+        }
+        output_size_instruction = output_size_map.get(output_size, "a concise response")
+        final_prompt_parts.append(f" (Please provide {output_size_instruction})")
 
     if rag_context:
         final_prompt_parts.append(rag_context)
@@ -213,7 +220,7 @@ def process_pdf(
                                 output size instruction should be added.
         enhancer_checkbox: String flag ("True"/"False") to indicate if the
                            prompt should be enhanced.
-        output_size: The desired output size (e.g., number of words).
+        output_size: The desired output size (e.g., number of sentences).
         temperature_slider_value: The temperature setting for model generation.
 
     Yields:
@@ -369,7 +376,7 @@ def process_chat_query_with_rag(
         model: The generative AI model instance (e.g., genai.GenerativeModel).
         change_length_checkbox: String flag ("True"/"False") to modify response length.
         enhancer_checkbox: String flag ("True"/"False") for prompt enhancement.
-        output_size: The desired output size (e.g., number of words).
+        output_size: The desired output size (e.g., number of sentences).
         temperature_slider_value: Temperature for model generation.
         chroma_client: The ChromaDB client instance.
         collection_name: Name of the ChromaDB collection for this document.

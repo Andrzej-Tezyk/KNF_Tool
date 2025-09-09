@@ -3,7 +3,6 @@ import logging
 
 import chromadb
 
-
 from backend.rag.llm_embedding_function import get_gemini_ef
 
 

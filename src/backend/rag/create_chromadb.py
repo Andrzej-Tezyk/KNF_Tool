@@ -1,23 +1,12 @@
 import time
 import logging
-<<<<<<< HEAD:src/backend/rag_chromadb.py
 import os
 from typing import Any
 from dotenv import load_dotenv
-=======
->>>>>>> origin/main:src/backend/rag/create_chromadb.py
 
 import chromadb
 
-<<<<<<< HEAD:src/backend/rag_chromadb.py
-load_dotenv()
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if not GEMINI_API_KEY:
-    raise ValueError("GEMINI_API_KEY not found in environment variables")
-=======
-
 from backend.rag.llm_embedding_function import get_gemini_ef
->>>>>>> origin/main:src/backend/rag/create_chromadb.py
 
 
 log = logging.getLogger("__name__")

@@ -8,10 +8,13 @@ import logging
 from dotenv import load_dotenv
 
 import markdown  # noqa:
-from flask import Flask, render_template, request, send_from_directory, Response
+from flask import Flask, render_template, request, send_from_directory, Response, send_file, abort
 from flask_socketio import SocketIO
 from flask_caching import Cache
 import google.generativeai as genai
+from docx import Document
+from htmldocx import HtmlToDocx
+import io
 from backend.chatbot.process_query import (
     process_query_with_rag,
     process_chat_query_with_rag,
@@ -176,6 +179,33 @@ def handle_clear_cache() -> None:
     output_index = -1
     log.info(f"Output index reset for sid: {sid}")
 
+@app.route('/download_docx', methods=['POST'])
+def download_docx():
+    # Safely parse JSON
+    data = request.get_json(silent=True) or {}
+    html_content = data.get("text", "")
+    if not html_content or not isinstance(html_content, str):
+        abort(400, description="No HTML content provided")
+
+    # Create a new Word document
+    doc = Document()
+
+    # Convert HTML into the document (htmldocx)
+    converter = HtmlToDocx()
+    # You can pass options if needed, e.g. base_url for relative links/images
+    converter.add_html_to_document(html_content, doc)
+
+    # Save to memory buffer
+    buffer = io.BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name="output.docx",
+        mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
 
 @socketio.on("reset_chat_history")
 def handle_reset_chat_history(data: dict) -> None:

@@ -1,4 +1,4 @@
-import { initSocketManager, socket } from './socketManager.js';
+import { initSocketManager, socket, createOutputContainer } from './socketManager.js';
 
 function getFormData() {
     const getElementValue = (id, property = 'value') => document.getElementById(id)?.[property];
@@ -22,6 +22,7 @@ function getFormData() {
  */
 document.addEventListener('DOMContentLoaded', function() {
     const outputDiv = document.getElementById('output'); 
+    let activeContainerId = null;
 
     // Define the page-specific "send" function
     function startProcessing() {
@@ -29,8 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (formData.pdfFiles.length === 0) {
             alert("Please select at least one file.");
-            socket.emit('stream_stopped'); 
-            return;
+            return false;
         }
 
         socket.emit('start_processing', formData);
@@ -38,17 +38,25 @@ document.addEventListener('DOMContentLoaded', function() {
         // Clear input after sending
         document.getElementById('input').value = '';
         document.getElementById('input').dispatchEvent(new Event('input'));
+
+        return true;
     }
 
     // Define page-specific socket event handlers
     const eventHandlers = {
-        'new_container': function(data) {
-            outputDiv.insertAdjacentHTML('beforeend', data.html);
+        'new_container': (data) => {
+            const newContainerElement = createOutputContainer(data);
+            outputDiv.appendChild(newContainerElement);
+            activeContainerId = data.id;
         },
-        'update_content': function(data) {
-            const container = document.getElementById(data.container_id);
-            if (container) {
-                container.innerHTML = data.html;
+        'update_content': (data) => {
+            const containerBody = document.getElementById(data.container_id);
+            if (containerBody) {
+                if (typeof containerBody.dataset.rawMarkdown === 'undefined') {
+                    containerBody.dataset.rawMarkdown = '';
+                }
+                containerBody.dataset.rawMarkdown += data.chunk;
+                containerBody.innerHTML = marked.parse(containerBody.dataset.rawMarkdown);
             }
         },
         'processing_complete_for_container': function(data) {
@@ -65,13 +73,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 chatButton.disabled = false;
                 console.log('Chat button enabled for container:', containerId);
-            } else {
-                console.warn('Could not find chat button with ID:', buttonId);
+            }
+            if (activeContainerId === containerId) {
+                activeContainerId = null;
+            }
+        },
+        'stream_stopped': () => {
+            if (activeContainerId) {
+                const buttonId = `chat-button-${activeContainerId}`;
+                const chatButton = document.getElementById(buttonId);
+                if (chatButton) {
+                    const iconSpan = chatButton.querySelector('.icon');
+                    if (iconSpan) {
+                        iconSpan.classList.remove('loading-spinner');
+                        iconSpan.classList.add('arrow-disabled');
+                        iconSpan.textContent = '➤';
+                    }
+                }
+                activeContainerId = null;
             }
         }
     };
 
-    // Initialize the socket manager with our specific configurations
+    // Initialize the socket manager with specific configurations
     initSocketManager({
         sendHandler: startProcessing,
         eventHandlers: eventHandlers
